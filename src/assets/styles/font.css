@@ -1,0 +1,13 @@
+/* src/assets/styles/font.css */
+@font-face {
+  font-family: 'font-zh'; /* 你自己起一个名字 */
+  src: url('@/assets/fonts/腾祥嘉丽准粗圆.TTF') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'font-en'; /* 你自己起一个名字 */
+  src: url('@/assets/fonts/GROBOLDpr.TTF') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}

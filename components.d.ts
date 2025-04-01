@@ -7,6 +7,12 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    AnimatedIcon: typeof import('./src/components/AnimatedIcon.vue')['default']
+    BackBtn: typeof import('./src/components/BackBtn.vue')['default']
+    DragBtn: typeof import('./src/components/DragBtn.vue')['default']
+    GiftList: typeof import('./src/components/GiftList.vue')['default']
+    GiftScrollBar: typeof import('./src/components/giftScrollBar.vue')['default']
+    GreenButton: typeof import('./src/components/GreenButton.vue')['default']
     HelloWorld: typeof import('./src/components/HelloWorld.vue')['default']
     IconCommunity: typeof import('./src/components/icons/IconCommunity.vue')['default']
     IconDocumentation: typeof import('./src/components/icons/IconDocumentation.vue')['default']
@@ -17,5 +23,6 @@ declare module 'vue' {
     RouterView: typeof import('vue-router')['RouterView']
     TheWelcome: typeof import('./src/components/TheWelcome.vue')['default']
     WelcomeItem: typeof import('./src/components/WelcomeItem.vue')['default']
+    WelfareHeader: typeof import('./src/components/WelfareHeader.vue')['default']
   }
 }

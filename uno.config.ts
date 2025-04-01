@@ -11,6 +11,11 @@ export default defineConfig({
     breakpoints: {
       lg: '1025px', // 修改 lg 断点为 1025px
     },
+    keyframes: {
+      'click-pulse': '{0%{transform:scale(1)}40%{transform:scale(0.9)}70%{transform:scale(1.05)}100%{transform:scale(1)}}',
+      'click-pulse-soft': '{0%{transform:scale(1)}50%{transform:scale(0.95)}100%{transform:scale(1)}}',
+      'click-pulse-strong': '{0%{transform:scale(1)}30%{transform:scale(0.85)}60%{transform:scale(1.1)}80%{transform:scale(0.95)}100%{transform:scale(1)}}',
+    },
   },
   presets: [
     presetUno(),
@@ -41,7 +46,17 @@ export default defineConfig({
     'wh-full': 'w-full h-full',
     'b-s': 'border border-solid border-[#f6f6f6]',
     'b-s-gray': 'border border-solid border-[#EEEEEE] ',
+    'text-stroke-black': 'text-stroke-1 text-stroke-[#40403e]',
+    // 点击动画
+    'click-animate': 'cursor-pointer active:animate-click-pulse',
+    'click-animate-soft': 'cursor-pointer active:animate-click-pulse-soft',
+    'click-animate-strong': 'cursor-pointer active:animate-[click-pulse-strong_0.5s_ease]',
   },
-  rules: [['shadow-custom', { 'box-shadow': '0 2px 10px rgba(0, 0, 0, .1)' }]],
+  rules: [
+    ['shadow-custom', { 'box-shadow': '0 2px 10px rgba(0, 0, 0, .1)' }],
+    ['animate-click-pulse', { animation: 'click-pulse 0.6s ease' }],
+    ['animate-click-pulse-soft', { animation: 'click-pulse-soft 0.5s ease' }],
+    ['animate-click-pulse-strong', { animation: 'click-pulse-strong 0.6s ease' }],
+  ],
   transformers: [transformerDirectives()],
 })

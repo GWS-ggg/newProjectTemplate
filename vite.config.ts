@@ -117,7 +117,7 @@ export default defineConfig(({ mode }) => {
       },
       esbuild: {
         drop: [
-          'console', // 如果线上需要打印，就把这行注释掉
+          // 'console', // 如果线上需要打印，就把这行注释掉
           'debugger',
         ],
         minify: true, // 启用 esbuild 的 minify 选项
@@ -128,7 +128,7 @@ export default defineConfig(({ mode }) => {
     },
     esbuild: {
       drop: [
-        'console', // 如果线上需要打印，就把这行注释掉
+        // 'console', // 如果线上需要打印，就把这行注释掉
         'debugger',
       ],
     },
