@@ -17,3 +17,9 @@ function setRootFontSize() {
 
 setRootFontSize()
 window.addEventListener('resize', setRootFontSize)
+
+export function getPGImg(name: string | undefined) {
+  if (!name)
+    return ''
+  return `https://piggygo-static-jy.forevernine.com/cdn/officialpay/${name}`
+}

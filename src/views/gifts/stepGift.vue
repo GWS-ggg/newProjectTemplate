@@ -1,7 +1,30 @@
 <script setup lang="ts">
+import type { ItemInfo, ProductInfo, StepGiftData } from '@/types'
+import { getProductListApi } from '@/api/index'
+import GreenButton from '@/components/GreenButton.vue'
+
+import { getPGImg } from '@/utils'
+import { computed, ref } from 'vue'
+
 function getImageUrl(name: string) {
   return new URL(`../../assets/images/gifts/stepGift/${name}`, import.meta.url).href
 }
+const productInfo = ref<ProductInfo>()
+const itemInfoList = ref<ItemInfo[]>([])
+async function getProductList() {
+  const res = await getProductListApi({
+    appid: '616876868660610',
+    uid: '102191',
+    producttype: 1,
+  })
+  productInfo.value = res.ProductInfo
+  itemInfoList.value = res.ItemInfo
+  let idNum = 0
+  itemInfoList.value.forEach((item) => {
+    item.id = idNum++
+  })
+}
+getProductList()
 
 const imgMap: Record<string, string> = {
   bgImg: getImageUrl('_0008_组-2.png'),
@@ -21,68 +44,78 @@ const imgMap: Record<string, string> = {
   back: new URL('../../assets/images/gifts/icon_back.png', import.meta.url).href,
 }
 
-interface Good {
-  id: number
-  leftImg: string
-  rightImg: string
-  desc: string
-  progress?: number
-  processAll?: number
-  price: string
-}
+const greenButtonRef = ref<InstanceType<typeof GreenButton> | null>(null)
+const isBuy = ref(false)
+function handleBtnClick() {
+  const goodsListTemp = [...itemInfoList.value]
+  console.log(itemInfoList.value, 'itemInfoList')
+  // 如果列表不为空，将第一个元素移动到最后
+  if (goodsListTemp.length > 0) {
+    // 先进行排序: target=false的排在前面
+    // 将没有TaskTargetScore或TaskTargetScore小于currentSocre的项移到数组后面
+    goodsListTemp.sort((a, b) => {
+      // 如果a没有TaskTargetScore或TaskTargetScore小于currentSocre，则排在后面
+      if (!a.TaskTargetScore || a.TaskTargetScore <= currentSocre.value) {
+        return 1
+      }
+      // 如果b没有TaskTargetScore或TaskTargetScore小于currentSocre，则排在后面
+      if (!b.TaskTargetScore || b.TaskTargetScore <= currentSocre.value) {
+        return -1
+      }
+      // 如果两者都有TaskTargetScore且都大于currentSocre，则保持原有顺序
+      return 0
+    })
 
-const goodsList: Good[] = [
-  {
-    id: 1,
-    leftImg: imgMap.carImg,
-    rightImg: imgMap.diceImg,
-    desc: 'TASK EXPIRED',
-    price: '12M',
-  },
-  {
-    id: 2,
-    leftImg: imgMap.diceImg,
-    rightImg: imgMap.diceImg,
-    desc: 'RAID 100 TIMERAID',
-    price: '18M',
-    progress: 21,
-    processAll: 200,
-  },
-  {
-    id: 3,
-    leftImg: imgMap.bombImg,
-    rightImg: imgMap.diceImg,
-    desc: 'RAID 100 TIMERAID',
-    price: '18M',
-    progress: 21,
-    processAll: 200,
-  },
-  {
-    id: 4,
-    leftImg: imgMap.stealImg,
-    rightImg: imgMap.diceImg,
-    desc: 'RAID 100 TIMESRAID',
-    price: '18M',
-    progress: 21,
-    processAll: 200,
-  },
-  {
-    id: 5,
-    leftImg: imgMap.stealImg,
-    rightImg: imgMap.diceImg,
-    desc: 'RAID 100 TUNES',
-    price: '18M',
-    progress: 21,
-    processAll: 200,
-  },
-]
+    // 更新商品列表
+    itemInfoList.value = goodsListTemp
+  }
+  console.log('handleBtnClick')
+
+  // TODO 购买成功
+  setTimeout(() => {
+    greenButtonRef.value?.triggerAnimation()
+  }, 100)
+  // 动画结束
+  setTimeout(() => {
+    isBuy.value = true
+  }, 3000)
+}
+const scoreTarget = ref<HTMLElement | null>(null)
+
+const priceComputed = computed(() => {
+  if (!productInfo.value?.Price)
+    return '0.00'
+  return (productInfo.value.Price / 100).toFixed(2)
+})
+
+const vipScore = computed(() => {
+  // Find the prop with VipScore field in productInfo.Props
+  if (!productInfo.value?.Props || productInfo.value.Props.length === 0)
+    return 0
+  console.log('productInfo.value.Props', productInfo.value.Props, productInfo.value.Props.find(item => item.VipScore !== undefined)?.VipScore)
+  return productInfo.value.Props.find(item => item.VipScore !== undefined)?.VipScore
+})
+
+const vipScoreAdd = computed(() => {
+  if (!productInfo.value?.AddProps || productInfo.value.AddProps.length === 0)
+    return 0
+  return productInfo.value.AddProps.find(item => item.VipScore !== undefined)?.VipScore
+})
+
+const iconProps = computed(() => {
+  if (!productInfo.value?.Props || productInfo.value.Props.length === 0)
+    return []
+  return productInfo.value.Props.filter(item => item.Icon)
+})
+
+const currentSocre = ref(1100)
 </script>
 
 <template>
   <div class="relative h-950 flex flex-col items-center text-32">
     <div
       class="w-full flex flex-col items-center justify-center bg-cover bg-center pt-190"
-      :style="{ backgroundImage: `url(${imgMap.bgImg})`,
+      :style="{ backgroundImage: `url(${getPGImg(productInfo?.Pic[0])})`,
                 backgroundSize: '120% auto',
                 backgroundPosition: 'center top 10%',
                 backgroundRepeat: 'no-repeat' }"
@@ -102,95 +135,124 @@ const goodsList: Good[] = [
             >
           </div>
           <!-- 左侧图标 -->
-          <div class="gradient-text flex flex-col items-start justify-center text-46 font-normal text-stroke-3 text-stroke-[#7e0a1a] -rotate-10">
+          <div
+            ref="scoreTarget"
+            class="gradient-text paint-order flex flex-col items-start justify-center whitespace-nowrap text-46 font-normal text-stroke-3 text-stroke-[#7e0a1a] -rotate-10"
+          >
             <div class="gradient-text">
-              300 %
+              {{ productInfo?.Discount }}%
             </div>
             <div class="gradient-text">
               MORE
             </div>
           </div>
         </div>
-        <div class="f-c text-38 text-stroke-2 text-stroke-[#46344a]">
-          <div>
-            Get up to <span class="color-[#fff44b]">30,000</span>
+        <div class="paint-order f-c text-38 text-stroke-3 text-stroke-[#46344a]">
+          <div class="relative">
+            <div>
+              Get up to <span class="color-[#fff44b]">30,000</span>
+            </div>
+            <div class="absolute bottom-1/2 f-c translate-y-1/2 -right-100">
+              <div
+                v-for="prop in iconProps"
+                :key="prop.PropID"
+                class="f-c"
+              >
+                <div class="relative">
+                  <img
+                    :src="getPGImg(prop.Icon)"
+                    class="h-45 w-45"
+                  >
+                  <div class="absolute bottom-0 left-0 f-c text-20">
+                    {{ prop.Text }}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <img
+
+          <!-- <img
             :src="imgMap.diceImg"
             class="ml-20 w-45"
-          >
+          > -->
         </div>
       </div>
     </div>
     <div
       class="bg-sacle-w-120 h-108 w-full flex flex-shrink-0 justify-center bg-cover bg-center"
-      :style="{ backgroundImage: `url(${imgMap.headerImg})`,
+      :style="{ backgroundImage: `url(${getPGImg(productInfo?.Pic[1])})`,
       }"
     >
-      <div class="flex items-center justify-center -mt-15">
+      <div
+        v-if="!isBuy"
+        class="flex items-center justify-center -mt-15"
+      >
         <div class="mr-20 flex flex-col items-end text-29 font-normal">
           <div class="dual-color-text relative">
-            <span
-              class="absolute inset-0 text-[#ffffd3] text-stroke-2 text-stroke-[#581368]"
-              style="text-shadow: 0px 3px 0px 0px #5f156f"
-            >Buy now to Claim</span>
-            <span class="gold-gradient-text relative z-10">Buy now to Claim</span>
+            <span class="absolute inset-0 text-[#ffffd3] text-stroke-2 text-stroke-[#581368]">Buy now to claim</span>
+            <span class="gold-gradient-text relative z-10">Buy now to claim</span>
           </div>
           <div class="dual-color-text relative">
-            <span
-              class="absolute inset-0 text-[#ffffd3] text-stroke-2 text-stroke-[#581368]"
-              style="text-shadow: 0px 3px 0px 0px #5f156f"
-            >your earned rewards</span>
+            <span class="absolute inset-0 text-[#ffffd3] text-stroke-2 text-stroke-[#581368]">your earned rewards</span>
             <span class="gold-gradient-text relative z-10">your earned rewards</span>
           </div>
         </div>
         <div class="z-20 h-75 w-220 f-c">
           <GreenButton
-            radius="20px"
-            border-width="1px"
+            ref="greenButtonRef"
+            radius="24px"
+            border-width="2px"
+            :score="vipScore"
+            :score-add="vipScoreAdd"
+            score-show
+            :score-target="scoreTarget"
+            @click="handleBtnClick"
           >
             <div
               class="z-10 text-47 text-[#1c6904]"
               style="text-shadow: 0px 2px 0px rgba(190, 251, 91, 0.75);"
             >
-              $19.00
+              ${{ priceComputed }}
             </div>
           </GreenButton>
-          <!-- <img
-            class="absolute left-0 top-0 h-full w-full"
-            :src="imgMap.btn_bg"
-            alt=""
-          > -->
-          <!-- <div
-            class="z-10 text-47 text-[#1c6904]"
-            style="text-shadow: 0px 2px 0px rgba(190, 251, 91, 0.75);"
-          >
-            $19.00
-          </div> -->
+        </div>
+      </div>
+      <div
+        v-if="isBuy"
+        class="flex items-center justify-center -mt-15"
+      >
+        <div class="mr-20 flex flex-col items-end text-29 font-normal">
+          <div class="dual-color-text relative">
+            <span class="absolute inset-0 text-[#ffffd3] text-stroke-2 text-stroke-[#581368]">Achieve the bar to gain the rewards!</span>
+            <span class="gold-gradient-text relative z-10">Achieve the bar to gain the rewards!</span>
+          </div>
         </div>
       </div>
     </div>
     <div class="w-full">
       <div class="hide-scrollbar mx-15 h-500 flex flex-shrink-0 flex-col overflow-x-hidden overflow-y-auto rounded-20 bg-[#171f3d] bg-opacity-70 px-10 py-20">
-        <template
-          v-for="item in goodsList"
-          :key="item.id"
+        <TransitionGroup
+          name="gift-list"
+          tag="div"
+          class="relative"
         >
           <div
-            class="relative mt-7 h-110 w-705 f-b flex-shrink-0 bg-cover text-white"
+            v-for="item in itemInfoList"
+            :key="item.id"
+            class="goods-item relative mt-7 h-110 w-705 f-b flex-shrink-0 bg-cover text-white"
             :style="{ backgroundImage: `url(${imgMap.taskBarImg})` }"
           >
             <div class="ml-43 f-s">
               <img
-                :src="item.leftImg"
+                :src="getPGImg(item.Pic)"
                 class="w-66"
               >
               <div class="ml-32 flex flex-col">
                 <div class="text-31 text-[#426676]">
-                  {{ item.desc }}
+                  {{ item.Content }}
                 </div>
                 <div
-                  v-if="item.progress"
+                  v-if="item.TaskTargetScore"
                   class="relative mt-16 h-37 w-271"
                 >
                   <img
@@ -198,29 +260,32 @@ const goodsList: Good[] = [
                     class="h-full w-full"
                   >
 
-                  <div class="absolute left-0 top-0 h-full w-[21%] overflow-hidden">
+                  <div
+                    class="absolute left-0 top-0 h-full overflow-hidden"
+                    :style="{ width: `${currentSocre / item.TaskTargetScore * 100}%` }"
+                  >
                     <img
                       :src="imgMap.processImg"
                       class="h-full w-auto"
                     >
                   </div>
-                  <div class="absolute left-1/2 top-1/2 text-22 text-white text-stroke-2 text-stroke-[#426676] -translate-x-1/2 -translate-y-1/2">
-                    {{ item.progress }} / {{ item.processAll }}
+                  <div class="paint-order absolute left-1/2 top-1/2 w-271 f-c text-22 text-white text-stroke-3 text-stroke-[#426676] -translate-x-1/2 -translate-y-1/2">
+                    {{ currentSocre }} / {{ item.TaskTargetScore }}
                   </div>
                 </div>
               </div>
             </div>
-            <div class="mr-37 flex flex-col">
+            <div class="relative mr-37 f-c">
               <img
-                :src="item.rightImg"
+                :src="getPGImg(item.Props[0].Icon)"
                 class="w-58"
               >
-              <div class="text-28 text-stroke-2 text-stroke-[#4d4d4d] -mt-10">
-                {{ item.price }}
+              <div class="absolute bottom-0 left-1/2 f-c translate-y-1/2 text-28 text-stroke-2 text-stroke-[#4d4d4d] -translate-x-1/2">
+                {{ item.Props[0].Text }}
               </div>
             </div>
           </div>
-        </template>
+        </TransitionGroup>
       </div>
     </div>
     <div class="mb-20 mt-20 w-full f-c">
@@ -278,5 +343,27 @@ const goodsList: Good[] = [
   &::-webkit-scrollbar {
     display: none;
   }
+}
+
+/* TransitionGroup动画样式 */
+.gift-list-move {
+  transition: transform 0.5s ease; /* 仅对transform应用过渡效果 */
+}
+
+.gift-list-enter-active,
+.gift-list-leave-active {
+  transition: all 0.5s ease; /* 对所有属性应用过渡效果 */
+}
+
+.gift-list-enter-from,
+.gift-list-leave-to {
+  opacity: 0;
+  transform: translateY(30px); /* 向下滑入，向上滑出 */
+}
+
+/* 确保离开的元素不会影响布局 */
+.gift-list-leave-active {
+  position: absolute;
+  width: 705px; /* 与列表项宽度一致 */
 }
 </style>

@@ -12,6 +12,7 @@ import { defineConfig, loadEnv } from 'vite'
 import imageminPlugin from 'vite-plugin-imagemin'
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
+  console.log('mode', mode)
   // 加载当前环境的环境变量
   const env = loadEnv(mode, process.cwd(), '')
 
@@ -104,6 +105,26 @@ export default defineConfig(({ mode }) => {
     // Listening on all local IPs
       host: true,
       port: 5179,
+      proxy: {
+        '/localpay': {
+          target: 'http://192.168.15.144:8010',
+          changeOrigin: true,
+          secure: false,
+          ws: true,
+          followRedirects: true,
+          configure: (proxy, options) => {
+            proxy.on('error', (err, req, res) => {
+              console.log('proxy error', err)
+            })
+            proxy.on('proxyReq', (proxyReq, req, res) => {
+              console.log('Sending Request to the Target:', req.method, req.url)
+            })
+            proxy.on('proxyRes', (proxyRes, req, res) => {
+              console.log('Received Response from the Target:', proxyRes.statusCode, req.url)
+            })
+          },
+        },
+      },
     },
     build: {
       target: 'ESNext',

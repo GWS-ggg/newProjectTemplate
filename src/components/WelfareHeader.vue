@@ -1,4 +1,8 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { useScoreElementStore } from '@/store/modules/scoreElement'
+
+const scoreElementStore = useScoreElementStore()
+</script>
 
 <template>
   <div class="welfare-header h-240 w-750 flex items-center">
@@ -32,6 +36,7 @@
       </div>
       <div class="flex items-center">
         <img
+          :ref="el => scoreElementStore.setScoreRef(el)"
           src="@/assets/images/WelfareHeader/icon_徽章1.png"
           alt=""
           class="h-60 w-60"

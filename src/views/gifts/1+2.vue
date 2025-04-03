@@ -186,11 +186,6 @@ function getPrice(giftPackage: GiftPackage) {
       </div>
     </div>
     <div class="relative mb-20 mt-30 flex gap-15">
-      <img
-        class="absolute bottom-50 z-30 h-130 cursor-pointer -left-30"
-        :src="imgMap.back"
-        alt=""
-      >
       <template
         v-for="(giftPackage, index) in giftData.giftList"
         :key="index"

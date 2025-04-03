@@ -9,10 +9,11 @@
     "preview": "vite preview",
     "build-only": "vite build",
     "type-check": "vue-tsc --build",
-    "post-build": "vue-tsc -b && vite build && post-build-cn D:/WorkCode/公司项目/new/frontend/web/officialCN/dist html/officialCN",
-    "post-build-test": "post-build-cn D:/WorkCode/公司项目/temp/officialPG/dist html/officialPG"
+    "post-build": "vue-tsc -b && vite build && post-build D:/WorkCode/公司项目/new/frontend/web/officialCN/dist html/officialPG",
+    "post-build-test": "vue-tsc -b && vite build --mode test && post-build  D:/WorkCode/公司项目/temp/officialPG/dist html/officialPG"
   },
   "dependencies": {
+    "axios": "^1.8.4",
     "pinia": "^3.0.1",
     "postcss-pxtorem": "^6.1.0",
     "sass": "^1.83.0",

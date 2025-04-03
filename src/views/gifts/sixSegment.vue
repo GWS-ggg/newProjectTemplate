@@ -12,6 +12,7 @@
 // }
 import AnimatedIcon from '@/components/AnimatedIcon.vue'
 
+import GreenButton from '@/components/GreenButton.vue'
 import { computed, ref } from 'vue'
 
 function getImageUrl(name: string) {
@@ -135,14 +136,29 @@ const giftData: GiftData = {
 const processBar = computed(() => {
   return `${giftData.currentScore / giftData.totalScore * 100}%`
 })
+
 const animatedIcon = ref<InstanceType<typeof AnimatedIcon> | null>(null)
 const iconImg = ref('')
 iconImg.value = imgMap.processIconLeftImg
 const glowImg = ref('')
 glowImg.value = imgMap.glowImg
-// 更新后的触发方法，现在调用组件的方法
-function triggerAnimation() {
-  animatedIcon.value?.triggerAnimation()
+
+const totalScore = ref(100)
+const _currentScore = ref(50)
+const scoreToAdd = ref(10)
+const scoreDisplayRef = ref<HTMLElement | null>(null)
+const greenButtonRef = ref<InstanceType<typeof GreenButton> | null>(null)
+
+function handleButtonClick() {
+  // 触发积分动画
+  console.log('greenButtonRef', greenButtonRef.value)
+  greenButtonRef.value?.triggerScoreAnimation()
+
+  // 2秒后更新分数（与动画同步）
+  setTimeout(() => {
+    totalScore.value += scoreToAdd.value
+    // 其他逻辑...
+  }, 1500)
 }
 
 function getAnimationDelay(index: number) {
@@ -158,12 +174,15 @@ function getAnimationDelay(index: number) {
 
 <template>
   <div class="relative mb-30 flex flex-col items-center text-32">
-    <div class="mt-19 text-29 text-stroke-1 text-stroke-[#19093e]">
+    <div class="paint-order mt-19 text-29 text-stroke-3 text-stroke-[#19093e]">
       END IN:60:00:00
     </div>
     <div class="relative mt-26 flex items-center justify-center">
       <div class="absolute z-10 h-66 w-66 f-c -left-40 -top-9">
-        <div class="relative h-full w-full">
+        <div
+          ref="scoreDisplayRef"
+          class="relative h-full w-full"
+        >
           <img
             class="h-full"
             :src="imgMap.processIconBgImg"
@@ -239,13 +258,29 @@ function getAnimationDelay(index: number) {
                 Available
               </div>
             </div>
-            <div class="ml-10 mt-20">
-              <template v-if="gift.isFree">
-                <div
-                  class="relative h-81 w-303 f-c click-animate cursor-pointer"
-                  @click="triggerAnimation"
+            <div
+              v-if="gift.isFree"
+              class="mt-20 f-c"
+            >
+              <div class="relative h-75 w-280">
+                <GreenButton
+                  radius="26px"
+                  border-width="2px"
+                  :score="40"
+                  score-show
+                  :score-target="scoreDisplayRef"
+                  @click="handleButtonClick"
                 >
+                  <div class="paint-order z-20 text-30 text-stroke-3 text-stroke-[#164b2e]">
+                    FREE
+                  </div>
                   <img
+                    :src="imgMap.lockImg"
+                    alt=""
+                    class="z-20 ml-20 w-40"
+                  >
+                </GreenButton>
+                <!-- <img
                     class="absolute inset-0 z-10 w-303"
                     :src="imgMap.btnBigImg "
                     alt=""
@@ -257,39 +292,38 @@ function getAnimationDelay(index: number) {
                     :src="imgMap.lockImg"
                     alt=""
                     class="z-20 ml-20 w-40"
+                  > -->
+              </div>
+            </div>
+            <div v-else>
+              <div class="ml-20 mt-20 f-b">
+                <div class="relative h-75 w-190">
+                  <GreenButton
+                    radius="24px"
+                    border-width="2px"
+                    :score="40"
+                    score-show
+                    @click="handleButtonClick"
                   >
-                </div>
-              </template>
-              <template v-else>
-                <div class="f-b">
-                  <div
-                    class="relative h-81 w-205 f-c click-animate"
-                    @click="triggerAnimation"
-                  >
-                    <img
-                      class="absolute left-0 top-0 z-10 w-205"
-                      :src="imgMap.btnSmallImg "
-                      alt=""
-                    >
-                    <div class="z-20 text-30 text-stroke-2 text-stroke-[#164b2e]">
+                    <div class="paint-order z-20 text-30 text-stroke-3 text-stroke-[#164b2e]">
                       {{ gift.price }}
                     </div>
-                  </div>
-                  <div
-                    class="relative h-59 w-94 f-e flex-col bg-cover bg-center bg-no-repeat"
-                    :style="{ backgroundImage: `url(${imgMap.scoreBgImg})` }"
+                  </GreenButton>
+                </div>
+                <div
+                  class="relative h-59 w-94 f-e flex-col bg-cover bg-center bg-no-repeat"
+                  :style="{ backgroundImage: `url(${imgMap.scoreBgImg})` }"
+                >
+                  <img
+                    class="absolute left-0 z-10 w-87 -top-20"
+                    :src="imgMap.scoreImg"
+                    alt=""
                   >
-                    <img
-                      class="absolute left-0 z-10 w-87 -top-20"
-                      :src="imgMap.scoreImg"
-                      alt=""
-                    >
-                    <div class="z-20 text-31 text-stroke-1 text-stroke-[rgba(0,0,0,0.6)] -mb-10">
-                      {{ gift.score }}
-                    </div>
+                  <div class="z-20 text-31 text-stroke-1 text-stroke-[rgba(0,0,0,0.6)] -mb-10">
+                    {{ gift.score }}
                   </div>
                 </div>
-              </template>
+              </div>
             </div>
           </div>
           <div
@@ -402,5 +436,11 @@ function getAnimationDelay(index: number) {
   to {
     opacity: 1;
   }
+}
+.outer-stroke {
+  -webkit-text-stroke: 2px black;
+  text-stroke: 2px black; /* 标准语法，兼容性较差 */
+  paint-order: stroke fill; /* 确保描边在填充外部 */
+  text-shadow: 0 0 0 transparent; /* 防止文字阴影干扰 */
 }
 </style>

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
+getProductList()
 function getImageUrl(name: string) {
   return new URL(`../../assets/images/gifts/newBattlePass/${name}`, import.meta.url).href
 }

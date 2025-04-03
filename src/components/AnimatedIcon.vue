@@ -1,59 +1,133 @@
 <script setup lang="ts">
-import { defineExpose, defineProps, onMounted, ref } from 'vue'
+import { computed, defineExpose, defineProps, nextTick, onMounted, ref } from 'vue'
 
 const props = defineProps({
   iconUrl: {
     type: String,
     required: true,
   },
-  glowUrl: {
-    type: String,
-    default: '',
-  },
-  showGlow: {
-    type: Boolean,
-    default: true,
-  },
-  // 可以自定义动画持续时间
+  // 动画持续时间
   duration: {
     type: Number,
     default: 2,
   },
+  // 起始位置（可以是元素引用或坐标对象）
+  startElement: {
+    type: Object as () => HTMLElement | null,
+    default: null,
+  },
+  // 目标位置（可以是元素引用或坐标对象）
+  targetElement: {
+    type: Object as () => HTMLElement | null,
+    default: null,
+  },
 })
 
 const iconRef = ref<HTMLElement | null>(null)
+const animationActive = ref(false)
+const startPos = ref({ x: 0, y: 0 })
+const endPos = ref({ x: 0, y: 0 })
 
+// 计算动画样式
+const animationStyle = computed(() => {
+  if (!animationActive.value)
+    return {}
+
+  return {
+    position: 'fixed',
+    left: '300px',
+    top: '300px',
+    zIndex: '1200',
+    pointerEvents: 'none',
+  }
+})
+
+// 触发动画方法
 function triggerAnimation() {
+  // 先激活动画状态
+  animationActive.value = true
+
+  // 使用 nextTick 确保 DOM 更新后再获取引用
+  nextTick(() => {
+    setTimeout(() => {
+      console.log('triggerAnimation icon', iconRef.value)
+      if (!iconRef.value)
+        return
+
+      // 计算起始位置
+      if (props.startElement) {
+        const rect = props.startElement.getBoundingClientRect()
+        startPos.value = {
+          x: rect.left + rect.width / 2,
+          y: rect.top + rect.height / 2,
+        }
+      }
+
+      // 计算目标位置
+      if (props.targetElement) {
+        const rect = props.targetElement.getBoundingClientRect()
+        endPos.value = {
+          x: rect.left,
+          y: rect.top,
+        }
+      }
+      else {
+      // 默认目标位置（例如页面顶部中间）
+        endPos.value = {
+          x: window.innerWidth / 2,
+          y: 50,
+        }
+      }
+      console.log('startPos', startPos.value)
+      console.log('endPos', endPos.value)
+
+      // 设置初始样式
+      Object.assign(iconRef.value.style, {
+        left: `${startPos.value.x}px`,
+        top: `${startPos.value.y}px`,
+        transform: 'translate(-50%, -50%)',
+        opacity: '0',
+      })
+
+      // 重置并触发动画
+      iconRef.value.classList.remove('animate')
+      void iconRef.value.offsetWidth // 强制重绘
+      iconRef.value.classList.add('animate')
+    }, 50)
+    // 动画结束后处理
+    // setTimeout(() => {
+    //   animationActive.value = false
+    // }, props.duration * 1000)
+  })
+}
+
+// 将方法暴露给父组件
+defineExpose({
+  triggerAnimation,
+})
+
+// 监听动画结束
+onMounted(() => {
   if (!iconRef.value)
     return
 
-  iconRef.value.classList.remove('animate')
-  // 强制浏览器重绘以重启动画
-  void iconRef.value.offsetWidth
-  iconRef.value.classList.add('animate')
-}
-
-// 将方法暴露给父组件使用
-defineExpose({
-  triggerAnimation,
+  // 动画结束监听
+  iconRef.value.addEventListener('animationend', () => {
+    animationActive.value = false
+  })
 })
 </script>
 
 <template>
   <div
+    v-show="animationActive"
     ref="iconRef"
     class="animated-icon"
   >
-    <div class="relative z-200 h-100 w-100 f-c">
+    <div class="relative z-1000 h-100 w-100 flex items-center justify-center">
       <img
         :src="iconUrl"
-        class="z-150 w-100"
-        alt=""
-      >
-      <img
-        v-if="showGlow"
-        :src="glowUrl"
-        class="absolute left-0 top-0 z-105 w-100"
+        class="z-1000 z-20 w-100"
         alt=""
       >
     </div>
@@ -63,32 +137,35 @@ defineExpose({
 <style scoped>
 .animated-icon {
   position: fixed;
-  left: 50%;
-  bottom: 15vh;
-  transform: translateX(-50%) translateY(0vh);
-  opacity: 0;
-  z-index: 100;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  pointer-events: none;
 }
 
 .animated-icon.animate {
-  animation: moveUp v-bind('`${props.duration}s`') forwards;
+  animation: moveToTarget 3s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
 }
 
-@keyframes moveUp {
+@keyframes moveToTarget {
   0% {
-    transform: translate(-50%, 0vh);
     opacity: 0;
+    transform: translate(-50%, -50%) scale(0.5);
   }
-  40% {
-    transform: translate(-50%, 0vh);
+
+  20% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  80% {
     opacity: 1;
   }
-  90% {
-    opacity: 1;
-  }
+
   100% {
-    transform: translate(-50%, -75vh);
     opacity: 0;
+    transform: translate(calc(v-bind('endPos.x - startPos.x') * 1px),
+        calc(v-bind('endPos.y - startPos.y') * 1px)) scale(0.75);
+    /* transform: translate(300px, 300px) scale(0.75); */
   }
 }
 </style>

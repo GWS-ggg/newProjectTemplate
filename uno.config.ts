@@ -51,12 +51,14 @@ export default defineConfig({
     'click-animate': 'cursor-pointer active:animate-click-pulse',
     'click-animate-soft': 'cursor-pointer active:animate-click-pulse-soft',
     'click-animate-strong': 'cursor-pointer active:animate-[click-pulse-strong_0.5s_ease]',
+    'paint-order': 'paint-order-stroke-fill'
   },
   rules: [
     ['shadow-custom', { 'box-shadow': '0 2px 10px rgba(0, 0, 0, .1)' }],
     ['animate-click-pulse', { animation: 'click-pulse 0.6s ease' }],
     ['animate-click-pulse-soft', { animation: 'click-pulse-soft 0.5s ease' }],
     ['animate-click-pulse-strong', { animation: 'click-pulse-strong 0.6s ease' }],
+    ['paint-order-stroke-fill', { 'paint-order': 'stroke fill' }],
   ],
   transformers: [transformerDirectives()],
 })
