@@ -23,3 +23,9 @@ export function getPGImg(name: string | undefined) {
     return ''
   return `https://piggygo-static-jy.forevernine.com/cdn/officialpay/${name}`
 }
+
+export function getPrice(price: number) {
+  if (!price)
+    return '0.00'
+  return (price / 100).toFixed(2)
+}

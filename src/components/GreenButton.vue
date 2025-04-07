@@ -151,8 +151,17 @@ defineExpose({
                 alt=""
                 class="h-73"
               >
-              <div class="absolute top-20 rotate-10 text-24 text-red -right-10 -mt-25">
-                bonus
+              <div class="absolute top-20 rotate-15 text-24 -right-10 -mt-25">
+                <div class="flex flex-col items-end font-normal">
+                  <div class="dual-color-text relative">
+                    <div class="paint-order absolute inset-0 text-[#ffe318] text-stroke-3 text-stroke-[#ffffff]">
+                      bouns
+                    </div>
+                    <div class="red-gradient-text relative z-10">
+                      bouns
+                    </div>
+                  </div>
+                </div>
               </div>
               <div class="absolute bottom-0 left-1/2 text-24 text-white text-stroke-black -mt-25 -translate-x-1/2">
                 {{ scoreAdd }}
@@ -211,5 +220,21 @@ defineExpose({
   background: linear-gradient(0deg, #1d6301 0%, #5f9f26 100%);
   border-radius: v-bind('`calc(${radius} + ${borderWidth})`'); /* 动态计算，比按钮圆角大 2px */
   z-index: -1;
+}
+
+.dual-color-text {
+  /* 确保两层文本完全重叠 */
+  display: inline-block;
+  position: relative;
+}
+
+.red-gradient-text {
+  background: linear-gradient(355deg, #e71010 33%,#f35d2a 49%, #ffa943 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+
+  /* 移除文字阴影，因为我们现在使用双层文本 */
 }
 </style>

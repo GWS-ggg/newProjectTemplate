@@ -18,7 +18,7 @@ async function getProductList() {
     producttype: 1,
   })
   productInfo.value = res.ProductInfo
-  itemInfoList.value = res.ItemInfo
+  itemInfoList.value = res.ItemInfo as ItemInfo[]
   let idNum = 0
   itemInfoList.value.forEach((item) => {
     item.id = idNum++
@@ -277,11 +277,11 @@ const currentSocre = ref(1100)
             </div>
             <div class="relative mr-37 f-c">
               <img
-                :src="getPGImg(item.Props[0].Icon)"
+                :src="getPGImg(item.Props?.[0]?.Icon)"
                 class="w-58"
               >
               <div class="absolute bottom-0 left-1/2 f-c translate-y-1/2 text-28 text-stroke-2 text-stroke-[#4d4d4d] -translate-x-1/2">
-                {{ item.Props[0].Text }}
+                {{ item.Props?.[0]?.Text }}
               </div>
             </div>
           </div>

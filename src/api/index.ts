@@ -1,4 +1,4 @@
-import type { LoginData, StepGiftData, TabInfo } from '@/types'
+import type { GiftResponseData, LoginData, TabInfo } from '@/types'
 import request from '@/utils/request'
 
 // 获取指定礼包数据
@@ -7,7 +7,7 @@ export function getProductListApi(params: {
   uid: string
   producttype: number
 }): Promise<
-    StepGiftData
+    GiftResponseData
   > {
   return request({
     url: 'http://192.168.15.144:8010/localpay/official/productlist',
