@@ -92,6 +92,8 @@ const activeGift = ref(1)
 function handleClickGift(id: number) {
   activeGift.value = id
 }
+// 创建一个24小时后的时间戳
+const endTimestamp = ref(Date.now() + 24 * 45 * 60 * 9)
 </script>
 
 <template>
@@ -99,7 +101,7 @@ function handleClickGift(id: number) {
     <div class="mt-16 text-29 text-stroke-2 text-stroke-[#19093e]">
       Only one purchase can be made !
     </div>
-    <div class="w-700 flex items-end justify-center">
+    <div class="min-h-789 w-700 flex items-end justify-center">
       <div
         class="relative w-233 flex items-center justify-center"
         @click="handleClickGift(0)"
@@ -179,10 +181,12 @@ function handleClickGift(id: number) {
               </div>
             </div>
           </div>
-          <div class="btn-bg-small h-57 w-155 f-c">
-            <div class="text-29 text-stroke-1 text-stroke-[#164b2e]">
-              $30.00
-            </div>
+          <div class="z-10 h-57 w-155 f-c">
+            <GreenButton radius="20px">
+              <div class="pai text-29 text-stroke-1 text-stroke-[#164b2e]">
+                $30.00
+              </div>
+            </GreenButton>
           </div>
         </div>
       </div>
@@ -223,12 +227,31 @@ function handleClickGift(id: number) {
             </div>
           </div>
           <div class="btn-bg-small h-57 w-155 f-c">
-            <div class="text-29 text-stroke-1 text-stroke-[#164b2e]">
+            <div class="text-29 text-stroke-2 text-stroke-[#164b2e] paint-order">
               $30.00
             </div>
           </div>
         </div>
       </div>
+    </div>
+
+    <div class="z-10 mt-20 h-90 w-400">
+      <GreenButton radius="32px">
+        <div class="text-33 text-stroke-3 text-stroke-[#164b2e] paint-order">
+          BUY ALL $6.99
+        </div>
+      </GreenButton>
+    </div>
+
+    <div class="mt-20 f-c">
+      <CountDown
+        :end-time="endTimestamp"
+        class="text-26 text-[#f1e49e]"
+      >
+        <template #default="{ hours, minutes, seconds }">
+          End in {{ hours }}:{{ minutes }}:{{ seconds }}
+        </template>
+      </CountDown>
     </div>
   </div>
 </template>

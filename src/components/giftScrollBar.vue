@@ -129,106 +129,103 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="gift-bg h-180 w-full">
-    <div class="relative mt-50 h-130 flex items-center text-30 text-white">
-      <img
-        src="@/assets/images/GiftScrollBar/img_入口未选择遮盖.png"
-        alt=""
-        class="absolute left-0 top-0 z-0 h-full w-full"
+  <div class="relative h-130 w-full flex items-center text-30 text-white -mt-10">
+    <img
+      src="@/assets/images/GiftScrollBar/img_入口未选择遮盖.png"
+      alt=""
+      class="absolute left-0 top-0 z-0 h-126 w-full"
+    >
+    <!-- 使用Swiper替换原来的overflow滚动容器 -->
+    <Swiper
+      slides-per-view="auto"
+      :space-between="0"
+      :free-mode="true"
+      :modules="modules"
+      class="gift-swiper w-full pl-18"
+    >
+      <SwiperSlide
+        v-for="(pkg, index) in giftPackages"
+        :key="pkg.id"
+        class="gift-slide"
       >
-
-      <!-- 使用Swiper替换原来的overflow滚动容器 -->
-      <Swiper
-        slides-per-view="auto"
-        :space-between="0"
-        :free-mode="true"
-        :modules="modules"
-        class="gift-swiper w-full pl-18"
-      >
-        <SwiperSlide
-          v-for="(pkg, index) in giftPackages"
-          :key="pkg.id"
-          class="gift-slide"
-        >
-          <div class="relative mb-20 flex items-center justify-center">
-            <div class="absolute left-0 z-20 z-30 w-full f-c -bottom-19">
-              <div class="relative h-30 w-106 f-c border-2 border-[#3e9ebc] rounded-full border-solid bg-[#daecef] text-center text-22 text-[#385673] font-medium">
-                {{ formatTime(pkg.countdown.hours) }}.{{ formatTime(pkg.countdown.minutes) }}.{{
-                  formatTime(pkg.countdown.seconds) }}
-                <img
-                  v-if="pkg.id !== currentPackageId"
-                  src="@/assets/images/GiftScrollBar/img_入口未选择遮盖.png"
-                  alt=""
-                  class="absolute left-0 top-0 z-30 h-full w-full rounded-13"
-                  style="clip-path: inset( 0,4px);"
-                >
-              </div>
-            </div>
-            <!-- Gift package items -->
-            <div
-              class="relative mx-23 h-82 w-106 flex cursor-pointer items-center"
-              :class="{ 'scale-animation': pkg.id === currentPackageId }"
-              @click="handleSetCurrentPackage(pkg.id)"
-            >
-              <!-- 礼包标签 (Hot/Sale) -->
-              <div
-                v-if="pkg.tag"
-                class="absolute left-0 top-0 z-50 transform rounded-md text-16 text-white font-bold"
+        <div class="relative mb-20 flex items-center justify-center">
+          <div class="absolute left-0 z-20 z-30 w-full f-c -bottom-19">
+            <div class="relative h-30 w-106 f-c border-2 border-[#3e9ebc] rounded-full border-solid bg-[#daecef] text-center text-22 text-[#385673] font-medium">
+              {{ formatTime(pkg.countdown.hours) }}.{{ formatTime(pkg.countdown.minutes) }}.{{
+                formatTime(pkg.countdown.seconds) }}
+              <img
+                v-if="pkg.id !== currentPackageId"
+                src="@/assets/images/GiftScrollBar/img_入口未选择遮盖.png"
+                alt=""
+                class="absolute left-0 top-0 z-30 h-full w-full rounded-13"
+                style="clip-path: inset( 0,4px);"
               >
-                <div class="relative">
-                  <img
-                    v-if="pkg.tag === 'Hot'"
-                    src="@/assets/images/GiftScrollBar/img_热卖_标签.png"
-                    alt="标签"
-                    class="w-50"
-                  >
-                  <img
-                    v-if="pkg.tag === 'Sale'"
-                    src="@/assets/images/GiftScrollBar/img_打折_标签.png"
-                    alt="标签"
-                    class="w-50"
-                  >
-                  <div
-                    class="absolute top-8 z-10 w-full f-c text-18 color-[#f6f0e5] font-medium text-stroke-1 text-stroke-[#88140f] -left-5 -rotate-45"
-                    :class="{ 'text-stroke-[#147f05]!': pkg.tag === 'Hot' }"
-                  >
-                    {{ pkg.tag }}
-                  </div>
+            </div>
+          </div>
+          <!-- Gift package items -->
+          <div
+            class="relative mx-23 h-82 w-106 flex cursor-pointer items-center"
+            :class="{ 'scale-animation': pkg.id === currentPackageId }"
+            @click="handleSetCurrentPackage(pkg.id)"
+          >
+            <!-- 礼包标签 (Hot/Sale) -->
+            <div
+              v-if="pkg.tag"
+              class="absolute left-0 top-0 z-50 transform rounded-md text-16 text-white font-bold"
+            >
+              <div class="relative">
+                <img
+                  v-if="pkg.tag === 'Hot'"
+                  src="@/assets/images/GiftScrollBar/img_热卖_标签.png"
+                  alt="标签"
+                  class="w-50"
+                >
+                <img
+                  v-if="pkg.tag === 'Sale'"
+                  src="@/assets/images/GiftScrollBar/img_打折_标签.png"
+                  alt="标签"
+                  class="w-50"
+                >
+                <div
+                  class="absolute top-8 z-10 w-full f-c text-18 color-[#f6f0e5] font-medium text-stroke-1 text-stroke-[#88140f] -left-5 -rotate-45"
+                  :class="{ 'text-stroke-[#147f05]!': pkg.tag === 'Hot' }"
+                >
+                  {{ pkg.tag }}
                 </div>
               </div>
-
-              <!-- 礼包图片容器 -->
-              <div class="relative h-full w-full">
-                <img
-                  src="@/assets/images/GiftScrollBar/img_入口_bg_new.png"
-                  alt=""
-                  class="absolute left-0 top-0 z-10 h-full w-full"
-                >
-                <!-- 礼包图片 -->
-                <img
-                  :src="pkg.image"
-                  alt="Gift package"
-                  class="absolute left-0 top-0 z-20 w-full object-cover object-top"
-                  style="clip-path: inset(2px);"
-                >
-                <img
-                  v-if="pkg.id !== currentPackageId"
-                  src="@/assets/images/GiftScrollBar/img_入口未选择遮盖.png"
-                  alt=""
-                  class="absolute left-0 top-0 z-20 h-full w-full rounded-13"
-                >
-              </div>
             </div>
 
-            <!-- Divider line (add after each item except the last one) -->
-            <div
-              v-if="index < giftPackages.length - 1"
-              class="divider-line absolute right-0 top-8"
-            />
+            <!-- 礼包图片容器 -->
+            <div class="relative h-full w-full">
+              <img
+                src="@/assets/images/GiftScrollBar/img_入口_bg_new.png"
+                alt=""
+                class="absolute left-0 top-0 z-10 h-full w-full"
+              >
+              <!-- 礼包图片 -->
+              <img
+                :src="pkg.image"
+                alt="Gift package"
+                class="absolute left-0 top-0 z-20 w-full object-cover object-top"
+                style="clip-path: inset(2px);"
+              >
+              <img
+                v-if="pkg.id !== currentPackageId"
+                src="@/assets/images/GiftScrollBar/img_入口未选择遮盖.png"
+                alt=""
+                class="absolute left-0 top-0 z-20 h-full w-full rounded-13"
+              >
+            </div>
           </div>
-        </SwiperSlide>
-      </Swiper>
-    </div>
+
+          <!-- Divider line (add after each item except the last one) -->
+          <div
+            v-if="index < giftPackages.length - 1"
+            class="divider-line absolute right-0 top-8"
+          />
+        </div>
+      </SwiperSlide>
+    </Swiper>
   </div>
 </template>
 
@@ -276,8 +273,9 @@ onBeforeUnmount(() => {
 .divider-line {
   width: 3px;
   height: 83px;
-  background-color: #4f1719;
-  box-shadow: 1px 0px 1px 0px rgba(255, 151, 161, 0.21);
+  background-color: #000000;
+  opacity: 0.2;
+  box-shadow: 1px 0px 1px 0px rgba(170,155,224,0.21);
 }
 
 /* 自定义Swiper样式 */

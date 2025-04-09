@@ -30,7 +30,7 @@ const imgMap = {
   gift2Img: getImageUrl('通行证图标3.png'),
 }
 
-const scoreIconImg = new URL('../../assets/images/components/icon_score.png', import.meta.url).href
+const scoreIconImg = new URL('../../assets/images/common/icon_score.png', import.meta.url).href
 
 // 礼物数据类型
 interface Gift {

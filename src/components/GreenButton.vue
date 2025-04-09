@@ -44,12 +44,13 @@ function getImageUrl(name: string) {
 
 // 积分图标URL（应根据实际路径调整）
 const scoreIconImg = ref('')
-scoreIconImg.value = getImageUrl('icon_会员积分.png')
+scoreIconImg.value = getImageUrl('icon_score.png')
 
 const scoreSingleIconRef = ref<HTMLElement | null>(null)
 const animatedIconSingleRef = ref<InstanceType<typeof AnimatedIcon> | null>(null)
 // 单个积分 点击按钮时触发积分动画
 function triggerScoreSingleAnimation() {
+  console.log('triggerScoreSingleAnimation')
   if (animatedIconSingleRef.value && props.score > 0) {
     animatedIconSingleRef.value.triggerAnimation()
   }
@@ -72,7 +73,9 @@ const scoreAddShow = computed(() => {
 })
 
 function triggerAnimation() {
+  console.log('triggerAnimation')
   if (!scoreAddShow.value) {
+    console.log('triggerScoreSingleAnimation')
     triggerScoreSingleAnimation()
   }
   else {
@@ -92,22 +95,20 @@ defineExpose({
     <div class="btn-bg relative h-full w-full flex cursor-pointer items-center justify-center">
       <slot />
       <div
-        v-if="!scoreAddShow"
+        v-if="!scoreAddShow && scoreShow"
         class="absolute right-0 h-74 translate-x-1/2 -top-50"
       >
         <div class="relative">
           <img
-
             src="@/assets/images/components/GreenButton/img_气泡_小.png"
             alt=""
             class="h-73 w-74"
           >
           <div class="absolute left-1/2 top-1/2 flex flex-col items-center justify-center -translate-x-1/2 -translate-y-1/2">
-            <div class="relative mb-4 flex items-center justify-center">
+            <div class="relative mb-4 ml-4 flex items-center justify-center">
               <img
                 ref="scoreSingleIconRef"
-                src="@/assets/images/components/GreenButton/icon_会员积分.png"
-                alt=""
+                :src="scoreIconImg"
                 class="h-73"
               >
               <div class="absolute bottom-0 left-1/2 text-24 text-white text-stroke-black -mt-25 -translate-x-1/2">
@@ -131,7 +132,7 @@ defineExpose({
             <div class="relative flex items-center justify-center -mr-10">
               <img
                 ref="scoreIconRef"
-                src="@/assets/images/components/GreenButton/icon_会员积分.png"
+                :src="scoreIconImg"
                 alt=""
                 class="h-73"
               >
@@ -147,14 +148,14 @@ defineExpose({
             <div class="relative flex items-center justify-center -ml-10">
               <img
                 ref="scoreAddIconRef"
-                src="@/assets/images/components/GreenButton/icon_会员积分.png"
+                :src="scoreIconImg"
                 alt=""
                 class="h-73"
               >
               <div class="absolute top-20 rotate-15 text-24 -right-10 -mt-25">
                 <div class="flex flex-col items-end font-normal">
                   <div class="dual-color-text relative">
-                    <div class="paint-order absolute inset-0 text-[#ffe318] text-stroke-3 text-stroke-[#ffffff]">
+                    <div class="absolute inset-0 text-[#ffe318] text-stroke-3 text-stroke-[#ffffff] paint-order">
                       bouns
                     </div>
                     <div class="red-gradient-text relative z-10">
@@ -213,12 +214,12 @@ defineExpose({
 .btn-bg::before {
   content: "";
   position: absolute;
-  top: v-bind('`-${borderWidth}`');
-  left: v-bind('`-${borderWidth}`');
-  right: v-bind('`-${borderWidth}`');
-  bottom: v-bind('`-${borderWidth}`');
+  top: v-bind('`-${borderWidth || "2px"}`');
+  left: v-bind('`-${borderWidth || "2px"}`');
+  right: v-bind('`-${borderWidth || "2px"}`');
+  bottom: v-bind('`-${borderWidth || "2px"}`');
   background: linear-gradient(0deg, #1d6301 0%, #5f9f26 100%);
-  border-radius: v-bind('`calc(${radius} + ${borderWidth})`'); /* 动态计算，比按钮圆角大 2px */
+  border-radius: v-bind('`${radius}`'); /* 动态计算，比按钮圆角大 2px */
   z-index: -1;
 }
 

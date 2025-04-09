@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ItemInfo, ProductInfo, StepGiftData } from '@/types'
+import type { ItemInfo, ProductInfo } from '@/types'
 import { getProductListApi } from '@/api/index'
 import GreenButton from '@/components/GreenButton.vue'
 
@@ -44,6 +44,7 @@ const imgMap: Record<string, string> = {
   back: new URL('../../assets/images/gifts/icon_back.png', import.meta.url).href,
 }
 
+const currentSocre = ref(1100)
 const greenButtonRef = ref<InstanceType<typeof GreenButton> | null>(null)
 const isBuy = ref(false)
 function handleBtnClick() {
@@ -107,8 +108,6 @@ const iconProps = computed(() => {
     return []
   return productInfo.value.Props.filter(item => item.Icon)
 })
-
-const currentSocre = ref(1100)
 </script>
 
 <template>
@@ -137,7 +136,7 @@ const currentSocre = ref(1100)
           <!-- 左侧图标 -->
           <div
             ref="scoreTarget"
-            class="gradient-text paint-order flex flex-col items-start justify-center whitespace-nowrap text-46 font-normal text-stroke-3 text-stroke-[#7e0a1a] -rotate-10"
+            class="gradient-text flex flex-col items-start justify-center whitespace-nowrap text-46 font-normal text-stroke-3 text-stroke-[#7e0a1a] paint-order -rotate-10"
           >
             <div class="gradient-text">
               {{ productInfo?.Discount }}%
@@ -147,7 +146,7 @@ const currentSocre = ref(1100)
             </div>
           </div>
         </div>
-        <div class="paint-order f-c text-38 text-stroke-3 text-stroke-[#46344a]">
+        <div class="f-c text-38 text-stroke-3 text-stroke-[#46344a] paint-order">
           <div class="relative">
             <div>
               Get up to <span class="color-[#fff44b]">30,000</span>
@@ -197,7 +196,10 @@ const currentSocre = ref(1100)
             <span class="gold-gradient-text relative z-10">your earned rewards</span>
           </div>
         </div>
-        <div class="z-20 h-75 w-220 f-c">
+        <div
+          class="z-20 h-75 w-220 f-c"
+          @click="handleBtnClick"
+        >
           <GreenButton
             ref="greenButtonRef"
             radius="24px"
@@ -206,7 +208,6 @@ const currentSocre = ref(1100)
             :score-add="vipScoreAdd"
             score-show
             :score-target="scoreTarget"
-            @click="handleBtnClick"
           >
             <div
               class="z-10 text-47 text-[#1c6904]"
@@ -269,7 +270,7 @@ const currentSocre = ref(1100)
                       class="h-full w-auto"
                     >
                   </div>
-                  <div class="paint-order absolute left-1/2 top-1/2 w-271 f-c text-22 text-white text-stroke-3 text-stroke-[#426676] -translate-x-1/2 -translate-y-1/2">
+                  <div class="absolute left-1/2 top-1/2 w-271 f-c text-22 text-white text-stroke-3 text-stroke-[#426676] paint-order -translate-x-1/2 -translate-y-1/2">
                     {{ currentSocre }} / {{ item.TaskTargetScore }}
                   </div>
                 </div>
@@ -289,9 +290,14 @@ const currentSocre = ref(1100)
       </div>
     </div>
     <div class="mb-20 mt-20 w-full f-c">
-      <div class="rounded-20 bg-[#232e58] bg-opacity-70 px-20 py-10 text-31 text-white">
-        Ends in 30:00:00
-      </div>
+      <CountDown
+        :end-time="productInfo?.ExpireTime"
+        text-class="px-20 py-10 text-31 text-white"
+      >
+        <template #default="{ hours, minutes, seconds }">
+          Ends in {{ hours }}:{{ minutes }}:{{ seconds }}
+        </template>
+      </CountDown>
     </div>
   </div>
 </template>

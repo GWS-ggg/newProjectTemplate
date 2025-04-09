@@ -9,11 +9,13 @@ declare module 'vue' {
   export interface GlobalComponents {
     AnimatedIcon: typeof import('./src/components/AnimatedIcon.vue')['default']
     BackBtn: typeof import('./src/components/BackBtn.vue')['default']
+    CountDown: typeof import('./src/components/CountDown.vue')['default']
     GiftList: typeof import('./src/components/GiftList.vue')['default']
     GiftScrollBar: typeof import('./src/components/GiftScrollBar.vue')['default']
     GreenButton: typeof import('./src/components/GreenButton.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    StretchableBackground: typeof import('./src/components/StretchableBackground.vue')['default']
     WelfareHeader: typeof import('./src/components/WelfareHeader.vue')['default']
   }
 }

@@ -34,6 +34,7 @@ export interface ItemInfo {
   Pic?: string
   SkuID?: string
   TradeProductID?: number
+  BuyTimes?: number
   Props?: Array<{
     PropID?: number
     PropType?: number
@@ -47,13 +48,6 @@ export interface ItemInfo {
     VipScore?: number
   }>
   TaskTargetScore?: number
-}
-
-export interface LoginData {
-  username: string
-  viplevel: number
-  vipscore: number
-  viptargetscore: number
 }
 
 export interface TabInfo {
@@ -77,4 +71,24 @@ export interface BattlePassItemInfo {
   AddProps: Array<{
     VipScore: number
   }>
+}
+
+// 轮盘礼包
+export interface WheelGiftItemInfo {
+  id?: number
+  Key: number
+  Price: number
+  SkuID: string
+  TradeProductID: number
+  Limit: number
+  BuyTimes: number
+  Props?: Array<{
+    PropID: number
+    PropType: number
+    DeltaCount: number
+    Icon: string
+    Text?: string
+    Scale?: number
+  }>
+  ExpireTime: number
 }

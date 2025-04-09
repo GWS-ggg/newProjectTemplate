@@ -1,4 +1,5 @@
-import type { GiftResponseData, LoginData, TabInfo } from '@/types'
+import type { GiftResponseData, TabInfo } from '@/types'
+import type { LoginInfo } from './types'
 import request from '@/utils/request'
 
 // 获取指定礼包数据
@@ -10,7 +11,7 @@ export function getProductListApi(params: {
     GiftResponseData
   > {
   return request({
-    url: 'http://192.168.15.144:8010/localpay/official/productlist',
+    url: '/localpay/official/productlist',
     method: 'post',
     params,
   })
@@ -20,7 +21,7 @@ export function getProductListApi(params: {
 export function loginApi(params: {
   uid: string
 }): Promise<
-    LoginData
+    LoginInfo
   > {
   return request({
     url: '/localpay/official/login',

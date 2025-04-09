@@ -19,3 +19,8 @@
   80% { transform: scale(0.95); }
   100% { transform: scale(1); }
 }
+
+/* 禁用默认高亮 */
+* {
+  -webkit-tap-highlight-color: transparent;
+}

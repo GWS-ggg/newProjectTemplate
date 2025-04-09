@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import GreenButton from '@/components/GreenButton.vue'
-import { computed, ref } from 'vue'
+import { computed, ref, watchEffect } from 'vue'
 
 function getImageUrl(name: string) {
   return new URL(`../../assets/images/gifts/1+2/${name}`, import.meta.url).href
@@ -34,12 +34,15 @@ interface GiftOnePlusTwo {
 }
 
 interface GiftPackage {
+  id: number
   price: number
   bgImg: string
   score: number
   priceSymbol?: string
   priceImg?: string
   goodsList: Goods[]
+  BuyTimes: number
+  sortId?: number
 }
 
 interface Goods {
@@ -47,7 +50,7 @@ interface Goods {
   img: string
 }
 
-const giftData: GiftOnePlusTwo = {
+const giftData = ref<GiftOnePlusTwo>({
   title: 'BUY 1 PACK & GET 2 FREE !',
   currentScore: 100,
   totalScore: 200,
@@ -56,10 +59,12 @@ const giftData: GiftOnePlusTwo = {
   scoreImg: getImageUrl('icon_积分.png'),
   giftList: [
     {
+      id: 1,
       price: 20,
       bgImg: getImageUrl('img_条1_bg.png'),
       score: 50,
       priceSymbol: '$',
+      BuyTimes: 0,
       goodsList: [
         {
           price: '200',
@@ -80,10 +85,12 @@ const giftData: GiftOnePlusTwo = {
       ],
     },
     {
+      id: 2,
       price: 0,
       bgImg: getImageUrl('img_条2_bg.png'),
       score: 50,
-      priceImg: getImageUrl('icon_积分.png'),
+      priceImg: getImageUrl('锁.png'),
+      BuyTimes: 0,
       goodsList: [
         {
           price: '200',
@@ -104,10 +111,64 @@ const giftData: GiftOnePlusTwo = {
       ],
     },
     {
+      id: 3,
       price: 0,
       bgImg: getImageUrl('img_条2_bg.png'),
       score: 50,
-      priceImg: getImageUrl('icon_积分.png'),
+      priceImg: getImageUrl('锁.png'),
+      BuyTimes: 0,
+      goodsList: [
+        {
+          price: '2100',
+          img: getImageUrl('体力3.png'),
+        },
+        {
+
+          img: getImageUrl('魔法宝箱.png'),
+        },
+        {
+          price: '10min',
+          img: getImageUrl('天降buff-礼包活动icon.png'),
+        },
+        {
+          price: '10min',
+          img: getImageUrl('卡牌收益buff-礼包活动icon.png'),
+        },
+      ],
+    },
+    {
+      id: 4,
+      price: 20,
+      bgImg: getImageUrl('img_条2_bg.png'),
+      score: 50,
+      priceImg: getImageUrl('锁.png'),
+      BuyTimes: 0,
+      goodsList: [
+        {
+          price: '200',
+          img: getImageUrl('钻石1.png'),
+        },
+        {
+          price: '750',
+          img: getImageUrl('体力3.png'),
+        },
+        {
+          price: '20 K',
+          img: getImageUrl('药水魔力瓶.png'),
+        },
+        {
+          price: '200',
+          img: getImageUrl('钻石1.png'),
+        },
+      ],
+    },
+    {
+      id: 5,
+      price: 0,
+      bgImg: getImageUrl('img_条2_bg.png'),
+      score: 50,
+      priceImg: getImageUrl('锁.png'),
+      BuyTimes: 0,
       goodsList: [
         {
           price: '2100',
@@ -128,22 +189,130 @@ const giftData: GiftOnePlusTwo = {
       ],
     },
   ],
-}
+})
+
+// 标记是否正在进行动画
+const isAnimating = ref(false)
+
+// 标记是否显示第三个礼包的新礼包动画
+const showNewGiftAnimation = ref(false)
+
+const displayedGifts = ref<GiftPackage[]>([])
+
+const showPlus = ref(true)
+
+watchEffect(() => {
+  // 如果正在进行动画，不更新礼包列表以避免干扰动画
+  if (isAnimating.value)
+    return
+
+  // 获取未购买的礼包
+  displayedGifts.value = giftData.value.giftList.filter(gift => gift.BuyTimes !== 1)
+  displayedGifts.value = displayedGifts.value.slice(0, 3)
+
+  let sortId = 0
+  displayedGifts.value.forEach((gift) => {
+    gift.sortId = sortId++
+  })
+})
+
 const processBar = computed(() => {
-  return `${giftData.currentScore / giftData.totalScore * 100}%`
+  return `${giftData.value.currentScore / giftData.value.totalScore * 100}%`
 })
 
 function getPrice(giftPackage: GiftPackage) {
   if (giftPackage.price === 0) {
     return 'FREE'
   }
-  return `${giftPackage.priceSymbol}${giftPackage.price.toFixed(2)}`
+  return `$${giftPackage.price.toFixed(2)}`
+}
+
+// 创建一个映射来存储button refs
+const greenButtonRefs = ref<Map<number, InstanceType<typeof GreenButton>>>(new Map())
+
+// 设置ref的方法
+function setButtonRef(el: any, id: number) {
+  if (el) {
+    greenButtonRefs.value.set(id, el as InstanceType<typeof GreenButton>)
+  }
+}
+
+function handleButtonClick(giftPackage: GiftPackage) {
+  console.log(giftPackage.sortId)
+  if (giftPackage.sortId !== 0) {
+    return
+  }
+  if (isAnimating.value)
+    return
+  isAnimating.value = true
+
+  // 设置第三个礼包不应该显示new-gift动画
+  showNewGiftAnimation.value = false
+
+  const buttonRef = greenButtonRefs.value.get(giftPackage.id)
+
+  buttonRef?.triggerAnimation()
+  handlePlusAnimation()
+  setTimeout(() => {
+    handleGiftAnimation(giftPackage)
+  }, 500)
+}
+
+function handlePlusAnimation() {
+  showPlus.value = false
+  setTimeout(() => {
+    showPlus.value = true
+  }, 1500) // 2秒后重新显示
+}
+
+function handleGiftAnimation(giftPackage: GiftPackage) {
+  const giftElements = document.querySelectorAll('.gift-container')
+  if (giftElements.length >= 1) {
+    // 第一块礼包消失动画
+    giftElements[0].classList.add('fade-out')
+
+    if (giftElements.length >= 2) {
+      giftElements[1].classList.add('move-to-first')
+    }
+    // 第三块向左移动到第二块位置
+    if (giftElements.length >= 3) {
+      giftElements[2].classList.add('move-to-second')
+    }
+    // 延迟执行后续动画
+
+    // 第二块向左移动到第一块位置
+    if (giftElements.length >= 2) {
+      giftElements[1].classList.add('move-to-first')
+    }
+    // 第三块向左移动到第二块位置
+    if (giftElements.length >= 3) {
+      giftElements[2].classList.add('move-to-second')
+    }
+
+    // 更新购买次数，但不立即更新视图（延迟到动画结束后）
+    setTimeout(() => {
+      isAnimating.value = false
+
+      // 移除所有动画类，为下次动画做准备
+      document.querySelectorAll('.gift-container').forEach((element) => {
+        element.classList.remove('fade-out', 'move-to-first', 'move-to-second')
+      })
+
+      // 更新购买次数
+      giftData.value.giftList[giftPackage.id - 1].BuyTimes = 1
+      showNewGiftAnimation.value = true
+      // 保证动画快速渲染的关键！！ 定时器驱动渲染 ？？？？
+      // setTimeout(() => {
+      //   showNewGiftAnimation.value = false
+      // }, 100)
+    }, 800)
+  }
 }
 </script>
 
 <template>
   <div class="justify-cente flex flex-col items-center pt-16 text-32">
-    <div class="text-center text-29 text-stroke-3 text-stroke-[#19093e]">
+    <div class="text-center text-29 text-stroke-3 text-stroke-[#19093e] paint-order">
       {{ giftData.title }}
     </div>
     <div class="relative mt-35 flex items-center justify-center">
@@ -187,17 +356,23 @@ function getPrice(giftPackage: GiftPackage) {
     </div>
     <div class="relative mb-20 mt-30 flex gap-15">
       <template
-        v-for="(giftPackage, index) in giftData.giftList"
-        :key="index"
+        v-for="giftPackage in displayedGifts"
+        :key="giftPackage.id"
       >
-        <div class="w-208 flex flex-col">
+        <div
+          class="gift-container z-10 w-208 flex flex-col"
+          :class="{
+            'new-gift': giftPackage.sortId === 2 && showNewGiftAnimation,
+          }"
+        >
           <div
             class="relative h-654 w-full flex flex-col bg-cover bg-center bg-no-repeat"
-            :style="{ backgroundImage: `url(${giftPackage.bgImg})` }"
+            :style="{ backgroundImage: giftPackage.price > 0 ? `url(${imgMap.strip_1})` : `url(${imgMap.strip_2})` }"
           >
             <img
-              v-if="index !== giftData.giftList.length - 1"
-              class="absolute top-1/2 z-20 h-96 w-96 translate-x-1/2 -right-5 -translate-y-1/2"
+              v-if="giftPackage.price === 0 && giftPackage.sortId !== 0"
+              class="absolute top-1/2 z-20 h-96 w-96 transition-opacity duration-500 -left-5 -translate-x-1/2 -translate-y-1/2"
+              :class="{ 'opacity-0': !showPlus }"
               :src="giftData.plusImg"
               alt=""
             >
@@ -238,33 +413,26 @@ function getPrice(giftPackage: GiftPackage) {
             </div>
           </div>
 
-          <!-- 图片实现 -->
-          <div class="relative mt-10 h-90 w-200 f-c">
-            <img
-              class="absolute left-0 top-0 h-full w-full"
-              :src="imgMap.btn_bg"
-              alt=""
+          <div class="relative z-10 mt-10 h-90 w-200">
+            <GreenButton
+              :ref="el => setButtonRef(el, giftPackage.id)"
+              radius="21px"
+              border-width="2px"
+              :score="40"
+              score-show
+              @click="handleButtonClick(giftPackage)"
             >
-            <div class="relative z-10 h-full w-full f-c gap-5">
-              <span class="text-42 text-stroke-2 text-stroke-[#164b2e]">{{ getPrice(giftPackage) }}</span>
-              <img
-                v-if="giftPackage.priceImg"
-                class="h-50"
-                :src="giftPackage.priceImg"
-                alt=""
-              >
-            </div>
+              <div class="relative z-10 h-full w-full f-c gap-5">
+                <span class="text-42 text-stroke-2 text-stroke-[#164b2e]">{{ getPrice(giftPackage) }}</span>
+                <img
+                  v-if="giftPackage.priceImg"
+                  class="h-50"
+                  :src="giftPackage.priceImg"
+                  alt=""
+                >
+              </div>
+            </GreenButton>
           </div>
-          <!-- CSS实现 -->
-          <!-- <div class="gradient-border h-90 w-200 f-c gap-5">
-              <span class="text-42 text-stroke-2 text-stroke-[#164b2e]">{{ getPrice(giftPackage) }}</span>
-              <img
-                v-if="giftPackage.priceImg"
-                class="h-50"
-                :src="giftPackage.priceImg"
-                alt=""
-              >
-            </div> -->
         </div>
       </template>
     </div>
@@ -344,4 +512,68 @@ function getPrice(giftPackage: GiftPackage) {
   mask-composite: exclude;
   pointer-events: none;
 }
+
+/* 动画相关样式 */
+.fade-out {
+  animation: fadeOut 0.5s forwards;
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+}
+
+/* 第二块礼包移动到第一块位置 */
+.move-to-first {
+  animation: moveToFirst 0.6s forwards;
+}
+
+@keyframes moveToFirst {
+  to {
+    transform: translateX(calc(-100% - 15px));
+  }
+}
+
+/* 第三块礼包移动到第二块位置 */
+.move-to-second {
+  animation: moveToSecond 0.6s forwards;
+}
+
+@keyframes moveToSecond {
+  to {
+    transform: translateX(calc(-100% - 15px));
+  }
+}
+
+.new-gift {
+  opacity: 0;
+  transform: scale(0.3);
+  animation: newGiftAppear 0.5s ease forwards;
+  // animation-delay: 0.8s;
+}
+
+@keyframes newGiftAppear {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  80% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+// .gift-container {
+//   transition: transform 0.6s ease;
+// }
 </style>

@@ -1,9 +1,10 @@
 import axios from 'axios'
 // create an axios instance
+
 const service = axios.create({
   // 海外测试 https://mprogram-test.forevernine.com/
   // 海外正式 https://mprogram.forevernine.com/
-  baseURL: import.meta.env.DEV ? '/' : import.meta.env.VITE_REQ_URL, // url = base url + request url
+  baseURL: (import.meta as any).env.VITE_REQ_URL, // url = base url + request url
   withCredentials: false, // send cookies when cross-domain requests
   timeout: 10000, // request timeout
   headers: {

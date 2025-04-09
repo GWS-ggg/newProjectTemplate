@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import GreenButton from '@/components/GreenButton.vue'
 import { ref } from 'vue'
 
 function getImageUrl(name: string) {
@@ -41,6 +42,11 @@ const giftList = ref<Gift[]>([
 
   },
 ])
+const greenButtonRef = ref<InstanceType<typeof GreenButton> | null>(null)
+function handleBtnClick() {
+  greenButtonRef.value?.triggerAnimation()
+  console.log(greenButtonRef.value, 'greenButtonRef')
+}
 </script>
 
 <template>
@@ -89,8 +95,12 @@ const giftList = ref<Gift[]>([
       </div>
     </div>
     <div class="absolute bottom-35 left-1/2 h-96 w-317 f-c -translate-x-1/2">
-      <div class="h-96 w-317">
+      <div
+        class="h-96 w-317"
+        @click="handleBtnClick"
+      >
         <GreenButton
+          ref="greenButtonRef"
           radius="24px"
           :score="40"
           :score-add="40"
