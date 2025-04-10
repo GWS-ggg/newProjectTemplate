@@ -29,6 +29,30 @@ const props = defineProps({
     type: Object as () => HTMLElement | null,
     default: null,
   },
+  // 气泡位置自定义
+  bubblePosition: {
+    type: Object as () => {
+      top?: string
+      right?: string
+      bottom?: string
+      left?: string
+      translateX?: string
+      translateY?: string
+    },
+    default: () => ({}),
+  },
+  // 单个气泡位置
+  singleBubblePosition: {
+    type: Object as () => {
+      top?: string
+      right?: string
+      bottom?: string
+      left?: string
+      translateX?: string
+      translateY?: string
+    },
+    default: () => ({}),
+  },
 })
 
 const { scoreRef } = useScoreElementStore()
@@ -84,9 +108,41 @@ function triggerAnimation() {
   }
 }
 
+// 存储当前回调
+let currentAnimationCallback: (() => void) | undefined
+
+// 动画完成处理函数
+function animationCompletedHandler() {
+  console.log('Animation completed')
+  if (currentAnimationCallback) {
+    currentAnimationCallback()
+    currentAnimationCallback = undefined
+  }
+}
+
+// 带回调的动画触发函数
+function triggerAnimationWithCallback(callback?: () => void) {
+  console.log('triggerAnimationWithCallback')
+
+  // 存储回调函数以便在事件触发时调用
+  currentAnimationCallback = callback
+
+  // 触发动画
+  triggerAnimation()
+
+  // 设置超时保证回调会执行
+  setTimeout(() => {
+    if (currentAnimationCallback) {
+      currentAnimationCallback()
+      currentAnimationCallback = undefined
+    }
+  }, 2000)
+}
+
 // 暴露方法给父组件
 defineExpose({
   triggerAnimation,
+  triggerAnimationWithCallback,
 })
 </script>
 
@@ -96,7 +152,14 @@ defineExpose({
       <slot />
       <div
         v-if="!scoreAddShow && scoreShow"
-        class="absolute right-0 h-74 translate-x-1/2 -top-50"
+        class="absolute h-74"
+        :style="{
+          top: singleBubblePosition.top ?? '-25px',
+          right: singleBubblePosition.right ?? '0',
+          bottom: singleBubblePosition.bottom,
+          left: singleBubblePosition.left,
+          transform: `translate(${singleBubblePosition.translateX ?? '50%'}, ${singleBubblePosition.translateY ?? '0'})`,
+        }"
       >
         <div class="relative">
           <img
@@ -120,7 +183,14 @@ defineExpose({
       </div>
       <div
         v-if="scoreAddShow"
-        class="absolute right-0 h-91 translate-x-1/2 -top-74"
+        class="absolute h-91"
+        :style="{
+          top: bubblePosition.top ?? '-40px',
+          right: bubblePosition.right ?? '0',
+          bottom: bubblePosition.bottom,
+          left: bubblePosition.left,
+          transform: `translate(${bubblePosition.translateX ?? '50%'}, ${bubblePosition.translateY ?? '0'})`,
+        }"
       >
         <div class="relative">
           <img
@@ -179,6 +249,7 @@ defineExpose({
         :icon-url="scoreIconImg"
         :start-element="scoreIconRef"
         :target-element="scoreRef"
+        @animation-complete="animationCompletedHandler"
       />
     </Teleport>
     <Teleport to="body">
@@ -187,6 +258,7 @@ defineExpose({
         :icon-url="scoreIconImg"
         :start-element="scoreAddIconRef"
         :target-element="scoreRef"
+        @animation-complete="animationCompletedHandler"
       />
     </Teleport>
 
@@ -196,6 +268,7 @@ defineExpose({
         :icon-url="scoreIconImg"
         :start-element="scoreSingleIconRef"
         :target-element="scoreRef"
+        @animation-complete="animationCompletedHandler"
       />
     </Teleport>
   </div>

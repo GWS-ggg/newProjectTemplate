@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import GreenButton from '@/components/GreenButton.vue'
+import { computed, ref, watchEffect } from 'vue'
 
 function getImageUrl(name: string) {
   return new URL(`../../assets/images/gifts/threeSegmentN/${name}`, import.meta.url).href
@@ -35,6 +36,8 @@ interface Gift {
   iconList: GiftIcon[]
   score: number
   isPurchased: boolean
+  BuyTimes: number
+  sortId?: number
 }
 const giftList = ref<Gift[]>([
   {
@@ -45,6 +48,7 @@ const giftList = ref<Gift[]>([
     isPurchased: false,
     bgImg: imgMap.bg1Img,
     bgOkImg: imgMap.bg1OkImg,
+    BuyTimes: 1,
     iconList: [
       { id: 1, iconImg: imgMap.diceImg, desc: '200' },
       { id: 2, iconImg: imgMap.goldImg, desc: '30K' },
@@ -60,6 +64,7 @@ const giftList = ref<Gift[]>([
     isPurchased: false,
     bgImg: imgMap.bg2Img,
     bgOkImg: imgMap.bg2OkImg,
+    BuyTimes: 0,
     iconList: [
       { id: 1, iconImg: imgMap.box1Img, desc: '100' },
       { id: 2, iconImg: imgMap.diamondImg, desc: '200' },
@@ -75,6 +80,55 @@ const giftList = ref<Gift[]>([
     isPurchased: false,
     bgImg: imgMap.bg3Img,
     bgOkImg: imgMap.bg3OkImg,
+    BuyTimes: 0,
+    iconList: [
+      { id: 1, iconImg: imgMap.box1Img, desc: '200' },
+      { id: 2, iconImg: imgMap.diamondImg, desc: '300' },
+      { id: 3, iconImg: imgMap.box2Img, desc: '200' },
+    ],
+    score: 60,
+  },
+  {
+    id: 4,
+    btnDesc: 'FREE',
+    available: true,
+    isFree: true,
+    isPurchased: false,
+    bgImg: imgMap.bg1Img,
+    bgOkImg: imgMap.bg1OkImg,
+    BuyTimes: 0,
+    iconList: [
+      { id: 1, iconImg: imgMap.diceImg, desc: '200' },
+      { id: 2, iconImg: imgMap.goldImg, desc: '30K' },
+      { id: 3, iconImg: imgMap.diamondImg, desc: '200' },
+    ],
+    score: 40,
+  },
+  {
+    id: 5,
+    btnDesc: '20.00',
+    available: true,
+    isFree: false,
+    isPurchased: false,
+    bgImg: imgMap.bg2Img,
+    bgOkImg: imgMap.bg2OkImg,
+    BuyTimes: 0,
+    iconList: [
+      { id: 1, iconImg: imgMap.box1Img, desc: '100' },
+      { id: 2, iconImg: imgMap.diamondImg, desc: '200' },
+      { id: 3, iconImg: imgMap.box2Img, desc: '100' },
+    ],
+    score: 20,
+  },
+  {
+    id: 6,
+    btnDesc: '60.00',
+    available: true,
+    isFree: false,
+    isPurchased: false,
+    bgImg: imgMap.bg3Img,
+    bgOkImg: imgMap.bg3OkImg,
+    BuyTimes: 0,
     iconList: [
       { id: 1, iconImg: imgMap.box1Img, desc: '200' },
       { id: 2, iconImg: imgMap.diamondImg, desc: '300' },
@@ -84,11 +138,129 @@ const giftList = ref<Gift[]>([
   },
 ])
 
-function handlePurchaseButton(item: Gift) {
-  if (item.isPurchased) {
-    return
+const displayGiftList = ref<Gift[]>([])
+
+watchEffect(() => {
+  displayGiftList.value = giftList.value.filter(item => item.BuyTimes === 0).slice(0, 3)
+  let sortId = 1
+  displayGiftList.value.forEach((item) => {
+    item.sortId = sortId++
+  })
+})
+// 创建一个映射来存储button refs
+const greenButtonRefs = ref<Map<number, InstanceType<typeof GreenButton>>>(new Map())
+
+// 设置ref的方法
+function setButtonRef(el: any, id: number) {
+  if (el) {
+    greenButtonRefs.value.set(id, el as InstanceType<typeof GreenButton>)
   }
-  item.isPurchased = true
+}
+const isAnimating = ref(false)
+const showNewGiftAnimation = ref(false)
+
+// 创建CSS动画Promise函数 - 使用事件监听器和超时保护
+function animateWithClass(element: Element | null, className: string, duration: number): Promise<void> {
+  return new Promise((resolve) => {
+    if (!element) {
+      resolve()
+      return
+    }
+
+    const onAnimationEnd = () => {
+      element.removeEventListener('animationend', onAnimationEnd)
+      resolve()
+    }
+
+    element.addEventListener('animationend', onAnimationEnd)
+    element.classList.add(className)
+
+    // 安全超时处理
+    setTimeout(() => {
+      if (element.classList.contains(className)) {
+        element.removeEventListener('animationend', onAnimationEnd)
+        resolve()
+      }
+    }, duration + 50)
+  })
+}
+
+// 使用async/await实现流畅的动画序列
+async function handlePurchaseButton(currentGift: Gift) {
+  // 防止重复点击
+  if (isAnimating.value)
+    return
+
+  isAnimating.value = true
+  const buttonRef = greenButtonRefs.value.get(currentGift.id)
+
+  try {
+    // 1. 创建积分动画Promise
+    const scoreAnimationPromise = new Promise<void>((resolve) => {
+      if (buttonRef) {
+        buttonRef.triggerAnimationWithCallback(() => resolve())
+      }
+      else {
+        resolve()
+      }
+    })
+
+    // 2. 执行消失动画
+    const giftElement = document.querySelector(`#gift-${currentGift.sortId}`)
+    await animateWithClass(giftElement, 'fade-out', 500)
+
+    // 3. 执行上滑动画
+    const gift2 = document.querySelector('#gift-2')
+    const gift3 = document.querySelector('#gift-3')
+
+    await Promise.all([
+      animateWithClass(gift2, 'move-up', 500),
+      animateWithClass(gift3, 'move-up', 500),
+    ])
+
+    // 4. 重置所有动画类
+    document.querySelectorAll('.gift-container').forEach((element) => {
+      element.classList.remove('fade-out', 'move-up')
+    })
+
+    // 5. 更新数据并执行新礼物出现动画
+    const selectedGift = giftList.value.find(item => item.id === currentGift.id)
+    if (selectedGift) {
+      selectedGift.BuyTimes = 1
+    }
+
+    showNewGiftAnimation.value = true
+
+    // 等待新礼物动画完成
+    const newGift = document.querySelector('.fade-in')
+    if (newGift) {
+      await new Promise<void>((resolve) => {
+        const onFadeInEnd = () => {
+          newGift.removeEventListener('animationend', onFadeInEnd)
+          resolve()
+        }
+        newGift.addEventListener('animationend', onFadeInEnd, { once: true })
+
+        // 安全超时
+        setTimeout(resolve, 500)
+      })
+    }
+    else {
+      await new Promise<void>(resolve => setTimeout(resolve, 500))
+    }
+
+    showNewGiftAnimation.value = false
+
+    // 6. 等待积分动画完成
+    await scoreAnimationPromise
+  }
+  finally {
+    // 无论何种情况都重置状态
+    isAnimating.value = false
+    if (!buttonRef) {
+      currentGift.isPurchased = true
+    }
+  }
 }
 </script>
 
@@ -101,66 +273,66 @@ function handlePurchaseButton(item: Gift) {
       Take each deal take each deal !"
     </div>
     <div
-      v-for="item in giftList"
+      v-for="item in displayGiftList"
+      :id="`gift-${item.sortId}`"
       :key="item.id"
-      class="relative mt-20 w-710 flex items-center justify-center"
+      class="gift-container relative mt-20 w-710 flex items-center justify-center"
+      :class="{ 'fade-in': item.sortId === 3 && showNewGiftAnimation }"
     >
       <div class="w-710">
         <img
-          :src="item.isPurchased ? item.bgOkImg : item.bgImg"
+          :src="item.bgImg"
           alt=""
           class="w-full"
-          :class="{ 'flip-active': item.isPurchased }"
         >
       </div>
 
-      <div v-if="!item.isPurchased">
-        <div class="absolute left-0 top-30 h-120 w-full">
-          <div class="h-full flex items-center justify-center gap-30">
-            <div
-              v-for="icon in item.iconList"
-              :key="icon.id"
-              class="h-full flex flex-col items-center justify-center"
-            >
-              <img
-                :src="icon.iconImg"
-                alt=""
-                class="h-full"
-              >
-              <div class="text-42 text-[#fff] text-stroke-1 text-stroke-[#464646] -mt-32">
-                {{ icon.desc }}
-              </div>
-            </div>
-          </div>
-        </div>
-        <div
-          class="absolute bottom-38 left-1/2 z-30 h-100 w-300 -translate-x-1/2"
-          @click="handlePurchaseButton(item)"
-        >
-          <GreenButton
-            radius="20px"
-            border-width="2px"
-            :score="item.score"
-            score-show
+      <div class="absolute left-0 top-30 h-120 w-full">
+        <div class="h-full flex items-center justify-center gap-30">
+          <div
+            v-for="icon in item.iconList"
+            :key="icon.id"
+            class="h-full flex flex-col items-center justify-center"
           >
-            <div class="relative text-40 text-[#fff] text-stroke-2 text-stroke-[#164b2e]">
-              {{ item.btnDesc }}
-              <img
-                v-if="!item.isFree"
-                :src="imgMap.lockImg"
-                alt=""
-                class="absolute top-0 h-42 -right-40"
-              >
+            <img
+              :src="icon.iconImg"
+              alt=""
+              class="h-full"
+            >
+            <div class="text-42 text-[#fff] text-stroke-1 text-stroke-[#464646] -mt-32">
+              {{ icon.desc }}
             </div>
-          </GreenButton>
+          </div>
         </div>
-        <div class="absolute bottom-35 left-50 f-c flex-col">
-          <div class="text-20 text-[#fff] text-stroke-1 text-stroke-[#5d2f0a]">
-            1/1
+      </div>
+      <div
+        class="absolute bottom-38 left-1/2 z-30 h-100 w-300 -translate-x-1/2"
+        @click="handlePurchaseButton(item)"
+      >
+        <GreenButton
+          :ref="el => setButtonRef(el, item.id)"
+          radius="20px"
+          border-width="2px"
+          :score="item.score"
+          score-show
+        >
+          <div class="relative text-40 text-[#fff] text-stroke-2 text-stroke-[#164b2e]">
+            {{ item.btnDesc }}
+            <img
+              v-if="!item.isFree"
+              :src="imgMap.lockImg"
+              alt=""
+              class="absolute top-0 h-42 -right-40"
+            >
           </div>
-          <div class="text-18 text-[#fddfb0] text-stroke-1 text-stroke-[#5d2f0a]">
-            Available
-          </div>
+        </GreenButton>
+      </div>
+      <div class="absolute bottom-35 left-50 f-c flex-col">
+        <div class="text-20 text-[#fff] text-stroke-1 text-stroke-[#5d2f0a]">
+          1/1
+        </div>
+        <div class="text-18 text-[#fddfb0] text-stroke-1 text-stroke-[#5d2f0a]">
+          Available
         </div>
       </div>
     </div>
@@ -196,5 +368,44 @@ function handlePurchaseButton(item: Gift) {
 
 .flip-active {
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+// 消失效果
+.fade-out {
+  animation: fade-out 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes fade-out {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+
+.move-up {
+  animation: moveUp 0.6s forwards;
+}
+@keyframes moveUp {
+  to {
+    transform: translateY(-360px);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 </style>

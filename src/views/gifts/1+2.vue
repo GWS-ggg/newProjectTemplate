@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import type { onePlusTwoGiftItemInfo, ProductInfo } from '@/types'
+import { getProductListApi } from '@/api'
+
 import GreenButton from '@/components/GreenButton.vue'
 import { computed, ref, watchEffect } from 'vue'
 
@@ -49,6 +52,22 @@ interface Goods {
   price?: string
   img: string
 }
+const productInfo = ref<ProductInfo>()
+const itemInfoList = ref<onePlusTwoGiftItemInfo[]>([])
+async function getProductList() {
+  const res = await getProductListApi({
+    appid: '616876868660610',
+    uid: '102191',
+    producttype: 4,
+  })
+  productInfo.value = res.ProductInfo
+  itemInfoList.value = res.ItemInfo as onePlusTwoGiftItemInfo[]
+  let idNum = 0
+  itemInfoList.value.forEach((item) => {
+    item.id = idNum++
+  })
+}
+getProductList()
 
 const giftData = ref<GiftOnePlusTwo>({
   title: 'BUY 1 PACK & GET 2 FREE !',

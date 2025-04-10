@@ -108,6 +108,13 @@ const iconProps = computed(() => {
     return []
   return productInfo.value.Props.filter(item => item.Icon)
 })
+
+const bubblePosition = {
+  top: '-20px',
+  right: '-20px',
+  translateX: '50%',
+  translateY: '0',
+}
 </script>
 
 <template>
@@ -208,6 +215,7 @@ const iconProps = computed(() => {
             :score-add="vipScoreAdd"
             score-show
             :score-target="scoreTarget"
+            :bubble-position="bubblePosition"
           >
             <div
               class="z-10 text-47 text-[#1c6904]"

@@ -92,3 +92,21 @@ export interface WheelGiftItemInfo {
   }>
   ExpireTime: number
 }
+
+export interface onePlusTwoGiftItemInfo {
+  id?: number
+  Title: string
+  Key: number
+  TradeProductID: number
+  Limit: number
+  Price?: number
+  Props: Array<{
+    PropID: number
+    PropType: number
+    DeltaCount: number
+    Icon: string
+    Text?: string
+    Scale?: number
+  }>
+  ExpireTime: number
+}

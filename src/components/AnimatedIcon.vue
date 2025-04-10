@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defineExpose, defineProps, nextTick, onMounted, ref } from 'vue'
+import { defineEmits, defineExpose, defineProps, nextTick, onMounted, ref } from 'vue'
 
 const props = defineProps({
   iconUrl: {
@@ -22,6 +22,9 @@ const props = defineProps({
     default: null,
   },
 })
+
+// 定义事件
+const emit = defineEmits(['animationComplete'])
 
 const iconRef = ref<HTMLElement | null>(null)
 const animationActive = ref(false)
@@ -114,6 +117,8 @@ onMounted(() => {
 
   iconRef.value.addEventListener('animationend', () => {
     animationActive.value = false
+    // 使用Vue事件机制发出事件
+    emit('animationComplete')
   })
 })
 </script>
@@ -137,7 +142,7 @@ onMounted(() => {
 <style scoped>
 .animated-icon {
   position: fixed;
-  z-index: 1000;
+  z-index: 9999;
   pointer-events: none;
   /* 初始化CSS变量 */
   --diff-x: 0;
