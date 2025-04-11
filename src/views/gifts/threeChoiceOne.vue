@@ -98,7 +98,7 @@ const endTimestamp = ref(Date.now() + 24 * 45 * 60 * 9)
 
 <template>
   <div class="relative mb-30 f-c flex-col text-29">
-    <div class="mt-16 text-29 text-stroke-2 text-stroke-[#19093e]">
+    <div class="mt-30 text-29 text-stroke-2 text-stroke-[#19093e]">
       Only one purchase can be made !
     </div>
     <div class="min-h-789 w-700 flex items-end justify-center">

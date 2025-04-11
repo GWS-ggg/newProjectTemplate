@@ -47,7 +47,7 @@ const imgMap: Record<string, string> = {
 const currentSocre = ref(1100)
 const greenButtonRef = ref<InstanceType<typeof GreenButton> | null>(null)
 const isBuy = ref(false)
-function handleBtnClick() {
+async function handleBtnClick() {
   const goodsListTemp = [...itemInfoList.value]
   console.log(itemInfoList.value, 'itemInfoList')
   // 如果列表不为空，将第一个元素移动到最后
@@ -72,6 +72,9 @@ function handleBtnClick() {
   }
   console.log('handleBtnClick')
 
+  // 执行动画
+  await executeAnimations()
+
   // TODO 购买成功
   setTimeout(() => {
     greenButtonRef.value?.triggerAnimation()
@@ -81,6 +84,75 @@ function handleBtnClick() {
     isBuy.value = true
   }, 3000)
 }
+
+// 动画相关函数
+function animateWithClass(element: Element | null, className: string, duration: number): Promise<void> {
+  return new Promise((resolve) => {
+    if (!element) {
+      resolve()
+      return
+    }
+
+    element.classList.add(className)
+
+    setTimeout(() => {
+      element.classList.remove(className)
+      resolve()
+    }, duration)
+  })
+}
+
+// 使用Map管理元素及其动画
+async function executeAnimations() {
+  // 创建一个动画配置Map
+  const animationConfig = new Map([
+    ['gift-1', {
+      element: document.querySelector('#gift-1'),
+      animations: [
+        { className: 'move-up', duration: 500, phase: 'first' },
+        { className: 'move-to-first', duration: 1000, phase: 'second' },
+      ],
+    }],
+    ['gift-2', {
+      element: document.querySelector('#gift-2'),
+      animations: [
+        { className: 'move-up', duration: 500, phase: 'first' },
+        { className: 'move-to-second', duration: 1000, phase: 'second' },
+      ],
+    }],
+    ['gift-3', {
+      element: document.querySelector('#gift-3'),
+      animations: [
+        { className: 'move-up', duration: 500, phase: 'first' },
+        { className: 'fade-out', duration: 800, phase: 'second' },
+      ],
+    }],
+  ])
+
+  // 过滤出有效的元素配置
+  const validConfigs = Array.from(animationConfig.values())
+    .filter(config => config.element !== null)
+
+  if (validConfigs.length === 0)
+    return
+
+  // 分阶段执行动画
+  const phases = ['first', 'second']
+
+  for (const phase of phases) {
+    // 收集当前阶段的所有动画
+    const phaseAnimations = validConfigs.map((config) => {
+      const animation = config.animations.find(anim => anim.phase === phase)
+      return animation ? animateWithClass(config.element, animation.className, animation.duration) : Promise.resolve()
+    }).filter(Boolean)
+
+    // 并行执行当前阶段的所有动画
+    if (phaseAnimations.length > 0) {
+      await Promise.all(phaseAnimations)
+    }
+  }
+}
+
 const scoreTarget = ref<HTMLElement | null>(null)
 
 const priceComputed = computed(() => {
@@ -110,17 +182,17 @@ const iconProps = computed(() => {
 })
 
 const bubblePosition = {
-  top: '-20px',
-  right: '-20px',
+  top: '-0.5rem',
+  right: '-0.42rem',
   translateX: '50%',
   translateY: '0',
 }
 </script>
 
 <template>
-  <div class="relative h-950 flex flex-col items-center text-32">
+  <div class="relative max-h-[calc(100vh+80px)] min-h-[calc(100vh-420px)] flex flex-col items-center text-32">
     <div
-      class="w-full flex flex-col items-center justify-center bg-cover bg-center pt-190"
+      class="w-full flex flex-none shrink-0 flex-col items-center justify-center bg-cover bg-center pt-190"
       :style="{ backgroundImage: `url(${getPGImg(productInfo?.Pic[0])})`,
                 backgroundSize: '120% auto',
                 backgroundPosition: 'center top 10%',
@@ -238,8 +310,9 @@ const bubblePosition = {
         </div>
       </div>
     </div>
-    <div class="w-full">
-      <div class="hide-scrollbar mx-15 h-500 flex flex-shrink-0 flex-col overflow-x-hidden overflow-y-auto rounded-20 bg-[#171f3d] bg-opacity-70 px-10 py-20">
+
+    <div class="hide-scrollbar h-500 w-full flex-shrink flex-grow">
+      <div class="hide-scrollbar custom-scrollbar h-full w-full flex flex-col items-center overflow-x-hidden overflow-y-auto rounded-20 bg-[#171f3d] bg-opacity-70 px-10 py-20">
         <TransitionGroup
           name="gift-list"
           tag="div"
@@ -248,7 +321,7 @@ const bubblePosition = {
           <div
             v-for="item in itemInfoList"
             :key="item.id"
-            class="goods-item relative mt-7 h-110 w-705 f-b flex-shrink-0 bg-cover text-white"
+            class="goods-item relative mt-7 h-110 w-705 f-b bg-cover text-white"
             :style="{ backgroundImage: `url(${imgMap.taskBarImg})` }"
           >
             <div class="ml-43 f-s">
@@ -297,7 +370,7 @@ const bubblePosition = {
         </TransitionGroup>
       </div>
     </div>
-    <div class="mb-20 mt-20 w-full f-c">
+    <div class="mb-20 mt-20 w-full f-c flex-none">
       <CountDown
         :end-time="productInfo?.ExpireTime"
         text-class="px-20 py-10 text-31 text-white"
@@ -379,5 +452,104 @@ const bubblePosition = {
 .gift-list-leave-active {
   position: absolute;
   width: 705px; /* 与列表项宽度一致 */
+}
+
+.flex-adaptive-container {
+  display: flex;
+  justify-content: space-evenly; /* 均匀分布元素，包括首尾 */
+  align-items: center;
+  width: 100%;
+
+  /* 设置最小间距，防止元素过于靠近 */
+  gap: 20px;
+
+  /* 可选：增加内边距，确保首尾元素不会靠近容器边缘 */
+  padding: 0 15px;
+}
+
+.flex-dynamic-gap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+
+  /* 基于元素数量动态设置间距 */
+  &.items-3 {
+    gap: 40px; /* 三个元素时的间距较大 */
+  }
+
+  &.items-4 {
+    gap: 20px; /* 四个元素时的间距较小 */
+  }
+}
+
+.grid-adaptive-container {
+  display: grid;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+
+  /* 动态设置网格列 */
+  &.items-3 {
+    grid-template-columns: repeat(3, auto);
+    gap: 40px;
+  }
+
+  &.items-4 {
+    grid-template-columns: repeat(4, auto);
+    gap: 20px;
+  }
+}
+
+.move-up {
+  animation: moveUp 0.5s ease forwards;
+}
+
+.move-to-first {
+  animation: moveToFirst 1s ease forwards;
+}
+
+.move-to-second {
+  animation: moveToSecond 1s ease forwards;
+}
+
+.fade-out {
+  animation: fadeOut 0.8s ease forwards;
+}
+
+@keyframes moveUp {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes moveToFirst {
+  0% {
+    transform: translateY(-20px);
+  }
+  100% {
+    transform: translateY(-20px) translateX(-100%);
+  }
+}
+
+@keyframes moveToSecond {
+  0% {
+    transform: translateY(-20px);
+  }
+  100% {
+    transform: translateY(-20px) translateX(-100%);
+  }
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 </style>

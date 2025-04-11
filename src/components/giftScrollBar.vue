@@ -133,7 +133,7 @@ onBeforeUnmount(() => {
     <img
       src="@/assets/images/GiftScrollBar/img_入口未选择遮盖.png"
       alt=""
-      class="absolute left-0 top-0 z-0 h-126 w-full"
+      class="absolute left-0 top-0 z-0 h-124 w-full"
     >
     <!-- 使用Swiper替换原来的overflow滚动容器 -->
     <Swiper
@@ -173,7 +173,7 @@ onBeforeUnmount(() => {
               v-if="pkg.tag"
               class="absolute left-0 top-0 z-50 transform rounded-md text-16 text-white font-bold"
             >
-              <div class="relative">
+              <div class="relative -ml-2 -mt-2">
                 <img
                   v-if="pkg.tag === 'Hot'"
                   src="@/assets/images/GiftScrollBar/img_热卖_标签.png"
@@ -187,7 +187,7 @@ onBeforeUnmount(() => {
                   class="w-50"
                 >
                 <div
-                  class="absolute top-8 z-10 w-full f-c text-18 color-[#f6f0e5] font-medium text-stroke-1 text-stroke-[#88140f] -left-5 -rotate-45"
+                  class="absolute top-6 z-10 w-full f-c text-16 color-[#f6f0e5] font-medium text-stroke-3 text-stroke-[#88140f] paint-order -left-6 -rotate-45"
                   :class="{ 'text-stroke-[#147f05]!': pkg.tag === 'Hot' }"
                 >
                   {{ pkg.tag }}

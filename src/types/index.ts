@@ -94,12 +94,15 @@ export interface WheelGiftItemInfo {
 }
 
 export interface onePlusTwoGiftItemInfo {
-  id?: number
+  id: number
   Title: string
   Key: number
   TradeProductID: number
+  SkuID?: string
   Limit: number
   Price?: number
+  BuyTimes?: number
+  sortId?: number
   Props: Array<{
     PropID: number
     PropType: number
@@ -109,4 +112,22 @@ export interface onePlusTwoGiftItemInfo {
     Scale?: number
   }>
   ExpireTime: number
+}
+
+export interface ThreeChoiceOneGiftItemInfo {
+  id: number
+  Key: number
+  TradeProductID: number
+  SkuID?: string
+  Limit: number
+  Price?: number
+  BuyTimes?: number
+  Props: Array<{
+    PropID: number
+    PropType: number
+    DeltaCount: number
+    Icon: string
+    Text?: string
+    Scale?: number
+  }>
 }

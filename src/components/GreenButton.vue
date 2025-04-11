@@ -152,7 +152,7 @@ defineExpose({
       <slot />
       <div
         v-if="!scoreAddShow && scoreShow"
-        class="absolute h-74"
+        class="absolute z-50 h-74"
         :style="{
           top: singleBubblePosition.top ?? '-25px',
           right: singleBubblePosition.right ?? '0',
@@ -183,7 +183,7 @@ defineExpose({
       </div>
       <div
         v-if="scoreAddShow"
-        class="absolute h-91"
+        class="absolute z-50 h-91"
         :style="{
           top: bubblePosition.top ?? '-40px',
           right: bubblePosition.right ?? '0',
@@ -249,6 +249,7 @@ defineExpose({
         :icon-url="scoreIconImg"
         :start-element="scoreIconRef"
         :target-element="scoreRef"
+        :score="score"
         @animation-complete="animationCompletedHandler"
       />
     </Teleport>
@@ -258,6 +259,7 @@ defineExpose({
         :icon-url="scoreIconImg"
         :start-element="scoreAddIconRef"
         :target-element="scoreRef"
+        :score="scoreAdd"
         @animation-complete="animationCompletedHandler"
       />
     </Teleport>
@@ -268,6 +270,7 @@ defineExpose({
         :icon-url="scoreIconImg"
         :start-element="scoreSingleIconRef"
         :target-element="scoreRef"
+        :score="score"
         @animation-complete="animationCompletedHandler"
       />
     </Teleport>
@@ -294,6 +297,23 @@ defineExpose({
   background: linear-gradient(0deg, #1d6301 0%, #5f9f26 100%);
   border-radius: v-bind('`${radius}`'); /* 动态计算，比按钮圆角大 2px */
   z-index: -1;
+}
+
+/* 气泡容器样式 */
+.bubble-small-container {
+  position: absolute;
+  top: -25px;
+  right: -15px;
+  z-index: 9999; /* 超高层级 */
+  pointer-events: none; /* 让用户点击能穿透气泡 */
+}
+
+.bubble-large-container {
+  position: absolute;
+  top: -40px;
+  right: -30px;
+  z-index: 9999;
+  pointer-events: none;
 }
 
 .dual-color-text {

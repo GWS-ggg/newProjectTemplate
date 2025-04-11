@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import GreenButton from '@/components/GreenButton.vue'
+import { useAnimatableRefs } from '@/composables/useButtonRefs'
+import { animateWithClass } from '@/utils'
 import { ref } from 'vue'
 
 function getImageUrl(name: string) {
@@ -84,36 +86,20 @@ const giftList = ref<Gift[]>([
     score: 60,
   },
 ])
+const { setRef, triggerAnimation } = useAnimatableRefs()
 
-// 创建一个映射来存储button refs
-const greenButtonRefs = ref<Map<number, InstanceType<typeof GreenButton>>>(new Map())
-
-// 设置ref的方法
-function setButtonRef(el: any, id: number) {
-  if (el) {
-    greenButtonRefs.value.set(id, el as InstanceType<typeof GreenButton>)
-  }
-}
-
-function handlePurchaseButton(item: Gift) {
-  const buttonRef = greenButtonRefs.value.get(item.id)
-
-  if (buttonRef) {
-    // 使用带回调的动画函数，动画完成后再翻转卡片
-    buttonRef.triggerAnimationWithCallback(() => {
-      item.isPurchased = true
-    })
-  }
-  else {
-    // 如果没有找到按钮引用，直接设置为已购买
-    item.isPurchased = true
-  }
+async function handlePurchaseButton(item: Gift) {
+  triggerAnimation(item.id)
+  const giftElement = document.querySelector(`#gift-${item.id}`)
+  console.log(giftElement, 'giftElement')
+  item.isPurchased = true
+  await animateWithClass(giftElement, 'flip-active', 600)
 }
 </script>
 
 <template>
   <div class="mb-30 flex flex-col items-center justify-center text-29">
-    <div class="mt-10 text-[#fff] text-stroke-1 text-stroke-[#19093e]">
+    <div class="mt-30 text-[#fff] text-stroke-1 text-stroke-[#19093e]">
       END IN: 60:00:00
     </div>
     <div class="mt-24 text-24 text-[#fef29f] text-stroke-1 text-stroke-[#682c2e]">
@@ -121,6 +107,7 @@ function handlePurchaseButton(item: Gift) {
     </div>
     <div
       v-for="item in giftList"
+      :id="`gift-${item.id}`"
       :key="item.id"
       class="relative mt-20 w-710 flex items-center justify-center"
     >
@@ -129,11 +116,10 @@ function handlePurchaseButton(item: Gift) {
           :src="item.isPurchased ? item.bgOkImg : item.bgImg"
           alt=""
           class="w-full"
-          :class="{ 'flip-active': item.isPurchased }"
         >
       </div>
 
-      <div v-if="!item.isPurchased">
+      <div v-show="!item.isPurchased">
         <div class="absolute left-0 top-30 h-120 w-full">
           <div class="h-full flex items-center justify-center gap-30">
             <div
@@ -157,7 +143,7 @@ function handlePurchaseButton(item: Gift) {
           @click="handlePurchaseButton(item)"
         >
           <GreenButton
-            :ref="el => setButtonRef(el, item.id)"
+            :ref="el => setRef(el, item.id)"
             radius="20px"
             border-width="2px"
             :score="item.score"

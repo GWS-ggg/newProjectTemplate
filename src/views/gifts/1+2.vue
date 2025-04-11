@@ -3,7 +3,11 @@ import type { onePlusTwoGiftItemInfo, ProductInfo } from '@/types'
 import { getProductListApi } from '@/api'
 
 import GreenButton from '@/components/GreenButton.vue'
-import { computed, ref, watchEffect } from 'vue'
+import { useAnimatableRefs } from '@/composables/useButtonRefs'
+
+import { animateWithClass, getPGImg } from '@/utils'
+
+import { computed, nextTick, ref, watchEffect } from 'vue'
 
 function getImageUrl(name: string) {
   return new URL(`../../assets/images/gifts/1+2/${name}`, import.meta.url).href
@@ -24,6 +28,7 @@ const imgMap: Record<string, string> = {
   boxImg: getImageUrl('魔法宝箱.png'),
   diceImg: getImageUrl('骰子.png'),
   btn_bg: getImageUrl('btn_1+2礼包按钮.png'),
+  lock: getImageUrl('锁.png'),
 }
 interface GiftOnePlusTwo {
   title: string
@@ -65,9 +70,35 @@ async function getProductList() {
   let idNum = 0
   itemInfoList.value.forEach((item) => {
     item.id = idNum++
+    if (item.BuyTimes === undefined) {
+      item.BuyTimes = 0
+    }
+    if (item.Price === undefined) {
+      item.Price = 0
+    }
   })
 }
 getProductList()
+
+function getPorpsInfo(props: Array<{
+  PropID: number
+  PropType: number
+  DeltaCount: number
+  Icon: string
+  Text?: string
+}>) {
+  return props.filter(prop => prop.PropID !== 270001)
+}
+
+function getScoreInfo(props: Array<{
+  PropID: number
+  PropType: number
+  DeltaCount: number
+  Icon: string
+  Text?: string
+}>) {
+  return props.find(prop => prop.PropID === 270001)
+}
 
 const giftData = ref<GiftOnePlusTwo>({
   title: 'BUY 1 PACK & GET 2 FREE !',
@@ -216,20 +247,20 @@ const isAnimating = ref(false)
 // 标记是否显示第三个礼包的新礼包动画
 const showNewGiftAnimation = ref(false)
 
-const displayedGifts = ref<GiftPackage[]>([])
+const displayedGifts = ref<onePlusTwoGiftItemInfo[]>([])
 
 const showPlus = ref(true)
 
 watchEffect(() => {
   // 如果正在进行动画，不更新礼包列表以避免干扰动画
-  if (isAnimating.value)
-    return
+  // if (isAnimating.value)
+  //   return
 
   // 获取未购买的礼包
-  displayedGifts.value = giftData.value.giftList.filter(gift => gift.BuyTimes !== 1)
+  displayedGifts.value = itemInfoList.value.filter(gift => gift.BuyTimes !== 1)
   displayedGifts.value = displayedGifts.value.slice(0, 3)
 
-  let sortId = 0
+  let sortId = 1
   displayedGifts.value.forEach((gift) => {
     gift.sortId = sortId++
   })
@@ -239,42 +270,48 @@ const processBar = computed(() => {
   return `${giftData.value.currentScore / giftData.value.totalScore * 100}%`
 })
 
-function getPrice(giftPackage: GiftPackage) {
-  if (giftPackage.price === 0) {
+function getPrice(giftPackage: onePlusTwoGiftItemInfo) {
+  if (giftPackage.Price === 0) {
     return 'FREE'
   }
-  return `$${giftPackage.price.toFixed(2)}`
+  return `$${giftPackage.Price?.toFixed(2)}`
 }
+const { setRef, triggerAnimation } = useAnimatableRefs()
 
-// 创建一个映射来存储button refs
-const greenButtonRefs = ref<Map<number, InstanceType<typeof GreenButton>>>(new Map())
-
-// 设置ref的方法
-function setButtonRef(el: any, id: number) {
-  if (el) {
-    greenButtonRefs.value.set(id, el as InstanceType<typeof GreenButton>)
-  }
-}
-
-function handleButtonClick(giftPackage: GiftPackage) {
+async function handleButtonClick(giftPackage: onePlusTwoGiftItemInfo) {
   console.log(giftPackage.sortId)
-  if (giftPackage.sortId !== 0) {
+  if (giftPackage.sortId !== 1) {
     return
   }
-  if (isAnimating.value)
+
+  if (isAnimating.value) {
     return
+  }
+
   isAnimating.value = true
 
-  // 设置第三个礼包不应该显示new-gift动画
-  showNewGiftAnimation.value = false
+  try {
+    // 设置第三个礼包不应该显示new-gift动画
+    showNewGiftAnimation.value = false
 
-  const buttonRef = greenButtonRefs.value.get(giftPackage.id)
+    // 支付成功
+    // 加号动画
+    handlePlusAnimation()
 
-  buttonRef?.triggerAnimation()
-  handlePlusAnimation()
-  setTimeout(() => {
-    handleGiftAnimation(giftPackage)
-  }, 500)
+    // 触发按钮动画
+    triggerAnimation(giftPackage.id)
+
+    // 礼包动画
+    setTimeout(() => {
+      handleGiftAnimation(giftPackage)
+    }, 200)
+  }
+  catch (error) {
+    console.error(error)
+  }
+  finally {
+    isAnimating.value = false
+  }
 }
 
 function handlePlusAnimation() {
@@ -283,55 +320,57 @@ function handlePlusAnimation() {
     showPlus.value = true
   }, 1500) // 2秒后重新显示
 }
+async function handleGiftAnimation(giftPackage: onePlusTwoGiftItemInfo) {
+  const giftElement = document.querySelector(`#gift-${giftPackage.sortId}`)
+  // 第一块礼包消失动画
+  await animateWithClass(giftElement, 'fade-out', 500)
 
-function handleGiftAnimation(giftPackage: GiftPackage) {
-  const giftElements = document.querySelectorAll('.gift-container')
-  if (giftElements.length >= 1) {
-    // 第一块礼包消失动画
-    giftElements[0].classList.add('fade-out')
+  const gift2Element = document.querySelector(`#gift-2`)
+  const gift3Element = document.querySelector(`#gift-3`)
+  const animationPromises = []
 
-    if (giftElements.length >= 2) {
-      giftElements[1].classList.add('move-to-first')
-    }
-    // 第三块向左移动到第二块位置
-    if (giftElements.length >= 3) {
-      giftElements[2].classList.add('move-to-second')
-    }
-    // 延迟执行后续动画
+  // 只为存在的元素添加动画任务
+  if (gift2Element) {
+    animationPromises.push(animateWithClass(gift2Element, 'move-to-first', 500))
+  }
 
-    // 第二块向左移动到第一块位置
-    if (giftElements.length >= 2) {
-      giftElements[1].classList.add('move-to-first')
-    }
-    // 第三块向左移动到第二块位置
-    if (giftElements.length >= 3) {
-      giftElements[2].classList.add('move-to-second')
-    }
+  if (gift3Element) {
+    animationPromises.push(animateWithClass(gift3Element, 'move-to-second', 500))
+  }
 
-    // 更新购买次数，但不立即更新视图（延迟到动画结束后）
+  // 等待所有动画完成
+  if (animationPromises.length > 0) {
+    await Promise.all(animationPromises)
+  }
+
+  // 移除所有动画类，为下次动画做准备
+  document.querySelectorAll('.gift-container').forEach((element) => {
+    element.classList.remove('fade-out', 'move-to-first', 'move-to-second')
+  })
+  // 更新购买次数，但不立即更新视图（延迟到动画结束后）
+  // setTimeout(() => {
+
+  // 移除所有动画类，为下次动画做准备
+
+  const giftPackageIndex = itemInfoList.value.findIndex(gift => gift.id === giftPackage.id)
+  // 更新购买次数
+  itemInfoList.value[giftPackageIndex].BuyTimes = 1
+
+  await nextTick()
+  const newGift = document.querySelector('#gift-3')
+  if (newGift) {
+    await animateWithClass(newGift, 'fade-in', 500)
+    // 使用setTimeout避免过早清除动画类
     setTimeout(() => {
-      isAnimating.value = false
-
-      // 移除所有动画类，为下次动画做准备
-      document.querySelectorAll('.gift-container').forEach((element) => {
-        element.classList.remove('fade-out', 'move-to-first', 'move-to-second')
-      })
-
-      // 更新购买次数
-      giftData.value.giftList[giftPackage.id - 1].BuyTimes = 1
-      showNewGiftAnimation.value = true
-      // 保证动画快速渲染的关键！！ 定时器驱动渲染 ？？？？
-      // setTimeout(() => {
-      //   showNewGiftAnimation.value = false
-      // }, 100)
-    }, 800)
+      newGift.classList.remove('fade-in')
+    }, 600)
   }
 }
 </script>
 
 <template>
-  <div class="justify-cente flex flex-col items-center pt-16 text-32">
-    <div class="text-center text-29 text-stroke-3 text-stroke-[#19093e] paint-order">
+  <div class="justify-cente flex flex-col items-center text-32">
+    <div class="mt-30 text-center text-29 text-stroke-3 text-stroke-[#19093e] paint-order">
       {{ giftData.title }}
     </div>
     <div class="relative mt-35 flex items-center justify-center">
@@ -379,17 +418,16 @@ function handleGiftAnimation(giftPackage: GiftPackage) {
         :key="giftPackage.id"
       >
         <div
-          class="gift-container z-10 w-208 flex flex-col"
-          :class="{
-            'new-gift': giftPackage.sortId === 2 && showNewGiftAnimation,
-          }"
+          :id="`gift-${giftPackage.sortId}`"
+          class="gift-container w-208 flex flex-col"
+          :class="giftPackage.sortId ? `z-${30 - 5 * giftPackage.sortId}` : 'z-10'"
         >
           <div
             class="relative h-654 w-full flex flex-col bg-cover bg-center bg-no-repeat"
-            :style="{ backgroundImage: giftPackage.price > 0 ? `url(${imgMap.strip_1})` : `url(${imgMap.strip_2})` }"
+            :style="{ backgroundImage: giftPackage.Price && giftPackage.Price > 0 ? `url(${imgMap.strip_1})` : `url(${imgMap.strip_2})` }"
           >
             <img
-              v-if="giftPackage.price === 0 && giftPackage.sortId !== 0"
+              v-if="giftPackage.Price === 0 && giftPackage.sortId !== 1"
               class="absolute top-1/2 z-20 h-96 w-96 transition-opacity duration-500 -left-5 -translate-x-1/2 -translate-y-1/2"
               :class="{ 'opacity-0': !showPlus }"
               :src="giftData.plusImg"
@@ -402,30 +440,30 @@ function handleGiftAnimation(giftPackage: GiftPackage) {
               <div class="f-c flex-col -mt-10">
                 <img
                   class="h-60"
-                  :src="giftData.scoreImg"
+                  :src="getPGImg(getScoreInfo(giftPackage.Props)?.Icon)"
                   alt=""
                 >
                 <div class="text-stroke-black -mt-15">
-                  {{ giftPackage.score }}
+                  {{ getScoreInfo(giftPackage.Props)?.DeltaCount }}
                 </div>
               </div>
             </div>
-            <div class="mt-50 h-full w-full flex flex-col gap-20">
+            <div class="h-600 w-full flex flex-col justify-evenly gap-20">
               <template
-                v-for="goods in giftPackage.goodsList"
-                :key="goods.price"
+                v-for="(goods, index) in getPorpsInfo(giftPackage.Props)"
+                :key="index"
               >
                 <div class="flex flex-col items-center">
                   <img
                     class="h-100"
-                    :src="goods.img"
+                    :src="getPGImg(goods.Icon)"
                     alt=""
                   >
                   <span
-                    v-if="goods.price"
+                    v-if="goods.Text"
                     class="text-stroke-black -mt-25"
                   >
-                    {{ goods.price }}
+                    {{ goods.Text }}
                   </span>
                 </div>
               </template>
@@ -434,7 +472,7 @@ function handleGiftAnimation(giftPackage: GiftPackage) {
 
           <div class="relative z-10 mt-10 h-90 w-200">
             <GreenButton
-              :ref="el => setButtonRef(el, giftPackage.id)"
+              :ref="el => setRef(el, giftPackage.id)"
               radius="21px"
               border-width="2px"
               :score="40"
@@ -444,9 +482,9 @@ function handleGiftAnimation(giftPackage: GiftPackage) {
               <div class="relative z-10 h-full w-full f-c gap-5">
                 <span class="text-42 text-stroke-2 text-stroke-[#164b2e]">{{ getPrice(giftPackage) }}</span>
                 <img
-                  v-if="giftPackage.priceImg"
+                  v-if="giftPackage.sortId && giftPackage.sortId > 1"
                   class="h-50"
-                  :src="giftPackage.priceImg"
+                  :src="imgMap.lock"
                   alt=""
                 >
               </div>
@@ -570,7 +608,7 @@ function handleGiftAnimation(giftPackage: GiftPackage) {
   }
 }
 
-.new-gift {
+.fade-in {
   opacity: 0;
   transform: scale(0.3);
   animation: newGiftAppear 0.5s ease forwards;

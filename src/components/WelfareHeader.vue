@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useScoreElementStore } from '@/store/modules/scoreElement'
 import { computed, ref } from 'vue'
+import GradientStrokeText from './GradientStrokeText.vue'
 
 function getImageUrl(name: string) {
   return new URL(`../assets/images/WelfareHeader/${name}`, import.meta.url).href
@@ -54,7 +55,7 @@ const currentVipLevel = computed(() => vipLevelList.value[vipLevel.value])
               welfare
             </div>
             <div
-              class="text-61 text-[#fff309] font-bold"
+              class="text-61 text-[#fff309]"
               style="text-shadow:  3px 3px 0 #5b1800,  -1px 1px 0 #5b1800;"
             >
               100%
@@ -66,21 +67,30 @@ const currentVipLevel = computed(() => vipLevelList.value[vipLevel.value])
         </div>
       </div>
     </div>
-    <div class="flex flex-col items-start">
-      <div class="gradient-text text-52 text-stroke-2 text-stroke-[#632b0e] paint-order">
-        same price
+    <div class="ml-30 flex flex-col items-start pt-15">
+      <div class="flex flex-col items-start -ml-25">
+        <div
+          class="gradient-text-with-stroke text-52"
+          data-text="&nbsp;same price&nbsp;"
+        >
+          <span>&nbsp;same price&nbsp;</span>
+        </div>
+        <div
+          class="gradient-text-with-stroke text-52"
+          data-text="&nbsp;More Rewards&nbsp;"
+        >
+          <span>&nbsp;More  Rewards&nbsp;</span>
+        </div>
       </div>
-      <div class="gradient-text text-52 text-stroke-2 text-stroke-[#632b0e] paint-order">
-        More Rewards
-      </div>
-      <div class="flex items-center">
+
+      <div class="flex items-center -ml-10">
         <img
           :ref="el => scoreElementStore.setScoreRef(el as HTMLElement)"
           :src="currentVipLevel.icon"
           alt=""
           class="z-10 w-78"
         >
-        <div class="rounded-[15px] bg-[#200b49] bg-opacity-35 bg-cover bg-no-repeat px-[15px] py-[5px] text-white text-stroke-1 text-stroke-[#181818] paint-order -ml-12">
+        <div class="rounded-[24px] bg-[#200b49] bg-opacity-35 bg-cover bg-no-repeat px-25 py-2 text-30 text-white text-stroke-1 text-stroke-[#181818] paint-order -ml-12">
           21/100
         </div>
       </div>
@@ -111,5 +121,44 @@ background: linear-gradient(0deg, #647eff, #F2C511)
   /* 让背景只作用于文字部分 */
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+/* 添加新的类，专门用于处理渐变文本+描边 */
+.gradient-text-with-stroke {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+  --stroke-color: #632b0e;
+  --stroke-width: 2px;
+  --gradient: linear-gradient(180deg, #fdff79 27%, #f76901 100%);
+  width: fit-content;
+  // padding: 0 0.1em; /* 增加内边距 */
+  overflow: visible; /* 允许内容溢出 */
+}
+
+.gradient-text-with-stroke::before {
+  content: attr(data-text);
+  position: absolute;
+  z-index: -1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  -webkit-text-stroke: var(--stroke-width) var(--stroke-color);
+  text-stroke: var(--stroke-width) var(--stroke-color);
+  color: transparent;
+  white-space: nowrap; /* 确保文本不换行 */
+}
+
+.gradient-text-with-stroke span {
+  background: var(--gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  white-space: nowrap; /* 确保文本不换行 */
+  display: block; /* 块级显示更精确控制尺寸 */
+  width: 100%;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
 }
 </style>

@@ -315,7 +315,7 @@ function getItemClass(gift: GiftPackage) {
 
 <template>
   <div class="relative mb-30 flex flex-col items-center text-32">
-    <div class="mt-19 text-29 text-stroke-3 text-stroke-[#19093e] paint-order">
+    <div class="mt-30 text-29 text-stroke-3 text-stroke-[#19093e] paint-order">
       END IN:60:00:00
     </div>
     <div class="relative mt-26 flex items-center justify-center">

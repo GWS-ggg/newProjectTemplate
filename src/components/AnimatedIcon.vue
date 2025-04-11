@@ -21,6 +21,10 @@ const props = defineProps({
     type: Object as () => HTMLElement | null,
     default: null,
   },
+  score: {
+    type: Number,
+    default: 0,
+  },
 })
 
 // 定义事件
@@ -129,12 +133,18 @@ onMounted(() => {
     ref="iconRef"
     class="animated-icon"
   >
-    <div class="relative h-100 w-100 flex items-center justify-center">
+    <div class="relative h-100 w-100 flex flex-col items-center justify-center">
       <img
         :src="iconUrl"
         class="w-100"
         alt="动画图标"
       >
+      <div
+        v-if="score"
+        class="text-24 text-white text-stroke-black paint-order"
+      >
+        +{{ score }}
+      </div>
     </div>
   </div>
 </template>

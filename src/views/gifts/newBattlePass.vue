@@ -134,7 +134,7 @@ getProductList()
 
 <template>
   <div class="relative mb-30 flex flex-col items-center text-29 color-white leading-tight">
-    <div class="mt-19 text-29 color-[#fff] text-stroke-3 text-stroke-[#19093e] paint-order">
+    <div class="mt-30 text-29 color-[#fff] text-stroke-3 text-stroke-[#19093e] paint-order">
       仅限此赛季
     </div>
 
@@ -308,7 +308,7 @@ getProductList()
 
         <!-- 购买按钮 -->
         <div
-          class="absolute bottom-0 left-1/2 h-100 w-667 f-c text-40 color-[#944d07] -translate-x-1/2"
+          class="absolute bottom-0 left-1/2 h-100 w-667 f-c text-40 color-[#133e8a] -translate-x-1/2"
           @click="triggerScoreAddAnimationSecond"
         >
           <div class="relative h-full w-full f-c cursor-pointer">
@@ -384,12 +384,14 @@ getProductList()
       <AnimatedIcon
         ref="animatedIconRef"
         :icon-url="scoreIconImg"
+        :score="firstProduct.Props[0]?.VipScore || 0"
         :start-element="scoreIconRef"
         :target-element="scoreRef"
       />
       <AnimatedIcon
         ref="animatedIconAddRef"
         :icon-url="scoreIconImg"
+        :score="firstProduct.AddProps[0]?.VipScore || 0"
         :start-element="scoreAddIconRef"
         :target-element="scoreRef"
       />
@@ -398,12 +400,14 @@ getProductList()
       <AnimatedIcon
         ref="animatedIconRefSecond"
         :icon-url="scoreIconImg"
+        :score="secondProduct.Props[0]?.VipScore || 0"
         :start-element="scoreIconRefSecond"
         :target-element="scoreRef"
       />
       <AnimatedIcon
         ref="animatedIconAddRefSecond"
         :icon-url="scoreIconImg"
+        :score="secondProduct.AddProps[0]?.VipScore || 0"
         :start-element="scoreAddIconRefSecond"
         :target-element="scoreRef"
       />

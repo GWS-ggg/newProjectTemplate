@@ -29,3 +29,29 @@ export function getPrice(price: number) {
     return '0.00'
   return (price / 100).toFixed(2)
 }
+
+// 创建CSS动画Promise函数 - 使用事件监听器和超时保护
+export function animateWithClass(element: Element | null, className: string, duration: number): Promise<void> {
+  return new Promise((resolve) => {
+    if (!element) {
+      resolve()
+      return
+    }
+
+    // 使用 once: true 选项，确保事件只触发一次
+    const onAnimationEnd = () => {
+      resolve()
+    }
+
+    element.addEventListener('animationend', onAnimationEnd, { once: true })
+    element.classList.add(className)
+
+    // 安全超时仍然保留
+    setTimeout(() => {
+      if (element.classList.contains(className)) {
+        element.removeEventListener('animationend', onAnimationEnd)
+        resolve()
+      }
+    }, duration + 50)
+  })
+}

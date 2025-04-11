@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import GreenButton from '@/components/GreenButton.vue'
-import { computed, ref, watchEffect } from 'vue'
+import { useAnimatableRefs } from '@/composables/useButtonRefs'
+import { animateWithClass } from '@/utils'
+import { computed, nextTick, ref, watchEffect } from 'vue'
 
 function getImageUrl(name: string) {
   return new URL(`../../assets/images/gifts/threeSegmentN/${name}`, import.meta.url).href
@@ -147,43 +149,11 @@ watchEffect(() => {
     item.sortId = sortId++
   })
 })
-// 创建一个映射来存储button refs
-const greenButtonRefs = ref<Map<number, InstanceType<typeof GreenButton>>>(new Map())
 
-// 设置ref的方法
-function setButtonRef(el: any, id: number) {
-  if (el) {
-    greenButtonRefs.value.set(id, el as InstanceType<typeof GreenButton>)
-  }
-}
+// 使用组合式函数管理按钮引用
+const { setRef, triggerAnimation } = useAnimatableRefs()
+
 const isAnimating = ref(false)
-const showNewGiftAnimation = ref(false)
-
-// 创建CSS动画Promise函数 - 使用事件监听器和超时保护
-function animateWithClass(element: Element | null, className: string, duration: number): Promise<void> {
-  return new Promise((resolve) => {
-    if (!element) {
-      resolve()
-      return
-    }
-
-    const onAnimationEnd = () => {
-      element.removeEventListener('animationend', onAnimationEnd)
-      resolve()
-    }
-
-    element.addEventListener('animationend', onAnimationEnd)
-    element.classList.add(className)
-
-    // 安全超时处理
-    setTimeout(() => {
-      if (element.classList.contains(className)) {
-        element.removeEventListener('animationend', onAnimationEnd)
-        resolve()
-      }
-    }, duration + 50)
-  })
-}
 
 // 使用async/await实现流畅的动画序列
 async function handlePurchaseButton(currentGift: Gift) {
@@ -191,82 +161,63 @@ async function handlePurchaseButton(currentGift: Gift) {
   if (isAnimating.value)
     return
 
-  isAnimating.value = true
-  const buttonRef = greenButtonRefs.value.get(currentGift.id)
-
   try {
-    // 1. 创建积分动画Promise
-    const scoreAnimationPromise = new Promise<void>((resolve) => {
-      if (buttonRef) {
-        buttonRef.triggerAnimationWithCallback(() => resolve())
-      }
-      else {
-        resolve()
-      }
-    })
-
-    // 2. 执行消失动画
-    const giftElement = document.querySelector(`#gift-${currentGift.sortId}`)
-    await animateWithClass(giftElement, 'fade-out', 500)
-
-    // 3. 执行上滑动画
-    const gift2 = document.querySelector('#gift-2')
-    const gift3 = document.querySelector('#gift-3')
-
-    await Promise.all([
-      animateWithClass(gift2, 'move-up', 500),
-      animateWithClass(gift3, 'move-up', 500),
-    ])
-
-    // 4. 重置所有动画类
-    document.querySelectorAll('.gift-container').forEach((element) => {
-      element.classList.remove('fade-out', 'move-up')
-    })
-
-    // 5. 更新数据并执行新礼物出现动画
-    const selectedGift = giftList.value.find(item => item.id === currentGift.id)
-    if (selectedGift) {
-      selectedGift.BuyTimes = 1
-    }
-
-    showNewGiftAnimation.value = true
-
-    // 等待新礼物动画完成
-    const newGift = document.querySelector('.fade-in')
-    if (newGift) {
-      await new Promise<void>((resolve) => {
-        const onFadeInEnd = () => {
-          newGift.removeEventListener('animationend', onFadeInEnd)
-          resolve()
-        }
-        newGift.addEventListener('animationend', onFadeInEnd, { once: true })
-
-        // 安全超时
-        setTimeout(resolve, 500)
-      })
-    }
-    else {
-      await new Promise<void>(resolve => setTimeout(resolve, 500))
-    }
-
-    showNewGiftAnimation.value = false
-
-    // 6. 等待积分动画完成
-    await scoreAnimationPromise
+    isAnimating.value = true
+    await handleAnimation(currentGift)
   }
   finally {
     // 无论何种情况都重置状态
     isAnimating.value = false
-    if (!buttonRef) {
-      currentGift.isPurchased = true
-    }
+  }
+}
+
+async function handleAnimation(currentGift: Gift) {
+  // 1. 触发按钮动画
+  triggerAnimation(currentGift.id)
+
+  // 2. 执行消失动画
+  const giftElement = document.querySelector(`#gift-${currentGift.sortId}`)
+  await animateWithClass(giftElement, 'fade-out', 500)
+
+  // 3. 执行上滑动画
+  const elements = [
+    document.querySelector('#gift-2'),
+    document.querySelector('#gift-3'),
+  ].filter(Boolean) // 过滤掉不存在的元素
+
+  if (elements.length > 0) {
+    await Promise.all(
+      elements.map(el => animateWithClass(el, 'move-up', 500)),
+    )
+  }
+
+  // 4. 清理动画类并更新数据
+  document.querySelectorAll('.gift-container').forEach((el) => {
+    el.classList.remove('fade-out', 'move-up')
+  })
+
+  // 5. 更新礼物状态
+  const selectedGift = giftList.value.find(item => item.id === currentGift.id)
+  if (selectedGift) {
+    selectedGift.BuyTimes = 1
+  }
+
+  // 6. 等待DOM更新后再添加新礼物出现动画
+  await nextTick()
+  const newGift = document.querySelector('#gift-3')
+  if (newGift) {
+    animateWithClass(newGift, 'fade-in', 500)
+    // 使用setTimeout避免过早清除动画类
+    setTimeout(() => {
+      newGift.classList.remove('fade-in')
+    }, 600)
   }
 }
 </script>
 
 <template>
   <div class="mb-30 flex flex-col items-center justify-center text-29">
-    <div class="mt-10 text-[#fff] text-stroke-1 text-stroke-[#19093e]">
+    <div class="mt-30 text-[#fff] text-stroke-1 text-stroke-[#19093e]">
       END IN: 60:00:00
     </div>
     <div class="mt-24 text-24 text-[#fef29f] text-stroke-1 text-stroke-[#682c2e]">
@@ -277,7 +228,6 @@ async function handlePurchaseButton(currentGift: Gift) {
       :id="`gift-${item.sortId}`"
       :key="item.id"
       class="gift-container relative mt-20 w-710 flex items-center justify-center"
-      :class="{ 'fade-in': item.sortId === 3 && showNewGiftAnimation }"
     >
       <div class="w-710">
         <img
@@ -310,7 +260,7 @@ async function handlePurchaseButton(currentGift: Gift) {
         @click="handlePurchaseButton(item)"
       >
         <GreenButton
-          :ref="el => setButtonRef(el, item.id)"
+          :ref="el => setRef(el, item.id)"
           radius="20px"
           border-width="2px"
           :score="item.score"

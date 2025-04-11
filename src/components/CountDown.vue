@@ -16,7 +16,7 @@ const props = defineProps({
   // 文本样式
   textClass: {
     type: String,
-    default: 'text-26 text-[#d9cdb9] text-stroke-1 text-stroke-[#164b2e]',
+    default: 'text-26 text-[#d9cdb9] text-stroke-1 paint-order text-stroke-[#164b2e]',
   },
   // 倒计时结束回调
   onFinish: {

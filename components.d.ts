@@ -13,6 +13,8 @@ declare module 'vue' {
     CountDown: typeof import('./src/components/CountDown.vue')['default']
     GiftList: typeof import('./src/components/GiftList.vue')['default']
     GiftScrollBar: typeof import('./src/components/GiftScrollBar.vue')['default']
+    GradientStrokeText: typeof import('./src/components/GradientStrokeText.vue')['default']
+    GradientText: typeof import('./src/components/GradientText.vue')['default']
     GreenButton: typeof import('./src/components/GreenButton.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']

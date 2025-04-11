@@ -64,7 +64,7 @@ watch(() => currentGiftComponent.value, () => {
 </script>
 
 <template>
-  <div class="text-white">
+  <div class="h-full text-white">
     <Transition
       name="slide"
       mode="out-in"

@@ -47,6 +47,12 @@ function handleBtnClick() {
   greenButtonRef.value?.triggerAnimation()
   console.log(greenButtonRef.value, 'greenButtonRef')
 }
+const bubblePosition = {
+  top: '-0.2rem',
+  right: '-0.22rem',
+  translateX: '50%',
+  translateY: '0',
+}
 </script>
 
 <template>
@@ -105,6 +111,7 @@ function handleBtnClick() {
           :score="40"
           :score-add="40"
           score-show
+          :bubble-position="bubblePosition"
         >
           <div class="relative text-50">
             <!-- 底层：只有阴影的文字 -->
