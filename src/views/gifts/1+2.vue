@@ -490,7 +490,7 @@ async function handleGiftAnimation(giftPackage: onePlusTwoGiftItemInfo) {
               <div class="relative z-10 h-full w-full f-c gap-5">
                 <span class="text-42 text-stroke-2 text-stroke-[#164b2e]">{{ getPrice(giftPackage) }}</span>
                 <img
-                  v-if="giftPackage.sortId && giftPackage.sortId !== 1"
+                  v-if="giftPackage.sortId && giftPackage.sortId !== 1 && giftPackage.Price === 0 "
                   class="h-50"
                   :src="imgMap.lock"
                   alt=""

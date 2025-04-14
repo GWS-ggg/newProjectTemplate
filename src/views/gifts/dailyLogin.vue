@@ -1,6 +1,24 @@
 <script setup lang="ts">
+import type { DailyLoginItemInfo, ProductInfo } from '@/types'
+import { getProductListApi } from '@/api'
 import GreenButton from '@/components/GreenButton.vue'
+import { getPGImg } from '@/utils'
 import { ref } from 'vue'
+
+const dailyLoginItemInfo = ref<DailyLoginItemInfo[]>([])
+const productInfo = ref<ProductInfo>()
+async function getDailyLoginData() {
+  const res = await getProductListApi({
+    appid: '616876868660610',
+    uid: '102191',
+    producttype: 6,
+  })
+  dailyLoginItemInfo.value = res.ItemInfo as DailyLoginItemInfo[]
+  productInfo.value = res.ProductInfo as ProductInfo
+  // dailyLoginItemInfo.value[0].Props[2].Icon = 'box/30.png'
+  console.log(res, 'res')
+}
+getDailyLoginData()
 
 function getImageUrl(name: string) {
   return new URL(`../../assets/images/gifts/dailyLogin/${name}`, import.meta.url).href
@@ -22,7 +40,7 @@ interface Gift {
   price?: string
 }
 
-const giftList = ref<Gift[]>([
+const _giftList = ref<Gift[]>([
   {
     id: 1,
     img: imgMap.goldImg,
@@ -58,58 +76,62 @@ const bubblePosition = {
 </script>
 
 <template>
-  <div class="relative mb-50 w-full f-c flex-col">
-    <div class="relative">
-      <img
-        :src="imgMap.bgImg"
-        alt=""
-        class="w-590"
+  <div class="relative mb-70 w-full f-c flex-col">
+    <img
+      :src="imgMap.bgImg"
+      alt=""
+      class="w-590"
+    >
+
+    <div class="absolute left-1/2 f-c rounded-20 text-24 -bottom-40 -translate-x-1/2">
+      <CountDown
+        :end-time="productInfo?.ExpireTime"
+        text-class="px-20 py-10 text-26 text-white text-stroke-3 paint-order text-stroke-[#581616]"
       >
-      <div
-        class="absolute top-1/2 h-138 w-137 f-c flex-col translate-y-35 -right-20"
-        :style="{ backgroundImage: `url(${imgMap.discountImg})` }"
-      >
-        <div class="ml-20 mt-10 flex flex-col rotate-[15deg] items-center justify-center text-43 text-white text-stroke-4 text-stroke-[#ad145b] paint-order">
-          <div>
-            30%
-          </div>
-          <div class="-mt-10">
-            OFF
-          </div>
+        <template #default="{ hours, minutes, seconds }">
+          Ends in {{ hours }}:{{ minutes }}:{{ seconds }}
+        </template>
+      </CountDown>
+    </div>
+    <div
+      class="absolute right-70 top-1/2 h-138 w-137 f-c flex-col translate-y-35"
+      :style="{ backgroundImage: `url(${imgMap.discountImg})` }"
+    >
+      <div class="ml-20 mt-10 flex flex-col rotate-[15deg] items-center justify-center text-43 text-white text-stroke-4 text-stroke-[#ad145b] paint-order">
+        <div>
+          30%
+        </div>
+        <div class="-mt-10">
+          OFF
         </div>
       </div>
     </div>
-
     <div class="absolute left-1/2 top-60 f-c -translate-x-1/2">
       <img
         :src="imgMap.textImg"
         alt=""
       >
     </div>
-
-    <div class="absolute left-1/2 f-c rounded-20 text-24 -bottom-20 -translate-x-1/2">
-      Ends in 31:34:18
-    </div>
     <div class="absolute left-1/2 top-240 h-46 w-356 f-c rounded-20 bg-[#000000] bg-opacity-24 text-30 text-stroke-2 text-stroke-[#0a273d] -translate-x-1/2">
       Only one chance
     </div>
     <div class="absolute bottom-200 left-1/2 h-126 w-590 f-c -translate-x-1/2">
-      <div class="h-97 flex items-center justify-center gap-15">
+      <div class="h-97 flex items-center justify-evenly gap-15">
         <div
-          v-for="gift in giftList"
-          :key="gift.id"
+          v-for="(gift, index) in dailyLoginItemInfo[0]?.Props"
+          :key="index"
           class="relative h-full flex flex-col items-center"
         >
           <img
-            :src="gift.img"
+            :src="getPGImg(gift.Icon)"
             alt=""
             class="h-full"
           >
           <div
-            v-if="gift.price"
-            class="absolute bottom-10 left-1/2 translate-y-1/2 text-42 text-white text-stroke-3 text-stroke-[#4d1202] paint-order -translate-x-1/2"
+            v-if="gift.Text"
+            class="text-42 text-white text-stroke-3 text-stroke-[#4d1202] paint-order -mt-40"
           >
-            {{ gift.price }}
+            {{ gift.Text }}
           </div>
         </div>
       </div>
@@ -133,8 +155,7 @@ const bubblePosition = {
         <GreenButton
           ref="greenButtonRef"
           radius="24px"
-          :score="40"
-          :score-add="40"
+          :score="productInfo?.Props[0].VipScore"
           score-show
           :bubble-position="bubblePosition"
         >
@@ -144,12 +165,12 @@ const bubblePosition = {
               class="absolute inset-0"
               style="text-shadow: 0px 3px 0px #bcfb6b; color: transparent;"
             >
-              Buy now
+              {{ dailyLoginItemInfo[0]?.Price }}
             </div>
 
             <!-- 顶层：只有渐变的文字 -->
             <div class="gradient-text-with-shadow relative">
-              Buy now
+              {{ dailyLoginItemInfo[0]?.Price }}
             </div>
           </div>
         </GreenButton>

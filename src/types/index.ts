@@ -25,6 +25,7 @@ export interface ProductInfo {
   AddProps?: Array<{
     VipScore?: number
   }>
+  TaskTargetScore?: number
 }
 
 export interface ItemInfo {
@@ -122,12 +123,37 @@ export interface ThreeChoiceOneGiftItemInfo {
   Limit: number
   Price?: number
   BuyTimes?: number
-  Props: Array<{
-    PropID: number
-    PropType: number
-    DeltaCount: number
-    Icon: string
-    Text?: string
-    Scale?: number
-  }>
+  Props: Array<Prop>
+}
+
+interface Prop {
+  PropID: number
+  PropType: number
+  DeltaCount: number
+  Icon: string
+  Text?: string
+  Scale?: number
+}
+
+export interface DailyLoginItemInfo {
+  Key: number
+  Price: number
+  SkuID: string
+  TradeProductID: number
+  Limit: number
+  BuyTimes?: number
+  Props: Array<Prop>
+}
+
+export interface SixSegmentItemInfo {
+  id: number
+  sortId?: number
+  Key: number
+  Price: number
+  SkuID: string
+  TradeProductID: number
+  Limit: number
+  BuyTimes?: number
+  Props: Array<Prop>
+
 }

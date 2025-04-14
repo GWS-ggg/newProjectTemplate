@@ -1,23 +1,42 @@
 <script setup lang="ts">
-// const icon = ref<HTMLElement | null>(null)
-// const iconImg = ref('')
-// iconImg.value = imgMap.processIconLeftImg
-// function triggerAnimation() {
-//   if (!icon.value)
-//     return
-//   icon.value.classList.remove('animate')
-//   // 强制浏览器重绘以重启动画
-//   void icon.value.offsetWidth
-//   icon.value.classList.add('animate')
-// }
+import type { ProductInfo, SixSegmentItemInfo } from '@/types'
+
+import { getProductListApi } from '@/api'
 import AnimatedIcon from '@/components/AnimatedIcon.vue'
 
 import GreenButton from '@/components/GreenButton.vue'
+import { useAnimatableRefs } from '@/hooks/useButtonRefs'
+import { animateWithClass, getPGImg } from '@/utils'
 import { computed, nextTick, ref, watchEffect } from 'vue'
 
 function getImageUrl(name: string) {
   return new URL(`../../assets/images/gifts/sixSegment/${name}`, import.meta.url).href
 }
+const itemInfoList = ref<SixSegmentItemInfo[]>([])
+const productInfo = ref<ProductInfo>()
+async function getSixSegmentData() {
+  const res = await getProductListApi({
+    appid: '616876868660610',
+    uid: '102191',
+    producttype: 7,
+  })
+  productInfo.value = res.ProductInfo
+  itemInfoList.value = res.ItemInfo as SixSegmentItemInfo[]
+  itemInfoList.value = itemInfoList.value.slice(0, 7)
+  // 处理item数据 添加id BuyTimes Price
+  let idNum = 0
+  itemInfoList.value.forEach((item) => {
+    item.id = idNum++
+    if (item.BuyTimes === undefined) {
+      item.BuyTimes = 0
+    }
+    if (item.Price === undefined) {
+      item.Price = 0
+    }
+  })
+  console.log('res', res)
+}
+getSixSegmentData()
 interface Goods {
   img: string
   desc?: string
@@ -39,6 +58,8 @@ interface GiftData {
   totalScore: number
   giftList: GiftPackage[]
 }
+
+const okImg = new URL(`../../assets/images/common/icon_ok.png`, import.meta.url).href
 
 const imgMap = {
   pinkBgImg: getImageUrl('背景粉.png'),
@@ -164,13 +185,20 @@ const giftData = ref<GiftData>({
 
 // TODO 对礼包进行重新排序 购买的不显示  待购买的6个  其余的隐藏
 // 只显示前六个礼包
-const displayedGifts = ref<GiftPackage[]>([])
+const displayedGifts = ref<SixSegmentItemInfo[]>([])
+const noBuyGiftNum = computed(() => {
+  return itemInfoList.value.filter(item => item.BuyTimes === 0).length
+})
 watchEffect(() => {
-  displayedGifts.value = giftData.value.giftList.filter(gift => gift.BuyTimes !== 1)
-  displayedGifts.value = displayedGifts.value.slice(0, 6)
+  displayedGifts.value = itemInfoList.value.filter(item => item.BuyTimes === 0).slice(0, 6)
+  if (noBuyGiftNum.value <= 6) {
+    displayedGifts.value = itemInfoList.value.slice(-6)
+  }
   let sortId = 1
   displayedGifts.value.forEach((gift) => {
-    gift.sortId = sortId++
+    if (gift.BuyTimes === 0) {
+      gift.sortId = sortId++
+    }
   })
 })
 
@@ -196,104 +224,105 @@ const totalScore = ref(100)
 const _currentScore = ref(50)
 const scoreToAdd = ref(10)
 const scoreDisplayRef = ref<HTMLElement | null>(null)
-// 创建一个映射来存储button refs
-const greenButtonRefs = ref<Map<number, InstanceType<typeof GreenButton>>>(new Map())
-
-// 设置ref的方法
-function setButtonRef(el: any, id: number) {
-  if (el) {
-    greenButtonRefs.value.set(id, el as InstanceType<typeof GreenButton>)
-  }
-}
+// 使用组合式函数管理按钮引用
+const { setRef, triggerAnimation } = useAnimatableRefs()
 
 // 处理购买礼包后的动画效果
-async function handleGiftPurchase(gift: GiftPackage) {
-  if (isAnimating.value)
-    return
-  isAnimating.value = true
-
+async function handleGiftPurchase(gift: SixSegmentItemInfo) {
   // 查找礼包在显示列表中的索引
-  const giftIndex = giftData.value.giftList.findIndex(item => item.id === gift.id)
+  const giftIndex = itemInfoList.value.findIndex(item => item.id === gift.id)
   if (giftIndex === -1) {
-    isAnimating.value = false
     return
   }
-  // 等待状态更新后应用动画
-  // await nextTick()
+
   // 隐藏所有箭头
   arrowsVisible.value = false
-  // arrowsReappear.value = false
 
-  // 应用消失动画
+  // 1. 应用消失动画
   const giftElement = document.querySelector(`#gift-${gift.sortId}`)
   if (giftElement) {
-    giftElement.classList.add('fade-out')
+    await animateWithClass(giftElement, 'fade-out', 500)
   }
 
-  // 等待消失动画完成
-  setTimeout(() => {
-    // 根据礼包位置应用不同的动画
-    // 如果是第一个礼包被购买
-    const gift2 = document.querySelector('#gift-2')
-    const gift3 = document.querySelector('#gift-3')
-    const gift4 = document.querySelector('#gift-4')
-    const gift5 = document.querySelector('#gift-5')
-    const gift6 = document.querySelector('#gift-6')
+  // 2. 根据礼包位置应用不同的动画
+  const gift2 = document.querySelector('#gift-2')
+  const gift3 = document.querySelector('#gift-3')
+  const gift4 = document.querySelector('#gift-4')
+  const gift5 = document.querySelector('#gift-5')
+  const gift6 = document.querySelector('#gift-6')
 
-    if (gift2)
-      gift2.classList.add('move-left')
-    if (gift3)
-      gift3.classList.add('move-up')
-    if (gift4)
-      gift4.classList.add('move-right')
-    if (gift5)
-      gift5.classList.add('move-up')
-    if (gift6)
-      gift6.classList.add('move-left')
+  // 创建一个动画Promise数组
+  const animationPromises = []
 
-    // 等待移动动画完成后更新数组
-    setTimeout(() => {
-      // 移除已购买的礼包
-      // 标记礼包为已购买
-      giftData.value.giftList[giftIndex].BuyTimes = 1
-      newDelay.value = true
-      // 新增未购买的礼包
-      isAnimating.value = false
+  if (gift2)
+    animationPromises.push(animateWithClass(gift2, 'move-left', 600))
+  if (gift3)
+    animationPromises.push(animateWithClass(gift3, 'move-up', 600))
+  if (gift4)
+    animationPromises.push(animateWithClass(gift4, 'move-right', 600))
+  if (gift5)
+    animationPromises.push(animateWithClass(gift5, 'move-up', 600))
+  if (gift6)
+    animationPromises.push(animateWithClass(gift6, 'move-left', 600))
 
-      // 2秒后重新显示所有箭头并添加重新出现动画
-      setTimeout(() => {
-        // 标记为重新出现状态
-        // arrowsReappear.value = true
-        // 显示箭头
-        arrowsVisible.value = true
-      }, 150)
-    }, 600)
-  }, 500)
+  // 等待所有动画完成
+  if (animationPromises.length > 0)
+    await Promise.all(animationPromises)
+
+  // 3. 标记礼包为已购买
+  const currentGift = itemInfoList.value[giftIndex]
+  currentGift.BuyTimes = 1
+  newDelay.value = true
+
+  // 4. 清理动画类
+  document.querySelectorAll('.grid-item').forEach((el) => {
+    el.classList.remove('fade-out', 'move-left', 'move-right', 'move-up')
+  })
+
+  // 6. 等待DOM更新
+  await nextTick()
+
+  // 短暂延迟后再显示箭头，让新布局稳定
+  await new Promise(resolve => setTimeout(resolve, 150))
+  arrowsVisible.value = true
 }
 
-function handleButtonClick(gift: GiftPackage) {
+async function handleButtonClick(gift: SixSegmentItemInfo) {
+  console.log('gift', gift)
   if (isAnimating.value)
     return
+  console.log('111')
   // 只有第一个礼包可以被购买
   if (gift.sortId !== 1)
     return
 
-  // 使用映射获取按钮引用
-  const buttonRef = greenButtonRefs.value.get(gift.id)
-  // 触发积分动画
-  console.log('greenButtonRef', buttonRef)
-  buttonRef?.triggerAnimation()
+  isAnimating.value = true
+  try {
+    // 触发按钮积分动画
+    triggerAnimation(gift.id)
 
-  // 处理礼包购买
-  setTimeout(() => {
-    handleGiftPurchase(gift)
-  }, 1500)
+    // 等待积分动画完成
+    if (noBuyGiftNum.value > 6) {
+      // 延迟执行礼包购买动画，与按钮动画保持同步
+      await handleGiftPurchase(gift)
+    }
+    else {
+      // 如果礼包数量不足，直接标记为已购买
+      const currentGift = itemInfoList.value.find(item => item.id === gift.id)
+      if (currentGift) {
+        currentGift.BuyTimes = 1
+      }
+    }
 
-  // 2秒后更新分数（与动画同步）
-  setTimeout(() => {
+    // 更新分数
     totalScore.value += scoreToAdd.value
-    // 其他逻辑...
-  }, 1500)
+  }
+  catch (error) {
+    console.error('Error handling button click:', error)
+  }
+  finally {
+    isAnimating.value = false
+  }
 }
 
 function getAnimationDelay(sortId: number) {
@@ -303,20 +332,19 @@ function getAnimationDelay(sortId: number) {
   }
   return `${sortId * 0.15}s`
 }
-function getItemClass(gift: GiftPackage) {
-  // 如果不需要显示箭头，则添加no-arrow类来覆盖after伪元素
-  if (gift.sortId === displayedGifts.value.length) {
-    return `item-${gift.sortId} no-arrow`
-  }
-
-  return `item-${gift.sortId}`
-}
 </script>
 
 <template>
   <div class="relative mb-30 flex flex-col items-center text-32">
-    <div class="mt-30 text-29 text-stroke-3 text-stroke-[#19093e] paint-order">
-      END IN:60:00:00
+    <div class="mt-30">
+      <CountDown
+        :end-time="productInfo?.ExpireTime"
+        text-class="px-20 py-10 text-29 text-stroke-3 text-stroke-[#19093e] paint-order"
+      >
+        <template #default="{ hours, minutes, seconds }">
+          END IN  {{ hours }}:{{ minutes }}:{{ seconds }}
+        </template>
+      </CountDown>
     </div>
     <div class="relative mt-26 flex items-center justify-center">
       <div class="absolute z-10 h-66 w-66 f-c -left-40 -top-9">
@@ -373,32 +401,29 @@ function getItemClass(gift: GiftPackage) {
       }"
     >
       <div
-        v-for="gift in displayedGifts"
-        :id="`gift-${gift.sortId}`"
+        v-for="(gift, index) in displayedGifts"
+        :id="`${noBuyGiftNum > 6 ? `gift-${gift.sortId}` : `gift-${index + 1}`}`"
         :key="gift.id"
         class="relative h-303.55 w-326 transition-all duration-500"
-        :class="getItemClass(gift)"
+        :class="`${noBuyGiftNum > 6 ? `item-${gift.sortId}` : `item-${index + 1}`}`"
       >
         <div
           class="grid-item fade-in relative h-full w-full bg-cover bg-center bg-no-repeat"
           :class="{ purchased: gift.BuyTimes === 1 }"
-          :style="{ 'backgroundImage': `url(${gift.bgImg})`, 'animation-delay': `${getAnimationDelay(gift.sortId as number)}` }"
+          :style="{ 'backgroundImage': `url(${imgMap.pinkBgImg})`, 'animation-delay': `${getAnimationDelay(gift.sortId as number)}` }"
         >
           <div class="relative flex flex-col">
             <div class="mt-50 f-c">
-              <template
-                v-for="good in gift.goodsList"
-                :key="good.img"
+              <div
+                v-for="(good, index) in gift.Props"
+                :key="index"
+                class="h-90 w-100 f-e flex-col bg-cover bg-center bg-no-repeat"
+                :style="{ backgroundImage: `url(${getPGImg(good.Icon)})` }"
               >
-                <div
-                  class="h-90 w-100 f-e flex-col bg-cover bg-center bg-no-repeat"
-                  :style="{ backgroundImage: `url(${good.img})` }"
-                >
-                  <div class="text-34 text-stroke-2 text-stroke-[#464646] -mb-10">
-                    {{ good.desc }}
-                  </div>
+                <div class="text-34 text-stroke-2 text-stroke-[#464646] -mb-10">
+                  {{ good.Text }}
                 </div>
-              </template>
+              </div>
             </div>
             <div class="ml-24 mt-30 f-s">
               <div class="text-22 text-stroke-1 text-stroke-[#5d1a00]">
@@ -409,92 +434,68 @@ function getItemClass(gift: GiftPackage) {
               </div>
             </div>
             <div
-              v-if="gift.isFree && gift.BuyTimes !== 1"
+              v-show="gift.BuyTimes === 0"
               class="mt-20 f-c"
+              :class="{ 'f-b!': gift.Price !== 0 }"
             >
-              <div class="relative h-70 w-280">
+              <div
+                class="relative h-70 w-280"
+                :class="{ 'w-[190px]! ml-20': gift.Price !== 0 }"
+              >
                 <GreenButton
-                  :ref="el => setButtonRef(el, gift.id)"
+                  :ref="el => setRef(el, gift.id)"
                   radius="26px"
                   border-width="2px"
                   :score="40"
                   score-show
-                  :score-target="scoreDisplayRef"
                   @click="handleButtonClick(gift)"
                 >
-                  <div class="z-20 text-30 text-stroke-3 text-stroke-[#164b2e] paint-order">
-                    FREE
-                  </div>
-                  <img
-                    :src="imgMap.lockImg"
-                    alt=""
-                    class="z-20 ml-20 w-40"
+                  <div
+                    v-show="gift.Price === 0"
+                    class="relative z-20 text-30 text-stroke-3 text-stroke-[#164b2e] paint-order"
                   >
+                    FREE
+                    <img
+                      v-if="gift.sortId !== 1"
+                      :src="imgMap.lockImg"
+                      alt=""
+                      class="absolute top-1/2 z-20 ml-20 w-40 translate-x-1/2 -right-30 -translate-y-1/2"
+                    >
+                  </div>
+                  <div
+                    v-show="gift.Price !== 0"
+                    class="relative z-20 text-30 text-stroke-3 text-stroke-[#164b2e] paint-order"
+                  >
+                    {{ gift.Price }}
+                  </div>
                 </GreenButton>
               </div>
-            </div>
-            <div v-else-if="gift.BuyTimes !== 1">
-              <div class="ml-20 mt-20 f-b">
-                <div class="relative h-70 w-190">
-                  <GreenButton
-                    :ref="el => setButtonRef(el, gift.id)"
-                    radius="24px"
-                    border-width="2px"
-                    :score="40"
-                    score-show
-                    @click="handleButtonClick(gift)"
-                  >
-                    <div class="z-20 text-30 text-stroke-3 text-stroke-[#164b2e] paint-order">
-                      {{ gift.price }}
-                    </div>
-                  </GreenButton>
-                </div>
-                <div
-                  class="relative h-59 w-94 f-e flex-col bg-cover bg-center bg-no-repeat"
-                  :style="{ backgroundImage: `url(${imgMap.scoreBgImg})` }"
+              <div
+                v-if="gift.Price !== 0"
+                class="relative h-59 w-94 f-e flex-col bg-cover bg-center bg-no-repeat"
+                :style="{ backgroundImage: `url(${imgMap.scoreBgImg})` }"
+              >
+                <img
+                  class="absolute left-0 z-10 w-87 -top-20"
+                  :src="imgMap.scoreImg"
+                  alt=""
                 >
-                  <img
-                    class="absolute left-0 z-10 w-87 -top-20"
-                    :src="imgMap.scoreImg"
-                    alt=""
-                  >
-                  <div class="z-20 text-31 text-stroke-1 text-stroke-[rgba(0,0,0,0.6)] -mb-10">
-                    {{ gift.score }}
-                  </div>
+                <div class="z-20 text-31 text-stroke-1 text-stroke-[rgba(0,0,0,0.6)] -mb-10">
+                  {{ productInfo?.TaskTargetScore }}
                 </div>
               </div>
             </div>
-          </div>
-          <!-- <div
-            v-if="index === 0 || index === 4 "
-            class="connection-line absolute bottom-1/2 right-0 z-30 translate-x-[90%]"
-          >
-            <img
-              class="h-60"
-              :src="imgMap.arrowRightImg"
-              alt=""
+            <div
+              v-show="gift.BuyTimes && gift.BuyTimes > 0"
+              class="fade-in mt-10 f-c"
             >
+              <img
+                class="h-80"
+                :src="okImg"
+                alt=""
+              >
+            </div>
           </div>
-          <div
-            v-if="index === 1 || index === 3"
-            class="connection-line absolute bottom-0 right-1/2 z-30 translate-x-1/2 translate-y-[80%]"
-          >
-            <img
-              class="w-60"
-              :src="imgMap.arrowDownImg"
-              alt=""
-            >
-          </div>
-          <div
-            v-if="index === 2 "
-            class="connection-line absolute bottom-1/2 left-0 z-30 -translate-x-[70%]"
-          >
-            <img
-              class="h-60"
-              :src="imgMap.arrowLeftImg"
-              alt=""
-            >
-          </div> -->
         </div>
       </div>
     </div>
