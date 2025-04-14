@@ -3,7 +3,7 @@ import type { onePlusTwoGiftItemInfo, ProductInfo } from '@/types'
 import { getProductListApi } from '@/api'
 
 import GreenButton from '@/components/GreenButton.vue'
-import { useAnimatableRefs } from '@/composables/useButtonRefs'
+import { useAnimatableRefs } from '@/hooks/useButtonRefs'
 
 import { animateWithClass, getPGImg } from '@/utils'
 
@@ -12,6 +12,7 @@ import { computed, nextTick, ref, watchEffect } from 'vue'
 function getImageUrl(name: string) {
   return new URL(`../../assets/images/gifts/1+2/${name}`, import.meta.url).href
 }
+const okImg = new URL(`../../assets/images/common/icon_ok.png`, import.meta.url).href
 
 const imgMap: Record<string, string> = {
   score: getImageUrl('icon_积分.png'),
@@ -250,19 +251,24 @@ const showNewGiftAnimation = ref(false)
 const displayedGifts = ref<onePlusTwoGiftItemInfo[]>([])
 
 const showPlus = ref(true)
-
+const noBuyGiftNum = computed(() => {
+  return itemInfoList.value.filter(item => item.BuyTimes === 0).length
+})
 watchEffect(() => {
   // 如果正在进行动画，不更新礼包列表以避免干扰动画
   // if (isAnimating.value)
   //   return
 
   // 获取未购买的礼包
-  displayedGifts.value = itemInfoList.value.filter(gift => gift.BuyTimes !== 1)
-  displayedGifts.value = displayedGifts.value.slice(0, 3)
-
+  displayedGifts.value = itemInfoList.value.filter(gift => gift.BuyTimes === 0).slice(0, 3)
+  if (noBuyGiftNum.value <= 3) {
+    displayedGifts.value = itemInfoList.value.slice(-3)
+  }
   let sortId = 1
-  displayedGifts.value.forEach((gift) => {
-    gift.sortId = sortId++
+  displayedGifts.value.forEach((item) => {
+    if (item.BuyTimes === 0) {
+      item.sortId = sortId++
+    }
   })
 })
 
@@ -303,7 +309,15 @@ async function handleButtonClick(giftPackage: onePlusTwoGiftItemInfo) {
 
     // 礼包动画
     setTimeout(() => {
-      handleGiftAnimation(giftPackage)
+      if (noBuyGiftNum.value > 3) {
+        handleGiftAnimation(giftPackage)
+      }
+      else {
+        const selectedGift = itemInfoList.value.find(item => item.id === giftPackage.id)
+        if (selectedGift) {
+          selectedGift.BuyTimes = 1
+        }
+      }
     }, 200)
   }
   catch (error) {
@@ -420,19 +434,12 @@ async function handleGiftAnimation(giftPackage: onePlusTwoGiftItemInfo) {
         <div
           :id="`gift-${giftPackage.sortId}`"
           class="gift-container w-208 flex flex-col"
-          :class="giftPackage.sortId ? `z-${30 - 5 * giftPackage.sortId}` : 'z-10'"
+          :class="giftPackage.sortId ? `z-${40 - 10 * giftPackage.sortId}` : 'z-10'"
         >
           <div
             class="relative h-654 w-full flex flex-col bg-cover bg-center bg-no-repeat"
             :style="{ backgroundImage: giftPackage.Price && giftPackage.Price > 0 ? `url(${imgMap.strip_1})` : `url(${imgMap.strip_2})` }"
           >
-            <img
-              v-if="giftPackage.Price === 0 && giftPackage.sortId !== 1"
-              class="absolute top-1/2 z-20 h-96 w-96 transition-opacity duration-500 -left-5 -translate-x-1/2 -translate-y-1/2"
-              :class="{ 'opacity-0': !showPlus }"
-              :src="giftData.plusImg"
-              alt=""
-            >
             <div
               class="absolute bottom-30 right-0 z-30 h-50 w-92 f-c flex-col bg-cover bg-center"
               :style="{ backgroundImage: `url(${giftData.tagImg})` }"
@@ -470,8 +477,9 @@ async function handleGiftAnimation(giftPackage: onePlusTwoGiftItemInfo) {
             </div>
           </div>
 
-          <div class="relative z-10 mt-10 h-90 w-200">
+          <div class="relative z-30 mt-10 h-90 w-200">
             <GreenButton
+              v-show="giftPackage.BuyTimes === 0"
               :ref="el => setRef(el, giftPackage.id)"
               radius="21px"
               border-width="2px"
@@ -482,15 +490,37 @@ async function handleGiftAnimation(giftPackage: onePlusTwoGiftItemInfo) {
               <div class="relative z-10 h-full w-full f-c gap-5">
                 <span class="text-42 text-stroke-2 text-stroke-[#164b2e]">{{ getPrice(giftPackage) }}</span>
                 <img
-                  v-if="giftPackage.sortId && giftPackage.sortId > 1"
+                  v-if="giftPackage.sortId && giftPackage.sortId !== 1"
                   class="h-50"
                   :src="imgMap.lock"
                   alt=""
                 >
               </div>
             </GreenButton>
+            <div
+              v-show="giftPackage.BuyTimes !== 0"
+              class="fade-in f-c"
+            >
+              <img
+                class="h-100"
+                :src="okImg"
+                alt=""
+              >
+            </div>
           </div>
         </div>
+      </template>
+      <template
+        v-for="(giftPackage, index) in displayedGifts"
+        :key="giftPackage.id"
+      >
+        <img
+          v-if="giftPackage.Price === 0 && index !== 0"
+          class="absolute top-1/2 z-50 h-96 w-96 transition-opacity duration-500 -translate-x-1/2 -translate-y-100"
+          :class="{ 'opacity-0': !showPlus, 'left-215': index === 1, 'left-435': index === 2 }"
+          :src="giftData.plusImg"
+          alt=""
+        >
       </template>
     </div>
   </div>

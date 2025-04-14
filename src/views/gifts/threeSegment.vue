@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import GreenButton from '@/components/GreenButton.vue'
-import { useAnimatableRefs } from '@/composables/useButtonRefs'
+import { useAnimatableRefs } from '@/hooks/useButtonRefs'
 import { animateWithClass } from '@/utils'
 import { ref } from 'vue'
 

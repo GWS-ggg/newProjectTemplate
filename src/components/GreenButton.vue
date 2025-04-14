@@ -24,6 +24,11 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  // 蒙版
+  maskShow: {
+    type: Boolean,
+    default: false,
+  },
   // 动画目标元素
   scoreTarget: {
     type: Object as () => HTMLElement | null,
@@ -147,7 +152,13 @@ defineExpose({
 </script>
 
 <template>
-  <div class="h-full w-full click-animate">
+  <div class="relative h-full w-full click-animate">
+    <div
+      v-if="maskShow"
+      class="absolute z-50 bg-[#253c6b] opacity-67 -inset-2"
+      :style="{ borderRadius: radius, width: `calc(100% + ${borderWidth} + ${borderWidth})`, height: `calc(100% + ${borderWidth} + ${borderWidth})` }"
+    />
+
     <div class="btn-bg relative h-full w-full flex cursor-pointer items-center justify-center">
       <slot />
       <div

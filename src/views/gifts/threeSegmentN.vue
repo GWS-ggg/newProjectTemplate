@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import GreenButton from '@/components/GreenButton.vue'
-import { useAnimatableRefs } from '@/composables/useButtonRefs'
+import { useAnimatableRefs } from '@/hooks/useButtonRefs'
 import { animateWithClass } from '@/utils'
 import { computed, nextTick, ref, watchEffect } from 'vue'
 
@@ -20,6 +20,7 @@ const imgMap = {
   bg1OkImg: getImageUrl('11.png'),
   bg2OkImg: getImageUrl('22.png'),
   bg3OkImg: getImageUrl('33.png'),
+  okImg: getImageUrl('icon_勾.png'),
 }
 
 interface GiftIcon {
@@ -141,12 +142,19 @@ const giftList = ref<Gift[]>([
 ])
 
 const displayGiftList = ref<Gift[]>([])
-
+const noBuyGiftNum = computed(() => {
+  return giftList.value.filter(item => item.BuyTimes === 0).length
+})
 watchEffect(() => {
   displayGiftList.value = giftList.value.filter(item => item.BuyTimes === 0).slice(0, 3)
+  if (noBuyGiftNum.value <= 3) {
+    displayGiftList.value = giftList.value.slice(-3)
+  }
   let sortId = 1
   displayGiftList.value.forEach((item) => {
-    item.sortId = sortId++
+    if (item.BuyTimes === 0) {
+      item.sortId = sortId++
+    }
   })
 })
 
@@ -157,13 +165,26 @@ const isAnimating = ref(false)
 
 // 使用async/await实现流畅的动画序列
 async function handlePurchaseButton(currentGift: Gift) {
+  if (currentGift.sortId !== 1) {
+    return
+  }
+
   // 防止重复点击
   if (isAnimating.value)
     return
 
   try {
     isAnimating.value = true
-    await handleAnimation(currentGift)
+    // 三个礼物以上执行动画
+    if (noBuyGiftNum.value > 3) {
+      await handleAnimation(currentGift)
+    }
+    else {
+      const selectedGift = giftList.value.find(item => item.id === currentGift.id)
+      if (selectedGift) {
+        selectedGift.BuyTimes = 1
+      }
+    }
   }
   finally {
     // 无论何种情况都重置状态
@@ -255,16 +276,15 @@ async function handleAnimation(currentGift: Gift) {
           </div>
         </div>
       </div>
-      <div
-        class="absolute bottom-38 left-1/2 z-30 h-100 w-300 -translate-x-1/2"
-        @click="handlePurchaseButton(item)"
-      >
+      <div class="absolute bottom-38 left-1/2 z-30 h-100 w-300 -translate-x-1/2">
         <GreenButton
+          v-show="item.BuyTimes === 0"
           :ref="el => setRef(el, item.id)"
           radius="20px"
           border-width="2px"
           :score="item.score"
           score-show
+          @click="handlePurchaseButton(item)"
         >
           <div class="relative text-40 text-[#fff] text-stroke-2 text-stroke-[#164b2e]">
             {{ item.btnDesc }}
@@ -276,6 +296,16 @@ async function handleAnimation(currentGift: Gift) {
             >
           </div>
         </GreenButton>
+        <div
+          v-show="item.BuyTimes > 0"
+          class="fade-in f-c"
+        >
+          <img
+            class="h-100"
+            :src="imgMap.okImg"
+            alt=""
+          >
+        </div>
       </div>
       <div class="absolute bottom-35 left-50 f-c flex-col">
         <div class="text-20 text-[#fff] text-stroke-1 text-stroke-[#5d2f0a]">
