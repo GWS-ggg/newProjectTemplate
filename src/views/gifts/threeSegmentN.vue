@@ -322,7 +322,7 @@ async function handleAnimation(currentGift: ThreeSegmentNItemInfo) {
           <div class="relative text-40 text-[#fff] text-stroke-2 text-stroke-[#164b2e]">
             {{ item?.Price ? item?.Price : 'FREE' }}
             <img
-              v-if="item.Price === 0"
+              v-if="item.Price === 0 && item.sortId !== 1"
               :src="imgMap.lockImg"
               alt=""
               class="absolute top-0 h-50 -right-50"

@@ -14,6 +14,8 @@ function getImageUrl(name: string) {
 }
 const itemInfoList = ref<SixSegmentItemInfo[]>([])
 const productInfo = ref<ProductInfo>()
+const currentScore = ref(0)
+const targetScore = ref(0)
 async function getSixSegmentData() {
   const res = await getProductListApi({
     appid: '616876868660610',
@@ -23,6 +25,8 @@ async function getSixSegmentData() {
   productInfo.value = res.ProductInfo
   itemInfoList.value = res.ItemInfo as SixSegmentItemInfo[]
   itemInfoList.value = itemInfoList.value.slice(0, 7)
+  currentScore.value = res.ProductInfo?.TaskScore ?? 0
+  targetScore.value = res.ProductInfo?.TaskTargetScore ?? 0
   // 处理item数据 添加id BuyTimes Price
   let idNum = 0
   itemInfoList.value.forEach((item) => {
@@ -211,7 +215,7 @@ const arrowsReappear = ref(false)
 const newDelay = ref(false)
 
 const processBar = computed(() => {
-  return `${giftData.value.currentScore / giftData.value.totalScore * 100}%`
+  return `${currentScore.value / targetScore.value * 100}%`
 })
 
 const animatedIcon = ref<InstanceType<typeof AnimatedIcon> | null>(null)
@@ -332,6 +336,26 @@ function getAnimationDelay(sortId: number) {
   }
   return `${sortId * 0.15}s`
 }
+
+function getPorpsInfo(props: Array<{
+  PropID: number
+  PropType: number
+  DeltaCount: number
+  Icon: string
+  Text?: string
+}>) {
+  return props.filter(prop => prop.PropID !== 270001)
+}
+
+function getScoreInfo(props: Array<{
+  PropID: number
+  PropType: number
+  DeltaCount: number
+  Icon: string
+  Text?: string
+}>) {
+  return props.find(prop => prop.PropID === 270001)
+}
 </script>
 
 <template>
@@ -382,7 +406,7 @@ function getAnimationDelay(sortId: number) {
           }"
         />
         <div class="absolute left-1/2 top-1/2 text-31 -translate-x-1/2 -translate-y-1/2">
-          {{ giftData.currentScore }} / {{ giftData.totalScore }}
+          {{ currentScore }} / {{ targetScore }}
         </div>
       </div>
       <div class="absolute z-10 aspect-square h-64 f-c -right-35 -top-9">
@@ -415,8 +439,8 @@ function getAnimationDelay(sortId: number) {
           <div class="relative flex flex-col">
             <div class="mt-50 f-c">
               <div
-                v-for="(good, index) in gift.Props"
-                :key="index"
+                v-for="(good, goodIndex) in getPorpsInfo(gift.Props)"
+                :key="goodIndex"
                 class="h-90 w-100 f-e flex-col bg-cover bg-center bg-no-repeat"
                 :style="{ backgroundImage: `url(${getPGImg(good.Icon)})` }"
               >
@@ -477,11 +501,11 @@ function getAnimationDelay(sortId: number) {
               >
                 <img
                   class="absolute left-0 z-10 w-87 -top-20"
-                  :src="imgMap.scoreImg"
+                  :src="getPGImg(getScoreInfo(gift.Props)?.Icon)"
                   alt=""
                 >
                 <div class="z-20 text-31 text-stroke-1 text-stroke-[rgba(0,0,0,0.6)] -mb-10">
-                  {{ productInfo?.TaskTargetScore }}
+                  {{ getScoreInfo(gift.Props)?.DeltaCount }}
                 </div>
               </div>
             </div>

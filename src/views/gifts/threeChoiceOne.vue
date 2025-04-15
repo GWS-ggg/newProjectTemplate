@@ -112,10 +112,6 @@ function handleClickGift(giftPackage: ThreeChoiceOneGiftItemInfo) {
   triggerAnimation(giftPackage.id)
 }
 
-function handleClickBuyAll(giftPackage: ThreeChoiceOneGiftItemInfo) {
-  triggerAnimation(giftPackage.id)
-}
-
 const productInfo = ref<ProductInfo>()
 const itemInfoList = ref<ThreeChoiceOneGiftItemInfo[]>([])
 async function getProductList() {

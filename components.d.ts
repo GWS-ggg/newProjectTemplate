@@ -11,6 +11,7 @@ declare module 'vue' {
     AnimatedIcon: typeof import('./src/components/AnimatedIcon.vue')['default']
     BackBtn: typeof import('./src/components/BackBtn.vue')['default']
     CountDown: typeof import('./src/components/CountDown.vue')['default']
+    GiftComponents: typeof import('./src/components/GiftComponents.vue')['default']
     GiftList: typeof import('./src/components/GiftList.vue')['default']
     GiftScrollBar: typeof import('./src/components/GiftScrollBar.vue')['default']
     GradientStrokeText: typeof import('./src/components/GradientStrokeText.vue')['default']

@@ -60,6 +60,9 @@ interface Goods {
 }
 const productInfo = ref<ProductInfo>()
 const itemInfoList = ref<onePlusTwoGiftItemInfo[]>([])
+const currentScore = ref(0)
+const targetScore = ref(0)
+
 async function getProductList() {
   const res = await getProductListApi({
     appid: '616876868660610',
@@ -68,6 +71,8 @@ async function getProductList() {
   })
   productInfo.value = res.ProductInfo
   itemInfoList.value = res.ItemInfo as onePlusTwoGiftItemInfo[]
+  currentScore.value = res.ProductInfo?.TaskScore ?? 0
+  targetScore.value = res.ProductInfo?.TaskTargetScore ?? 0
   let idNum = 0
   itemInfoList.value.forEach((item) => {
     item.id = idNum++
@@ -273,7 +278,7 @@ watchEffect(() => {
 })
 
 const processBar = computed(() => {
-  return `${giftData.value.currentScore / giftData.value.totalScore * 100}%`
+  return `${currentScore.value / targetScore.value * 100}%`
 })
 
 function getPrice(giftPackage: onePlusTwoGiftItemInfo) {
@@ -415,7 +420,7 @@ async function handleGiftAnimation(giftPackage: onePlusTwoGiftItemInfo) {
           }"
         />
         <div class="absolute left-1/2 top-1/2 text-31 -translate-x-1/2 -translate-y-1/2">
-          {{ giftData.currentScore }} / {{ giftData.totalScore }}
+          {{ currentScore }} / {{ targetScore }}
         </div>
       </div>
       <div class="absolute z-10 aspect-square h-64 f-c -right-35 -top-9">

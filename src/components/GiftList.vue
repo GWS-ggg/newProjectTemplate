@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { Component } from 'vue'
 import { useGiftStore } from '@/store/modules/giftStore'
 import onePlusTwo from '@/views/gifts/1+2.vue'
 import battlePass from '@/views/gifts/battlePass.vue'
@@ -11,41 +12,80 @@ import stepGift from '@/views/gifts/stepGift.vue'
 import threeChoiceOne from '@/views/gifts/threeChoiceOne.vue'
 import threeSegment from '@/views/gifts/threeSegment.vue'
 import threeSegmentN from '@/views/gifts/threeSegmentN.vue'
-import { computed, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 
 const giftStore = useGiftStore()
 const currentPackageId = computed(() => {
   return giftStore.currentPackageId
 })
+
+// 组件映射对象，方便获取组件
+const componentMap: Record<number, Component> = {
+  1: stepGift,
+  2: newBattlePass,
+  3: sixSegment,
+  4: onePlusTwo,
+  5: newThreeChoiceOne,
+  6: dailyLogin,
+  7: roulette,
+  8: threeSegmentN,
+  9: threeSegment,
+  10: threeChoiceOne,
+}
+
+// 组件名称映射，用于 KeepAlive include
+const componentNames: Record<number, string> = {
+  1: 'StepGift',
+  2: 'NewBattlePass',
+  3: 'SixSegment',
+  4: 'OnePlusTwo',
+  5: 'NewThreeChoiceOne',
+  6: 'DailyLogin',
+  7: 'Roulette',
+  8: 'ThreeSegmentN',
+  9: 'ThreeSegment',
+  10: 'ThreeChoiceOne',
+}
+
 const currentGiftComponent = computed(() => {
-  switch (currentPackageId.value) {
-    case 1:
-      return stepGift
-    case 2:
-      return newBattlePass
-    case 3:
-      return sixSegment
-    case 4:
-      return onePlusTwo
-    case 5:
-      return newThreeChoiceOne
-    case 6:
-      return dailyLogin
-    case 7:
-      return roulette
-    case 8:
-      return threeSegmentN
-    case 9:
-      return threeSegment
-    case 10:
-      return threeChoiceOne
-    default:
-      return null
-  }
+  const id = currentPackageId.value
+  return componentMap[id] || null
 })
 
-// 监听组件变化，自动滚动到顶部
-watch(() => currentGiftComponent.value, () => {
+// 记录最近访问的组件ID，限制为最近5个
+const recentlyVisitedIds = ref<number[]>([])
+const maxCachedComponents = 5
+
+// 获取要缓存的组件名称列表
+const cachedComponentNames = computed(() => {
+  return recentlyVisitedIds.value.map(id => componentNames[id]).filter(Boolean)
+})
+
+// 更新最近访问的组件列表
+function updateRecentlyVisited(id: number) {
+  if (!id)
+    return
+
+  // 如果已经在列表中，先移除
+  const index = recentlyVisitedIds.value.indexOf(id)
+  if (index > -1) {
+    recentlyVisitedIds.value.splice(index, 1)
+  }
+
+  // 添加到列表开头
+  recentlyVisitedIds.value.unshift(id)
+
+  // 保持列表长度不超过最大缓存数
+  if (recentlyVisitedIds.value.length > maxCachedComponents) {
+    recentlyVisitedIds.value.pop()
+  }
+}
+
+// 监听组件变化，自动滚动到顶部和更新访问记录
+watch(() => currentPackageId.value, (newId) => {
+  // 更新最近访问记录
+  updateRecentlyVisited(newId)
+
   // 使用 setTimeout 确保在DOM更新后滚动
   setTimeout(() => {
     // 滚动整个页面到顶部
@@ -53,17 +93,15 @@ watch(() => currentGiftComponent.value, () => {
       top: 0,
       behavior: 'smooth',
     })
-
-    // 或者如果您只想滚动特定容器：
-    // document.querySelector('.main-content').scrollTop = 0
   }, 0)
-})
+}, { immediate: true })
 
-// 组件切换函数示例
-// function switchToComponent(component) {
-//   currentGiftComponent.value = component
-//   // 不需要在这里滚动，watch会处理
-// }
+// 在组件挂载时初始化最近访问列表
+onMounted(() => {
+  if (currentPackageId.value) {
+    updateRecentlyVisited(currentPackageId.value)
+  }
+})
 </script>
 
 <template>
@@ -72,7 +110,10 @@ watch(() => currentGiftComponent.value, () => {
       name="slide"
       mode="out-in"
     >
-      <component :is="currentGiftComponent" />
+      <!-- 使用 KeepAlive 并限制只缓存最近访问的几个组件 -->
+      <KeepAlive :include="cachedComponentNames">
+        <component :is="currentGiftComponent" />
+      </KeepAlive>
     </Transition>
   </div>
 </template>

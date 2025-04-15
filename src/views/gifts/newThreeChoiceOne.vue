@@ -236,7 +236,7 @@ const bubblePosition = {
         score-show
       >
         <div class="text-33 text-stroke-2 text-stroke-[#164b2e] paint-order">
-          BUY ALL ${{ itemInfoList[3 ].Price }}
+          BUY ALL ${{ itemInfoList[3].Price }}
         </div>
       </GreenButton>
     </div>

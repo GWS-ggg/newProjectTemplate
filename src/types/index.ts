@@ -26,6 +26,7 @@ export interface ProductInfo {
     VipScore?: number
   }>
   TaskTargetScore?: number
+  TaskScore?: number
 }
 
 export interface ItemInfo {
@@ -48,6 +49,7 @@ export interface ItemInfo {
   AddProps?: Array<{
     VipScore?: number
   }>
+  TaskScore?: number
   TaskTargetScore?: number
 }
 
