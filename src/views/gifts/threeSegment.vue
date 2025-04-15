@@ -1,8 +1,35 @@
 <script setup lang="ts">
+import type { ProductInfo, ThreeSegmentItemInfo } from '@/types'
+import { getProductListApi } from '@/api'
 import GreenButton from '@/components/GreenButton.vue'
 import { useAnimatableRefs } from '@/hooks/useButtonRefs'
-import { animateWithClass } from '@/utils'
-import { ref } from 'vue'
+import { animateWithClass, getPGImg } from '@/utils'
+import { computed, nextTick, ref } from 'vue'
+
+const itemInfoList = ref<ThreeSegmentItemInfo[]>([])
+const productInfo = ref<ProductInfo>()
+async function getThreeSegmentData() {
+  const res = await getProductListApi({
+    appid: '616876868660610',
+    uid: '102191',
+    producttype: 9,
+  })
+  productInfo.value = res.ProductInfo
+  itemInfoList.value = res.ItemInfo as ThreeSegmentItemInfo[]
+  // 处理item数据 添加id BuyTimes Price
+  let idNum = 0
+  itemInfoList.value.forEach((item) => {
+    item.id = idNum++
+    if (item.BuyTimes === undefined) {
+      item.BuyTimes = 0
+    }
+    if (item.Price === undefined) {
+      item.Price = 0
+    }
+  })
+  console.log('res', res)
+}
+getThreeSegmentData()
 
 function getImageUrl(name: string) {
   return new URL(`../../assets/images/gifts/threeSegment/${name}`, import.meta.url).href
@@ -39,7 +66,7 @@ interface Gift {
   score: number
   isPurchased: boolean
 }
-const giftList = ref<Gift[]>([
+const _giftList = ref<Gift[]>([
   {
     id: 1,
     btnDesc: 'FREE',
@@ -87,12 +114,14 @@ const giftList = ref<Gift[]>([
   },
 ])
 const { setRef, triggerAnimation } = useAnimatableRefs()
-
-async function handlePurchaseButton(item: Gift) {
+const currentGiftId = computed(() => {
+  return itemInfoList.value.find(item => item.BuyTimes === 0)?.id
+})
+async function handlePurchaseButton(item: ThreeSegmentItemInfo) {
   triggerAnimation(item.id)
   const giftElement = document.querySelector(`#gift-${item.id}`)
   console.log(giftElement, 'giftElement')
-  item.isPurchased = true
+  item.BuyTimes = 1
   await animateWithClass(giftElement, 'flip-active', 600)
 }
 </script>
@@ -100,42 +129,46 @@ async function handlePurchaseButton(item: Gift) {
 <template>
   <div class="mb-30 flex flex-col items-center justify-center text-29">
     <div class="mt-30 text-[#fff] text-stroke-1 text-stroke-[#19093e]">
-      END IN: 60:00:00
+      <CountDown
+        :end-time="productInfo?.ExpireTime"
+        text-class="px-20 py-10 text-29 text-stroke-3 text-stroke-[#19093e] paint-order"
+      >
+        <template #default="{ hours, minutes, seconds }">
+          END IN  {{ hours }}:{{ minutes }}:{{ seconds }}
+        </template>
+      </CountDown>
     </div>
-    <div class="mt-24 text-24 text-[#fef29f] text-stroke-1 text-stroke-[#682c2e]">
+    <div class="mt-24 text-24 text-[#fef29f] text-stroke-3 text-stroke-[#682c2e] paint-order">
       Take each deal take each deal !"
     </div>
     <div
-      v-for="item in giftList"
+      v-for="item in itemInfoList"
       :id="`gift-${item.id}`"
       :key="item.id"
-      class="relative mt-20 w-710 flex items-center justify-center"
+      class="relative mt-20 min-h-339 w-710 flex items-center justify-center"
     >
       <div class="w-710">
         <img
-          :src="item.isPurchased ? item.bgOkImg : item.bgImg"
+          :src="item.BuyTimes === 0 ? imgMap.bg1Img : imgMap.bg1OkImg"
           alt=""
           class="w-full"
         >
       </div>
 
-      <div v-show="!item.isPurchased">
-        <div class="absolute left-0 top-30 h-120 w-full">
+      <div v-show="item.BuyTimes === 0">
+        <div class="absolute left-0 top-35 h-120 w-full">
           <div class="h-full flex items-center justify-center gap-30">
-            <div
-              v-for="icon in item.iconList"
-              :key="icon.id"
-              class="h-full flex flex-col items-center justify-center"
+            <template
+              v-for="(icon, index) in item.Props"
+              :key="index"
             >
-              <img
-                :src="icon.iconImg"
-                alt=""
-                class="h-full"
-              >
-              <div class="text-42 text-[#fff] text-stroke-1 text-stroke-[#464646] -mt-32">
-                {{ icon.desc }}
-              </div>
-            </div>
+              <IconWithText
+                :icon-url="icon.Icon"
+                :text="icon.Text"
+                :icon-height="120"
+                :bottom="-10"
+              />
+            </template>
           </div>
         </div>
         <div
@@ -145,14 +178,13 @@ async function handlePurchaseButton(item: Gift) {
           <GreenButton
             :ref="el => setRef(el, item.id)"
             radius="20px"
-            border-width="2px"
-            :score="item.score"
+            :score="productInfo?.Props[0].VipScore"
             score-show
           >
             <div class="relative text-40 text-[#fff] text-stroke-2 text-stroke-[#164b2e]">
-              {{ item.btnDesc }}
+              {{ item.Price ? item.Price : 'FREE' }}
               <img
-                v-if="!item.isFree"
+                v-if="item.Price === 0 && currentGiftId !== item.id"
                 :src="imgMap.lockImg"
                 alt=""
                 class="absolute top-0 h-42 -right-40"

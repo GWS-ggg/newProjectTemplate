@@ -98,6 +98,12 @@ const giftPackages = ref([
     countdown: { hours: 19, minutes: 20, seconds: 10 },
     tag: null,
   },
+  {
+    id: 10,
+    image: getImageUrl('icon_3选1.png'),
+    countdown: { hours: 19, minutes: 20, seconds: 10 },
+    tag: null,
+  },
 ])
 
 // 格式化时间，确保两位数显示

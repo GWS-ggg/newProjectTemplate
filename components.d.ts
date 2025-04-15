@@ -16,6 +16,8 @@ declare module 'vue' {
     GradientStrokeText: typeof import('./src/components/GradientStrokeText.vue')['default']
     GradientText: typeof import('./src/components/GradientText.vue')['default']
     GreenButton: typeof import('./src/components/GreenButton.vue')['default']
+    IconList: typeof import('./src/components/IconList.vue')['default']
+    IconWithText: typeof import('./src/components/IconWithText.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     StretchableBackground: typeof import('./src/components/StretchableBackground.vue')['default']

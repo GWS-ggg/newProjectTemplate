@@ -65,6 +65,7 @@ export interface BattlePassItemInfo {
   Price: number
   SkuID: string
   TradeProductID: number
+  BuyTimes?: number
   Props: Array<{
     VipScore: number
   }>
@@ -156,4 +157,28 @@ export interface SixSegmentItemInfo {
   BuyTimes?: number
   Props: Array<Prop>
 
+}
+
+export interface ThreeSegmentNItemInfo {
+  id: number
+  sortId?: number
+  Key: number
+  Price: number
+  SkuID: string
+  TradeProductID: number
+  Limit: number
+  BuyTimes?: number
+  Props: Array<Prop>
+}
+
+export interface ThreeSegmentItemInfo {
+  id: number
+  sortId?: number
+  Key: number
+  Price: number
+  SkuID: string
+  TradeProductID: number
+  Limit: number
+  BuyTimes?: number
+  Props: Array<Prop>
 }

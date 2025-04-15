@@ -4,6 +4,7 @@ import onePlusTwo from '@/views/gifts/1+2.vue'
 import battlePass from '@/views/gifts/battlePass.vue'
 import dailyLogin from '@/views/gifts/dailyLogin.vue'
 import newBattlePass from '@/views/gifts/newBattlePass.vue'
+import newThreeChoiceOne from '@/views/gifts/newThreeChoiceOne.vue'
 import roulette from '@/views/gifts/roulette.vue'
 import sixSegment from '@/views/gifts/sixSegment.vue'
 import stepGift from '@/views/gifts/stepGift.vue'
@@ -27,7 +28,7 @@ const currentGiftComponent = computed(() => {
     case 4:
       return onePlusTwo
     case 5:
-      return threeChoiceOne
+      return newThreeChoiceOne
     case 6:
       return dailyLogin
     case 7:
@@ -36,6 +37,8 @@ const currentGiftComponent = computed(() => {
       return threeSegmentN
     case 9:
       return threeSegment
+    case 10:
+      return threeChoiceOne
     default:
       return null
   }

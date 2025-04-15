@@ -8,7 +8,7 @@ import { getPGImg } from '@/utils'
 import { computed, ref } from 'vue'
 
 function getImageUrl(name: string) {
-  return new URL(`../../assets/images/gifts/threeChoiceOne/${name}`, import.meta.url).href
+  return new URL(`../../assets/images/gifts/newThreeChoiceOne/${name}`, import.meta.url).href
 }
 
 const imgMap = {
@@ -122,7 +122,7 @@ async function getProductList() {
   const res = await getProductListApi({
     appid: '616876868660610',
     uid: '102191',
-    producttype: 10,
+    producttype: 5,
   })
   productInfo.value = res.ProductInfo
   itemInfoList.value = res.ItemInfo as ThreeChoiceOneGiftItemInfo[]
@@ -186,7 +186,7 @@ const bubblePosition = {
           />
         </transition>
         <div
-          class="absolute bottom-105 left-0 z-20 w-full flex flex-col items-center justify-start"
+          class="absolute bottom-105 left-0 z-20 w-full flex flex-col items-center justify-end"
           :class="giftPackage.id === 0 ? 'h-455' : giftPackage.id === 1 ? 'h-506' : 'h-562'"
         >
           <div class="flex flex-1 flex-col items-center justify-evenly gap-20">
@@ -223,6 +223,22 @@ const bubblePosition = {
           </div>
         </div>
       </div>
+    </div>
+
+    <div
+      class="z-10 mt-20 h-90 w-400"
+      @click="handleClickBuyAll(itemInfoList[3])"
+    >
+      <GreenButton
+        :ref="(el: any) => setRef(el, 3)"
+        radius="32px"
+        :score="productInfo?.Props?.[0]?.VipScore"
+        score-show
+      >
+        <div class="text-33 text-stroke-2 text-stroke-[#164b2e] paint-order">
+          BUY ALL ${{ itemInfoList[3 ].Price }}
+        </div>
+      </GreenButton>
     </div>
 
     <div class="mt-20 f-c">

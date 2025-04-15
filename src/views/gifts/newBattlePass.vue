@@ -31,7 +31,7 @@ const imgMap = {
 }
 
 const scoreIconImg = new URL('../../assets/images/common/icon_score.png', import.meta.url).href
-
+const okImg = new URL('../../assets/images/common/icon_ok.png', import.meta.url).href
 // 礼物数据类型
 interface Gift {
   id: number
@@ -104,12 +104,16 @@ function triggerAnimation(mainRef: any, addRef: any) {
 }
 
 // 按钮点击事件处理函数
-function triggerScoreAnimation() {
-  triggerAnimation(animatedIconRef, animatedIconAddRef)
-}
+function handleBtnClick(id: number, itemInfo: BattlePassItemInfo) {
+  console.log('handleBtnClick', id)
+  if (id === 1) {
+    triggerAnimation(animatedIconRef, animatedIconAddRef)
+  }
+  else {
+    triggerAnimation(animatedIconRefSecond, animatedIconAddRefSecond)
+  }
 
-function triggerScoreAddAnimationSecond() {
-  triggerAnimation(animatedIconRefSecond, animatedIconAddRefSecond)
+  itemInfo.BuyTimes = 1
 }
 
 // 获取商品数据
@@ -121,6 +125,10 @@ async function getProductList() {
       producttype: 2,
     })
     itemInfoList.value = res.ItemInfo as BattlePassItemInfo[]
+    itemInfoList.value.forEach((item) => {
+      if (item.BuyTimes === undefined)
+        item.BuyTimes = 0
+    })
     console.log('battle pass itemInfoList', itemInfoList.value)
   }
   catch (error) {
@@ -189,15 +197,27 @@ getProductList()
         <!-- 购买按钮 -->
         <div
           class="absolute bottom-0 left-1/2 h-100 w-667 f-c text-40 color-[#944d07] -translate-x-1/2"
-          @click="triggerScoreAnimation"
+          @click="handleBtnClick(1, firstProduct)"
         >
           <div class="relative h-full w-full f-c cursor-pointer">
-            <div>
+            <div v-if="firstProduct.BuyTimes === 0">
               ${{ getPrice(firstProduct.Price) }}
             </div>
-
+            <div
+              v-else
+              class="fade-in h-full f-c -mt-10"
+            >
+              <img
+                class="h-90"
+                :src="okImg"
+                alt=""
+              >
+            </div>
             <!-- 积分气泡 -->
-            <div class="absolute right-70 h-91 translate-x-1/2 -top-34">
+            <div
+              v-show="firstProduct.BuyTimes === 0"
+              class="absolute right-70 h-91 translate-x-1/2 -top-34"
+            >
               <div class="relative">
                 <img
                   src="@/assets/images/components/GreenButton/img_气泡_大.png"
@@ -309,15 +329,27 @@ getProductList()
         <!-- 购买按钮 -->
         <div
           class="absolute bottom-0 left-1/2 h-100 w-667 f-c text-40 color-[#133e8a] -translate-x-1/2"
-          @click="triggerScoreAddAnimationSecond"
+          @click="handleBtnClick(2, secondProduct)"
         >
           <div class="relative h-full w-full f-c cursor-pointer">
-            <div>
+            <div v-if="secondProduct.BuyTimes === 0">
               ${{ getPrice(secondProduct.Price) }}
             </div>
-
+            <div
+              v-else
+              class="fade-in h-full f-c -mt-10"
+            >
+              <img
+                class="h-90"
+                :src="okImg"
+                alt=""
+              >
+            </div>
             <!-- 积分气泡 -->
-            <div class="absolute right-70 h-91 translate-x-1/2 -top-34">
+            <div
+              v-show="secondProduct.BuyTimes === 0"
+              class="absolute right-70 h-91 translate-x-1/2 -top-34"
+            >
               <div class="relative">
                 <img
                   src="@/assets/images/components/GreenButton/img_气泡_大.png"
@@ -428,5 +460,18 @@ getProductList()
   background-clip: text;
   -webkit-text-fill-color: transparent;
   color: transparent;
+}
+.fade-in {
+  animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 </style>
