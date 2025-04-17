@@ -3,7 +3,7 @@ import type { DailyLoginItemInfo, ProductInfo } from '@/types'
 import { getProductListApi } from '@/api'
 import GreenButton from '@/components/GreenButton.vue'
 import IconWithText from '@/components/IconWithText.vue'
-import { getPGImg } from '@/utils'
+import { formatPrice, getPGImg } from '@/utils'
 import { findImagePath } from '@/utils/imageUtils'
 import { computed, ref } from 'vue'
 
@@ -21,7 +21,7 @@ async function getDailyLoginData() {
   console.log(res, 'res')
 }
 getDailyLoginData()
-const bgImg = computed(() => {
+const _bgImg = computed(() => {
   return findImagePath('Package_bg.png', productInfo.value?.Pic)
 })
 
@@ -155,7 +155,7 @@ const bubblePosition = {
     </div>
     <div class="absolute bottom-100 left-1/2 h-126 w-590 f-c -translate-x-1/2">
       <div class="relative h-97 flex items-center justify-center gap-15 text-48 color-[#fff0de] text-stroke-3 text-stroke-[#4d1202] paint-order">
-        ${{ dailyLoginItemInfo[0]?.Price }}
+        {{ formatPrice(dailyLoginItemInfo[0]?.Price || 0) }}
         <!-- <div class="absolute bottom-1/2 translate-y-1/2 text-30 text-white color-[#fbcaa7] text-stroke-3 text-stroke-[#4d1202] paint-order -right-120">
           <span class="relative">
             $15.00

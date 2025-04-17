@@ -12,7 +12,7 @@ import stepGift from '@/views/gifts/stepGift.vue'
 import threeChoiceOne from '@/views/gifts/threeChoiceOne.vue'
 import threeSegment from '@/views/gifts/threeSegment.vue'
 import threeSegmentN from '@/views/gifts/threeSegmentN.vue'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, provide, ref, watch } from 'vue'
 
 const giftStore = useGiftStore()
 
@@ -20,11 +20,11 @@ const giftStore = useGiftStore()
 const componentMap: Record<number, Component> = {
   1: stepGift,
   2: newBattlePass,
-  3: sixSegment,
+  3: roulette,
   4: onePlusTwo,
   5: newThreeChoiceOne,
   6: dailyLogin,
-  7: roulette,
+  7: sixSegment,
   8: threeSegmentN,
   9: threeSegment,
   10: threeChoiceOne,
@@ -34,11 +34,11 @@ const componentMap: Record<number, Component> = {
 const componentNames: Record<number, string> = {
   1: 'StepGift',
   2: 'NewBattlePass',
-  3: 'SixSegment',
+  3: 'Roulette',
   4: 'OnePlusTwo',
   5: 'NewThreeChoiceOne',
   6: 'DailyLogin',
-  7: 'Roulette',
+  7: 'SixSegment',
   8: 'ThreeSegmentN',
   9: 'ThreeSegment',
   10: 'ThreeChoiceOne',
@@ -98,6 +98,17 @@ onMounted(() => {
     updateRecentlyVisited(giftStore.currentGiftId)
   }
 })
+
+// 支付pop开关
+const isVisblePopup = ref(false)
+function showPopup() {
+  isVisblePopup.value = true
+}
+function onClosePopup() {
+  isVisblePopup.value = false
+}
+provide('isVisblePopup', isVisblePopup)
+provide('showPopup', showPopup)
 </script>
 
 <template>
@@ -108,10 +119,21 @@ onMounted(() => {
     >
       <!-- 使用 KeepAlive 并限制只缓存最近访问的几个组件 -->
       <KeepAlive :include="cachedComponentNames">
-        <component :is="currentGiftComponent" />
+        <component
+          :is="currentGiftComponent"
+          @show-popup="showPopup"
+        />
       </KeepAlive>
     </Transition>
   </div>
+  <Popup
+    :is-visble="isVisblePopup"
+    @popup-close="onClosePopup"
+  >
+    <div>
+      test 支付
+    </div>
+  </Popup>
 </template>
 
 <style lang="scss" scoped>

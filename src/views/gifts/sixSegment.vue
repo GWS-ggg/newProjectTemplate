@@ -6,7 +6,7 @@ import AnimatedIcon from '@/components/AnimatedIcon.vue'
 
 import GreenButton from '@/components/GreenButton.vue'
 import { useAnimatableRefs } from '@/hooks/useButtonRefs'
-import { animateWithClass, getPGImg } from '@/utils'
+import { animateWithClass, formatPrice, getPGImg } from '@/utils'
 import { findImagePath } from '@/utils/imageUtils'
 import { computed, nextTick, ref, watchEffect } from 'vue'
 
@@ -498,7 +498,7 @@ function getScoreInfo(props: Array<{
                     v-show="gift.Price !== 0"
                     class="relative z-20 text-30 text-stroke-3 text-stroke-[#164b2e] paint-order"
                   >
-                    {{ gift.Price }}
+                    {{ formatPrice(gift.Price || 0) }}
                   </div>
                 </GreenButton>
               </div>

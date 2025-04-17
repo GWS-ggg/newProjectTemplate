@@ -5,7 +5,7 @@ import { computed, ref } from 'vue'
 
 export const useGiftStore = defineStore('gift', () => {
   // 当前选中的礼包ID
-  const currentGiftId = ref<number>(1)
+  const currentGiftId = ref<number>(0)
   const shopListInfo = ref<ShopListItem[]>([])
 
   // 提供一个计算属性来访问 shopListInfo
@@ -22,8 +22,16 @@ export const useGiftStore = defineStore('gift', () => {
     const res = await getShopListInfoApi({
       uid,
     })
+
     // 创建一个新数组，确保响应式触发
     const newTabInfo = [...res.TabInfo]
+    newTabInfo.push({
+      BannerPic: 'newChooseThree/2/gift_icon.png',
+      ProductType: 7,
+      Expire: 1747734900,
+      id: 7,
+    })
+    newTabInfo.sort((a, b) => a.ProductType - b.ProductType)
     let idNum = 0
     newTabInfo.forEach((item) => {
       item.id = idNum++

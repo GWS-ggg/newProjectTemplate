@@ -24,12 +24,6 @@ export function getPGImg(name: string | undefined) {
   return `https://piggygo-static-jy.forevernine.com/cdn/officialpay/${name}`
 }
 
-export function getPrice(price: number) {
-  if (!price)
-    return '0.00'
-  return (price / 100).toFixed(2)
-}
-
 // 创建CSS动画Promise函数 - 使用事件监听器和超时保护
 export function animateWithClass(element: Element | null, className: string, duration: number): Promise<void> {
   return new Promise((resolve) => {
@@ -54,4 +48,8 @@ export function animateWithClass(element: Element | null, className: string, dur
       }
     }, duration + 50)
   })
+}
+
+export function formatPrice(price: number) {
+  return `$${(price / 100).toFixed(2)}`
 }

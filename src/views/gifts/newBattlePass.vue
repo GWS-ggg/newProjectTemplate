@@ -5,7 +5,7 @@ import { getProductListApi } from '@/api/index'
 import AnimatedIcon from '@/components/AnimatedIcon.vue'
 
 import { useScoreElementStore } from '@/store/modules/scoreElement'
-import { getPrice } from '@/utils'
+import { formatPrice } from '@/utils'
 import { computed, ref } from 'vue'
 
 // 获取积分元素引用
@@ -201,7 +201,7 @@ getProductList()
         >
           <div class="relative h-full w-full f-c cursor-pointer">
             <div v-if="firstProduct.BuyTimes === 0">
-              ${{ getPrice(firstProduct.Price) }}
+              {{ formatPrice(firstProduct.Price) }}
             </div>
             <div
               v-else
@@ -333,7 +333,7 @@ getProductList()
         >
           <div class="relative h-full w-full f-c cursor-pointer">
             <div v-if="secondProduct.BuyTimes === 0">
-              ${{ getPrice(secondProduct.Price) }}
+              {{ formatPrice(secondProduct.Price) }}
             </div>
             <div
               v-else

@@ -5,7 +5,7 @@ import { getProductListApi } from '@/api/index'
 import CountDown from '@/components/CountDown.vue'
 
 import GreenButton from '@/components/GreenButton.vue'
-import { getPGImg } from '@/utils'
+import { formatPrice, getPGImg } from '@/utils'
 
 import { findImagePath } from '@/utils/imageUtils'
 
@@ -235,7 +235,7 @@ function handleButtonClick() {
         score-show
       >
         <div class="text-40 text-white text-stroke-2 text-stroke-[#164b2e]">
-          Dance ${{ currentGift?.Price }}
+          Dance {{ formatPrice(currentGift?.Price || 0) }}
         </div>
       </GreenButton>
     </div>

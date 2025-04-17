@@ -3,7 +3,7 @@ import type { ItemInfo, ProductInfo } from '@/types'
 import { getProductListApi } from '@/api/index'
 import GreenButton from '@/components/GreenButton.vue'
 
-import { getPGImg } from '@/utils'
+import { formatPrice, getPGImg } from '@/utils'
 import { findImagePath } from '@/utils/imageUtils'
 
 import { computed, ref } from 'vue'
@@ -13,7 +13,6 @@ function getImageUrl(name: string) {
 }
 const productInfo = ref<ProductInfo>()
 const itemInfoList = ref<ItemInfo[]>([])
-const currentSocre = ref(0)
 async function getProductList() {
   const res = await getProductListApi({
     appid: '616876868660610',
@@ -103,12 +102,6 @@ async function handleBtnClick() {
 
 const scoreTarget = ref<HTMLElement | null>(null)
 
-const priceComputed = computed(() => {
-  if (!productInfo.value?.Price)
-    return '0.00'
-  return (productInfo.value.Price / 100).toFixed(2)
-})
-
 const vipScore = computed(() => {
   // Find the prop with VipScore field in productInfo.Props
   if (!productInfo.value?.Props || productInfo.value.Props.length === 0)
@@ -130,8 +123,8 @@ const iconProps = computed(() => {
 })
 
 const bubblePosition = {
-  top: '-0.5rem',
-  right: '-0.2rem',
+  top: '-0.4rem',
+  right: '-1.2rem',
   translateX: '50%',
   translateY: '0',
 }
@@ -241,7 +234,7 @@ const bubblePosition = {
               class="z-10 text-47 text-[#1c6904]"
               style="text-shadow: 0px 2px 0px rgba(190, 251, 91, 0.75);"
             >
-              ${{ priceComputed }}
+              {{ formatPrice(productInfo?.Price || 0) }}
             </div>
           </GreenButton>
         </div>

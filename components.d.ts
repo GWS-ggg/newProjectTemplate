@@ -19,6 +19,7 @@ declare module 'vue' {
     GreenButton: typeof import('./src/components/GreenButton.vue')['default']
     IconList: typeof import('./src/components/IconList.vue')['default']
     IconWithText: typeof import('./src/components/IconWithText.vue')['default']
+    Popup: typeof import('./src/components/Popup.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     ScaledImage: typeof import('./src/components/ScaledImage.vue')['default']

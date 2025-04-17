@@ -3,7 +3,7 @@ import type { ProductInfo, ThreeChoiceOneGiftItemInfo } from '@/types'
 
 import { getProductListApi } from '@/api'
 import { useAnimatableRefs } from '@/hooks/useButtonRefs'
-import { getPGImg } from '@/utils'
+import { formatPrice, getPGImg } from '@/utils'
 
 import { findImagePath } from '@/utils/imageUtils'
 
@@ -97,7 +97,7 @@ interface _Gift {
 //   },
 // ])
 
-const testbBgImgList = ref<string[]>([
+const _testbBgImgList = ref<string[]>([
   imgMap.bg1Img,
   imgMap.bg2Img,
   imgMap.bg3Img,
@@ -181,7 +181,7 @@ const bubblePosition = {
         <transition name="mask-lock">
           <img
             v-show="giftPackage.id !== activeGiftId"
-            class="absolute bottom-300 left-1/2 z-40 w-184 -translate-x-1/2"
+            class="absolute bottom-300 left-1/2 z-40 w-220 -translate-x-1/2"
             :src="imgMap.lockImg"
             alt=""
           >
@@ -227,7 +227,7 @@ const bubblePosition = {
               :mask-show="giftPackage.id !== activeGiftId"
             >
               <div class="text-29 text-stroke-2 text-stroke-[#164b2e] paint-order">
-                ${{ giftPackage.Price }}
+                {{ formatPrice(giftPackage.Price || 0) }}
               </div>
             </GreenButton>
           </div>

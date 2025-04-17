@@ -7,7 +7,7 @@ import IconWithText from '@/components/IconWithText.vue'
 
 import { useAnimatableRefs } from '@/hooks/useButtonRefs'
 
-import { animateWithClass, getPGImg } from '@/utils'
+import { animateWithClass, formatPrice, getPGImg } from '@/utils'
 
 import { findImagePath } from '@/utils/imageUtils'
 import { computed, nextTick, ref, watchEffect } from 'vue'
@@ -297,12 +297,11 @@ watchEffect(() => {
 const processBar = computed(() => {
   return `${currentScore.value / targetScore.value * 100}%`
 })
-
 function getPrice(giftPackage: onePlusTwoGiftItemInfo) {
   if (giftPackage.Price === 0) {
     return 'FREE'
   }
-  return `$${giftPackage.Price?.toFixed(2)}`
+  return formatPrice(giftPackage.Price || 0)
 }
 const { setRef, triggerAnimation } = useAnimatableRefs()
 

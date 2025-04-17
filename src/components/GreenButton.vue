@@ -194,7 +194,7 @@ defineExpose({
       </div>
       <div
         v-if="scoreAddShow"
-        class="absolute z-50 h-91"
+        class="absolute z-50 h-91 scale-[0.8]!"
         :style="{
           top: bubblePosition.top ?? '-40px',
           right: bubblePosition.right ?? '0',

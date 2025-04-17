@@ -4,7 +4,7 @@ import { getProductListApi } from '@/api'
 import GreenButton from '@/components/GreenButton.vue'
 import IconWithText from '@/components/IconWithText.vue'
 import { useAnimatableRefs } from '@/hooks/useButtonRefs'
-import { animateWithClass, getPGImg } from '@/utils'
+import { animateWithClass, formatPrice, getPGImg } from '@/utils'
 
 import { findImagePath } from '@/utils/imageUtils'
 import { computed, nextTick, ref, watchEffect } from 'vue'
@@ -334,7 +334,7 @@ async function handleAnimation(currentGift: ThreeSegmentNItemInfo) {
           @click="handlePurchaseButton(item)"
         >
           <div class="relative text-40 text-[#fff] text-stroke-3 text-stroke-[#164b2e] paint-order">
-            {{ item?.Price ? item?.Price : 'FREE' }}
+            {{ item?.Price ? formatPrice(item?.Price) : 'FREE' }}
             <img
               v-if="item.Price === 0 && item.sortId !== 1"
               :src="imgMap.lockImg"

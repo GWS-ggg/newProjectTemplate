@@ -3,7 +3,7 @@ import type { ProductInfo, ThreeChoiceOneGiftItemInfo } from '@/types'
 
 import { getProductListApi } from '@/api'
 import { useAnimatableRefs } from '@/hooks/useButtonRefs'
-import { getPGImg } from '@/utils'
+import { formatPrice, getPGImg } from '@/utils'
 
 import { findImagePath } from '@/utils/imageUtils'
 
@@ -133,8 +133,7 @@ const bubblePosition = {
   translateX: '50%',
   translateY: '0',
 }
-
-const maskList = ref<string[]>([
+const _maskList = ref<string[]>([
   imgMap.mask1Img,
   imgMap.mask2Img,
   imgMap.mask3Img,
@@ -159,6 +158,9 @@ onMounted(() => {
 
 // 计算当前缩放比例
 const scale = computed(() => {
+  if (windowWidth.value > 750) {
+    return 1
+  }
   return windowWidth.value / baseWidth
 })
 
@@ -281,7 +283,7 @@ getProductList()
         <transition name="mask-lock">
           <img
             v-show="giftPackage.id !== activeGiftId"
-            class="absolute bottom-300 left-1/2 z-40 w-160 -translate-x-1/2"
+            class="absolute bottom-300 left-1/2 z-40 w-185 -translate-x-1/2"
             :src="imgMap.lockImg"
             alt=""
           >
@@ -338,7 +340,7 @@ getProductList()
               :mask-show="giftPackage.id !== activeGiftId"
             >
               <div class="text-29 text-stroke-2 text-stroke-[#164b2e] paint-order">
-                ${{ giftPackage.Price }}
+                {{ formatPrice(giftPackage.Price || 0) }}
               </div>
             </GreenButton>
           </div>
@@ -357,7 +359,7 @@ getProductList()
         score-show
       >
         <div class="text-33 text-stroke-2 text-stroke-[#164b2e] paint-order">
-          BUY ALL ${{ itemInfoList[3].Price }}
+          BUY ALL {{ formatPrice(itemInfoList[3].Price || 0) }}
         </div>
       </GreenButton>
     </div>
