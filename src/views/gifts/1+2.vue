@@ -3,10 +3,13 @@ import type { onePlusTwoGiftItemInfo, ProductInfo } from '@/types'
 import { getProductListApi } from '@/api'
 
 import GreenButton from '@/components/GreenButton.vue'
+import IconWithText from '@/components/IconWithText.vue'
+
 import { useAnimatableRefs } from '@/hooks/useButtonRefs'
 
 import { animateWithClass, getPGImg } from '@/utils'
 
+import { findImagePath } from '@/utils/imageUtils'
 import { computed, nextTick, ref, watchEffect } from 'vue'
 
 function getImageUrl(name: string) {
@@ -85,6 +88,20 @@ async function getProductList() {
   })
 }
 getProductList()
+
+const collectionIconImg = computed(() => {
+  return findImagePath('CollectIcon.png', productInfo.value?.Pic)
+})
+const bgPayImg = computed(() => {
+  return findImagePath('ItemBg.png', productInfo.value?.Pic)
+})
+const bgImg = computed(() => {
+  return findImagePath('ItemBgPay.png', productInfo.value?.Pic)
+})
+
+const labelImg = computed(() => {
+  return findImagePath('Label.png', productInfo.value?.Pic)
+})
 
 function getPorpsInfo(props: Array<{
   PropID: number
@@ -393,15 +410,19 @@ async function handleGiftAnimation(giftPackage: onePlusTwoGiftItemInfo) {
       {{ giftData.title }}
     </div>
     <div class="relative mt-35 flex items-center justify-center">
-      <div
-        class="absolute z-10 aspect-square h-64 f-c bg-cover bg-center -left-40 -top-9"
-        :style="{ backgroundImage: `url(${imgMap.circle})` }"
-      >
-        <img
-          class="h-full"
-          :src="imgMap.score"
-          alt=""
-        >
+      <div class="absolute z-10 aspect-square h-64 f-c bg-cover bg-center -left-40 -top-9">
+        <div class="relative h-full">
+          <img
+            class="h-full"
+            :src="imgMap.circle"
+            alt=""
+          >
+          <img
+            class="absolute bottom-1/2 left-1/2 h-90 translate-y-1/2 -translate-x-1/2"
+            :src="collectionIconImg"
+            alt=""
+          >
+        </div>
       </div>
 
       <div class="relative h-48 f-s bg-cover bg-center text-center text-24">
@@ -423,10 +444,10 @@ async function handleGiftAnimation(giftPackage: onePlusTwoGiftItemInfo) {
           {{ currentScore }} / {{ targetScore }}
         </div>
       </div>
-      <div class="absolute z-10 aspect-square h-64 f-c -right-35 -top-9">
+      <div class="absolute right-0 top-1/2 z-10 h-90 f-c translate-x-1/2 -translate-y-1/2">
         <img
           class="h-full"
-          :src="imgMap.boxImg"
+          :src="getPGImg(productInfo?.Props?.[0]?.Icon)"
           alt=""
         >
       </div>
@@ -443,21 +464,20 @@ async function handleGiftAnimation(giftPackage: onePlusTwoGiftItemInfo) {
         >
           <div
             class="relative h-654 w-full flex flex-col bg-cover bg-center bg-no-repeat"
-            :style="{ backgroundImage: giftPackage.Price && giftPackage.Price > 0 ? `url(${imgMap.strip_1})` : `url(${imgMap.strip_2})` }"
+            :style="{ backgroundImage: giftPackage.Price && giftPackage.Price > 0 ? `url(${bgPayImg})` : `url(${bgImg})` }"
           >
             <div
               class="absolute bottom-30 right-0 z-30 h-50 w-92 f-c flex-col bg-cover bg-center"
-              :style="{ backgroundImage: `url(${giftData.tagImg})` }"
+              :style="{ backgroundImage: `url(${labelImg})` }"
             >
               <div class="f-c flex-col -mt-10">
-                <img
-                  class="h-60"
-                  :src="getPGImg(getScoreInfo(giftPackage.Props)?.Icon)"
-                  alt=""
-                >
-                <div class="text-stroke-black -mt-15">
-                  {{ getScoreInfo(giftPackage.Props)?.DeltaCount }}
-                </div>
+                <IconWithText
+                  :icon-url="collectionIconImg"
+                  :text="getScoreInfo(giftPackage.Props)?.DeltaCount.toString()"
+                  :icon-height="90"
+                  :bottom="-15"
+                  :text-size="32"
+                />
               </div>
             </div>
             <div class="h-600 w-full flex flex-col justify-evenly gap-20">
@@ -486,8 +506,7 @@ async function handleGiftAnimation(giftPackage: onePlusTwoGiftItemInfo) {
             <GreenButton
               v-show="giftPackage.BuyTimes === 0"
               :ref="el => setRef(el, giftPackage.id)"
-              radius="21px"
-              border-width="2px"
+              radius="0.21rem"
               :score="40"
               score-show
               @click="handleButtonClick(giftPackage)"

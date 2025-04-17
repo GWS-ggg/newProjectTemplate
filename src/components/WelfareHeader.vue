@@ -46,7 +46,7 @@ const currentVipLevel = computed(() => vipLevelList.value[vipLevel.value])
 </script>
 
 <template>
-  <div class="h-304 w-full flex items-center">
+  <div class="h-304 w-full flex">
     <div class="relative h-full w-[40%]">
       <div class="absolute left-50 top-30 z-10 w-[80%]">
         <div class="relative aspect-square w-full f-c">
@@ -54,10 +54,7 @@ const currentVipLevel = computed(() => vipLevelList.value[vipLevel.value])
             <div class="mt-40 f-c text-40 color-[#e77bff]">
               welfare
             </div>
-            <div
-              class="text-61 text-[#fff309]"
-              style="text-shadow:  3px 3px 0 #5b1800,  -1px 1px 0 #5b1800;"
-            >
+            <div class="text-61 text-[#fff309] text-shadow-[3px_3px_0_#5b1800]">
               100%
             </div>
             <div class="f-e text-30 text-[#acb3ff] text-stroke-2 text-stroke-[#271a58] paint-order">
@@ -67,8 +64,8 @@ const currentVipLevel = computed(() => vipLevelList.value[vipLevel.value])
         </div>
       </div>
     </div>
-    <div class="ml-30 flex flex-col items-start pt-15">
-      <div class="flex flex-col items-start -ml-25">
+    <div class="ml-30 mt-60 flex flex-col items-start">
+      <div class="flex flex-col items-start leading-60 -ml-25">
         <div
           class="gradient-text-with-stroke text-52"
           data-text="&nbsp;same price&nbsp;"
@@ -83,14 +80,14 @@ const currentVipLevel = computed(() => vipLevelList.value[vipLevel.value])
         </div>
       </div>
 
-      <div class="flex items-center -ml-10">
+      <div class="mt-18 flex items-center -ml-10">
         <img
           :ref="el => scoreElementStore.setScoreRef(el as HTMLElement)"
           :src="currentVipLevel.icon"
           alt=""
           class="z-10 w-78"
         >
-        <div class="rounded-[24px] bg-[#200b49] bg-opacity-35 bg-cover bg-no-repeat px-25 py-2 text-30 text-white text-stroke-1 text-stroke-[#181818] paint-order -ml-12">
+        <div class="rounded-[24px] bg-[#200b49] bg-opacity-35 bg-cover bg-no-repeat px-25 py-2 pl-35 text-30 text-white text-stroke-1 text-stroke-[#181818] paint-order -ml-25">
           21/100
         </div>
       </div>

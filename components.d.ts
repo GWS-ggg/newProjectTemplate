@@ -21,6 +21,7 @@ declare module 'vue' {
     IconWithText: typeof import('./src/components/IconWithText.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    ScaledImage: typeof import('./src/components/ScaledImage.vue')['default']
     StretchableBackground: typeof import('./src/components/StretchableBackground.vue')['default']
     WelfareHeader: typeof import('./src/components/WelfareHeader.vue')['default']
   }

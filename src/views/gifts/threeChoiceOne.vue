@@ -5,6 +5,8 @@ import { getProductListApi } from '@/api'
 import { useAnimatableRefs } from '@/hooks/useButtonRefs'
 import { getPGImg } from '@/utils'
 
+import { findImagePath } from '@/utils/imageUtils'
+
 import { computed, ref } from 'vue'
 
 function getImageUrl(name: string) {
@@ -12,9 +14,9 @@ function getImageUrl(name: string) {
 }
 
 const imgMap = {
-  bg1Img: getImageUrl('1.png'),
-  bg2Img: getImageUrl('2.png'),
-  bg3Img: getImageUrl('3.png'),
+  bg1Img: getImageUrl('三选一礼包_0004_1.png'),
+  bg2Img: getImageUrl('三选一礼包_0002_2.png'),
+  bg3Img: getImageUrl('三选一礼包_0003_3.png'),
   gift1Icon1Img: getImageUrl('体力3.png'),
   gift1Icon2Img: getImageUrl('药水魔力瓶.png'),
   gift1Icon3Img: getImageUrl('钻石1.png'),
@@ -95,7 +97,7 @@ interface _Gift {
 //   },
 // ])
 
-const bgImgList = ref<string[]>([
+const testbBgImgList = ref<string[]>([
   imgMap.bg1Img,
   imgMap.bg2Img,
   imgMap.bg3Img,
@@ -137,6 +139,18 @@ const displayItemInfoList = computed(() => {
   return itemInfoList.value.slice(0, 3)
 })
 getProductList()
+const giftCellBg1Img = computed(() => {
+  return findImagePath('gift_cell_bg_1.png', productInfo.value?.Pic)
+})
+const giftCellBg2Img = computed(() => {
+  return findImagePath('gift_cell_bg_2.png', productInfo.value?.Pic)
+})
+const giftCellBg3Img = computed(() => {
+  return findImagePath('gift_cell_bg_3.png', productInfo.value?.Pic)
+})
+const giftCellBgList = computed(() => {
+  return [giftCellBg1Img.value, giftCellBg2Img.value, giftCellBg3Img.value]
+})
 
 const bubblePosition = {
   top: '-0.4rem',
@@ -148,7 +162,7 @@ const bubblePosition = {
 
 <template>
   <div class="relative mb-30 f-c flex-col text-29">
-    <div class="mt-30 text-29 text-stroke-2 text-stroke-[#19093e] paint-order">
+    <div class="mt-30 text-29 text-stroke-3 text-stroke-[#19093e] paint-order">
       Only one purchase can be made !
     </div>
     <div class="min-h-789 w-700 flex items-end justify-center">
@@ -160,14 +174,14 @@ const bubblePosition = {
         @click="handleClickGift(giftPackage)"
       >
         <img
-          :src="bgImgList[giftPackage.id]"
+          :src="giftCellBgList[giftPackage.id]"
           alt=""
-          class="w-233"
+          class="w-204"
         >
         <transition name="mask-lock">
           <img
             v-show="giftPackage.id !== activeGiftId"
-            class="absolute bottom-300 left-1/2 z-40 w-170 -translate-x-1/2"
+            class="absolute bottom-300 left-1/2 z-40 w-184 -translate-x-1/2"
             :src="imgMap.lockImg"
             alt=""
           >
@@ -175,15 +189,15 @@ const bubblePosition = {
         <transition name="mask-overlay">
           <div
             v-show="giftPackage.id !== activeGiftId"
-            class="mask-overlay absolute bottom-20 left-1/2 z-30 w-170 f-c rounded-14 bg-[#253c6b] -translate-x-1/2"
+            class="mask-overlay absolute bottom-20 left-1/2 z-30 w-179 f-c rounded-14 bg-[#000] opacity-23 -translate-x-1/2"
             :class="[
-              giftPackage.id === 0 ? 'h-540' : giftPackage.id === 1 ? 'h-591' : 'h-647',
+              giftPackage.id === 0 ? 'h-582' : giftPackage.id === 1 ? 'h-643' : 'h-706',
             ]"
           />
         </transition>
         <div
           class="absolute bottom-105 left-0 z-20 w-full flex flex-col items-center justify-start"
-          :class="giftPackage.id === 0 ? 'h-455' : giftPackage.id === 1 ? 'h-506' : 'h-562'"
+          :class="giftPackage.id === 0 ? 'h-505' : giftPackage.id === 1 ? 'h-566' : 'h-612'"
         >
           <div class="flex flex-1 flex-col items-center justify-evenly gap-20">
             <div
@@ -206,7 +220,7 @@ const bubblePosition = {
           <div class="z-50 h-55 w-155">
             <GreenButton
               :ref="(el: any) => setRef(el, giftPackage.id)"
-              radius="24px"
+              radius="0.24rem"
               :score="productInfo?.Props?.[0]?.VipScore"
               score-show
               :single-bubble-position="bubblePosition"
@@ -265,7 +279,6 @@ const bubblePosition = {
 
 /* 蒙版遮罩动画 */
 .mask-overlay {
-  opacity: 0.67;
   transition: all 0.3s ease;
 }
 

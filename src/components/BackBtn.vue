@@ -2,7 +2,7 @@
 import { onMounted, onUnmounted, reactive, ref } from 'vue'
 
 // 按钮位置状态，改为对象以同时存储 x 和 y 坐标
-const btnPosition = reactive({ x: 20, y: 20 }) // 初始左下角位置
+const btnPosition = reactive({ x: 0, y: 0 }) // 初始左下角位置
 const backBtn = ref(null)
 const isDragging = ref(false)
 const startPos = reactive({ x: 0, y: 0 })
@@ -91,10 +91,10 @@ function stopDrag() {
 
   // 水平方向自动靠边
   if (btnPosition.x + btnWidth / 2 < screenSize.width / 2) {
-    btnPosition.x = 20 // 靠左
+    btnPosition.x = 0 // 靠左
   }
   else {
-    btnPosition.x = screenSize.width - btnWidth - 20 // 靠右
+    btnPosition.x = screenSize.width - btnWidth// 靠右
   }
   // // 在 stopDrag 函数中添加垂直靠边逻辑
   // if (btnPosition.y + btnHeight/2 < screenSize.height / 2) {
@@ -119,8 +119,8 @@ function handleResize() {
   const btnWidth = backBtn.value ? backBtn.value.offsetWidth : 130
   const btnHeight = backBtn.value ? backBtn.value.offsetHeight : 130
 
-  if (btnPosition.x > screenSize.width - btnWidth - 10) {
-    btnPosition.x = screenSize.width - btnWidth - 20
+  if (btnPosition.x > screenSize.width - btnWidth) {
+    btnPosition.x = screenSize.width - btnWidth
   }
 
   if (btnPosition.y > screenSize.height - btnHeight - 10) {
@@ -144,7 +144,7 @@ onUnmounted(() => {
 <template>
   <img
     ref="backBtn"
-    class="fixed z-60 h-130 cursor-pointer"
+    class="fixed z-60 h-130 cursor-pointer px-10"
     :style="{ left: `${btnPosition.x}px`, bottom: `${btnPosition.y}px` }"
     src="../assets/images/gifts/icon_back.png"
     alt=""

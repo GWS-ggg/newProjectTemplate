@@ -7,6 +7,7 @@ import AnimatedIcon from '@/components/AnimatedIcon.vue'
 import GreenButton from '@/components/GreenButton.vue'
 import { useAnimatableRefs } from '@/hooks/useButtonRefs'
 import { animateWithClass, getPGImg } from '@/utils'
+import { findImagePath } from '@/utils/imageUtils'
 import { computed, nextTick, ref, watchEffect } from 'vue'
 
 function getImageUrl(name: string) {
@@ -41,6 +42,13 @@ async function getSixSegmentData() {
   console.log('res', res)
 }
 getSixSegmentData()
+const collectBgImg = computed(() => {
+  return findImagePath('collectBg.png', productInfo.value?.Pic)
+})
+const collectPropImg = computed(() => {
+  return findImagePath('collectProp.png', productInfo.value?.Pic)
+})
+
 interface Goods {
   img: string
   desc?: string
@@ -88,7 +96,7 @@ const imgMap = {
   btnBigImg: getImageUrl('btn_6阶N段式按钮_大.png'),
   glowImg: getImageUrl('img_光.png'),
 }
-const giftData = ref<GiftData>({
+const _giftData = ref<GiftData>({
   title: 'END IN:60:00:00',
   currentScore: 100,
   totalScore: 200,
@@ -363,7 +371,7 @@ function getScoreInfo(props: Array<{
     <div class="mt-30">
       <CountDown
         :end-time="productInfo?.ExpireTime"
-        text-class="px-20 py-10 text-29 text-stroke-3 text-stroke-[#19093e] paint-order"
+        text-class="px-20 text-29 text-stroke-3 text-stroke-[#19093e] paint-order"
       >
         <template #default="{ hours, minutes, seconds }">
           END IN  {{ hours }}:{{ minutes }}:{{ seconds }}
@@ -384,8 +392,8 @@ function getScoreInfo(props: Array<{
         </div>
 
         <img
-          class="absolute w-115 -bottom-4 -left-9"
-          :src="imgMap.processIconLeftImg"
+          class="absolute bottom-1/2 left-1/2 h-90 translate-y-1/2 -translate-x-1/2"
+          :src="collectPropImg"
           alt=""
         >
       </div>
@@ -409,10 +417,10 @@ function getScoreInfo(props: Array<{
           {{ currentScore }} / {{ targetScore }}
         </div>
       </div>
-      <div class="absolute z-10 aspect-square h-64 f-c -right-35 -top-9">
+      <div class="absolute right-0 top-1/2 z-10 h-90 f-c translate-x-1/2 -translate-y-1/2">
         <img
           class="h-full"
-          :src="imgMap.box3Img"
+          :src="getPGImg(productInfo?.Props[0]?.Icon as string)"
           alt=""
         >
       </div>
@@ -444,7 +452,7 @@ function getScoreInfo(props: Array<{
                 class="h-90 w-100 f-e flex-col bg-cover bg-center bg-no-repeat"
                 :style="{ backgroundImage: `url(${getPGImg(good.Icon)})` }"
               >
-                <div class="text-34 text-stroke-2 text-stroke-[#464646] -mb-10">
+                <div class="text-34 text-stroke-2 text-stroke-[#464646] paint-order -mb-10">
                   {{ good.Text }}
                 </div>
               </div>
@@ -459,8 +467,8 @@ function getScoreInfo(props: Array<{
             </div>
             <div
               v-show="gift.BuyTimes === 0"
-              class="mt-20 f-c"
-              :class="{ 'f-b!': gift.Price !== 0 }"
+              class="mt-20"
+              :class="{ 'f-b': gift.Price !== 0, 'f-c': gift.Price === 0 }"
             >
               <div
                 class="relative h-70 w-280"
@@ -468,8 +476,8 @@ function getScoreInfo(props: Array<{
               >
                 <GreenButton
                   :ref="el => setRef(el, gift.id)"
-                  radius="26px"
-                  border-width="2px"
+                  radius="0.26rem"
+                  border-width="0.02rem"
                   :score="40"
                   score-show
                   @click="handleButtonClick(gift)"
@@ -495,13 +503,13 @@ function getScoreInfo(props: Array<{
                 </GreenButton>
               </div>
               <div
-                v-if="gift.Price !== 0"
+                v-if="gift.Price !== 0 "
                 class="relative h-59 w-94 f-e flex-col bg-cover bg-center bg-no-repeat"
-                :style="{ backgroundImage: `url(${imgMap.scoreBgImg})` }"
+                :style="{ backgroundImage: `url(${collectBgImg})` }"
               >
                 <img
                   class="absolute left-0 z-10 w-87 -top-20"
-                  :src="getPGImg(getScoreInfo(gift.Props)?.Icon)"
+                  :src="collectPropImg"
                   alt=""
                 >
                 <div class="z-20 text-31 text-stroke-1 text-stroke-[rgba(0,0,0,0.6)] -mb-10">

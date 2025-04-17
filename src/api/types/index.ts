@@ -4,3 +4,15 @@ export interface LoginInfo {
   vipscore: number
   viptargetscore: number
 }
+
+export interface ShopListInfo {
+  TabInfo: ShopListItem[]
+}
+
+export interface ShopListItem {
+  id: number
+  BannerPic?: string
+  Expire: number
+  ProductType: number
+
+}

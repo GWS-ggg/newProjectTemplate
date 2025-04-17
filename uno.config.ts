@@ -46,12 +46,12 @@ export default defineConfig({
     'wh-full': 'w-full h-full',
     'b-s': 'border border-solid border-[#f6f6f6]',
     'b-s-gray': 'border border-solid border-[#EEEEEE] ',
-    'text-stroke-black': 'text-stroke-1 text-stroke-[#40403e]',
+    'text-stroke-black': 'text-stroke-3 text-stroke-[#40403e] paint-order',
     // 点击动画
     'click-animate': 'cursor-pointer active:animate-click-pulse',
     'click-animate-soft': 'cursor-pointer active:animate-click-pulse-soft',
     'click-animate-strong': 'cursor-pointer active:animate-[click-pulse-strong_0.5s_ease]',
-    'paint-order': 'paint-order-stroke-fill'
+    'paint-order': 'paint-order-stroke-fill',
   },
   rules: [
     ['shadow-custom', { 'box-shadow': '0 2px 10px rgba(0, 0, 0, .1)' }],

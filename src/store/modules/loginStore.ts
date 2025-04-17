@@ -4,7 +4,12 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
 export const useLoginStore = defineStore('login', () => {
-  const loginInfo = ref<LoginInfo>({})
+  const loginInfo = ref<LoginInfo>({
+    username: '',
+    viplevel: 0,
+    vipscore: 0,
+    viptargetscore: 0,
+  })
 
   async function getLoginInfo(uid: string) {
     const res = await loginApi({

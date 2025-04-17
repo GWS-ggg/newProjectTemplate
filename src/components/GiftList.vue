@@ -15,9 +15,6 @@ import threeSegmentN from '@/views/gifts/threeSegmentN.vue'
 import { computed, onMounted, ref, watch } from 'vue'
 
 const giftStore = useGiftStore()
-const currentPackageId = computed(() => {
-  return giftStore.currentPackageId
-})
 
 // 组件映射对象，方便获取组件
 const componentMap: Record<number, Component> = {
@@ -48,8 +45,7 @@ const componentNames: Record<number, string> = {
 }
 
 const currentGiftComponent = computed(() => {
-  const id = currentPackageId.value
-  return componentMap[id] || null
+  return componentMap[giftStore.currentGiftInfo?.ProductType || 1] || null
 })
 
 // 记录最近访问的组件ID，限制为最近5个
@@ -82,7 +78,7 @@ function updateRecentlyVisited(id: number) {
 }
 
 // 监听组件变化，自动滚动到顶部和更新访问记录
-watch(() => currentPackageId.value, (newId) => {
+watch(() => giftStore.currentGiftId, (newId) => {
   // 更新最近访问记录
   updateRecentlyVisited(newId)
 
@@ -98,8 +94,8 @@ watch(() => currentPackageId.value, (newId) => {
 
 // 在组件挂载时初始化最近访问列表
 onMounted(() => {
-  if (currentPackageId.value) {
-    updateRecentlyVisited(currentPackageId.value)
+  if (giftStore.currentGiftId) {
+    updateRecentlyVisited(giftStore.currentGiftId)
   }
 })
 </script>

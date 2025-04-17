@@ -6,11 +6,11 @@ export function initRootFontSize() {
     if (!clientWidth)
       return
 
-    if (clientWidth <= 1024) {
+    if (clientWidth <= 750) {
       docEl.style.fontSize = `${100 * (clientWidth / 750)}px`
     }
     else {
-      docEl.style.fontSize = `${100 * (clientWidth / 1920)}px`
+      docEl.style.fontSize = `100px`
     }
   }
 

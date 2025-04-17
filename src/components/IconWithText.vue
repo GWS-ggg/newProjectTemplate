@@ -19,7 +19,7 @@ withDefaults(defineProps<Props>(), {
   iconHeight: 90,
   textClass: ' text-stroke-3 text-stroke-[#464646] paint-order',
   containerClass: 'relative h-full flex flex-col items-center justify-center',
-  useGetPGImg: true,
+  useGetPGImg: false,
   bottom: 0,
   textSize: 45,
   textColor: '#fff',
@@ -32,7 +32,7 @@ withDefaults(defineProps<Props>(), {
       :src="useGetPGImg ? getPGImg(iconUrl) : iconUrl"
       alt=""
       :style="{
-        height: `${iconHeight}px`,
+        height: `${iconHeight / 100}rem`,
       }"
     >
     <div
@@ -40,8 +40,8 @@ withDefaults(defineProps<Props>(), {
       class="absolute left-1/2 -translate-x-1/2"
       :class="textClass"
       :style="{
-        bottom: `${bottom}px`,
-        fontSize: `${textSize}px`,
+        bottom: `${bottom / 100}rem`,
+        fontSize: `${textSize / 100}rem`,
         color: textColor,
       }"
     >

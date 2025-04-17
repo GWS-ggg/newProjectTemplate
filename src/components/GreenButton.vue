@@ -6,11 +6,11 @@ import { computed, onMounted, ref } from 'vue'
 const props = defineProps({
   radius: {
     type: String,
-    default: '32px',
+    default: '0.32rem',
   },
   borderWidth: {
     type: String,
-    default: '2px',
+    default: '0.02rem',
   },
   score: {
     type: Number,
@@ -155,7 +155,7 @@ defineExpose({
   <div class="relative h-full w-full click-animate">
     <div
       v-if="maskShow"
-      class="absolute z-50 bg-[#253c6b] opacity-67 -inset-2"
+      class="absolute z-50 bg-[#000] opacity-23 -inset-2"
       :style="{ borderRadius: radius, width: `calc(100% + ${borderWidth} + ${borderWidth})`, height: `calc(100% + ${borderWidth} + ${borderWidth})` }"
     />
 
@@ -165,7 +165,7 @@ defineExpose({
         v-if="!scoreAddShow && scoreShow"
         class="absolute z-50 h-74"
         :style="{
-          top: singleBubblePosition.top ?? '-25px',
+          top: singleBubblePosition.top ?? '-0.3rem',
           right: singleBubblePosition.right ?? '0',
           bottom: singleBubblePosition.bottom,
           left: singleBubblePosition.left,
@@ -306,7 +306,7 @@ defineExpose({
   right: v-bind('`-${borderWidth || "2px"}`');
   bottom: v-bind('`-${borderWidth || "2px"}`');
   background: linear-gradient(0deg, #1d6301 0%, #5f9f26 100%);
-  border-radius: v-bind('`${radius}`'); /* 动态计算，比按钮圆角大 2px */
+   border-radius: v-bind('`${radius}`'); /* 动态计算，比按钮圆角大 2px */
   z-index: -1;
 }
 

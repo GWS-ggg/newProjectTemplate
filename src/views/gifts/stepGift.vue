@@ -4,6 +4,8 @@ import { getProductListApi } from '@/api/index'
 import GreenButton from '@/components/GreenButton.vue'
 
 import { getPGImg } from '@/utils'
+import { findImagePath } from '@/utils/imageUtils'
+
 import { computed, ref } from 'vue'
 
 function getImageUrl(name: string) {
@@ -11,6 +13,7 @@ function getImageUrl(name: string) {
 }
 const productInfo = ref<ProductInfo>()
 const itemInfoList = ref<ItemInfo[]>([])
+const currentSocre = ref(0)
 async function getProductList() {
   const res = await getProductListApi({
     appid: '616876868660610',
@@ -19,12 +22,19 @@ async function getProductList() {
   })
   productInfo.value = res.ProductInfo
   itemInfoList.value = res.ItemInfo as ItemInfo[]
+
   let idNum = 0
   itemInfoList.value.forEach((item) => {
     item.id = idNum++
   })
 }
 getProductList()
+const bgImg = computed(() => {
+  return findImagePath('bg.png', productInfo.value?.Pic)
+})
+const redBarImg = computed(() => {
+  return findImagePath('red_bar.png', productInfo.value?.Pic)
+})
 
 const imgMap: Record<string, string> = {
   bgImg: getImageUrl('_0008_组-2.png'),
@@ -44,10 +54,13 @@ const imgMap: Record<string, string> = {
   back: new URL('../../assets/images/gifts/icon_back.png', import.meta.url).href,
 }
 
-const currentSocre = ref(1100)
 const greenButtonRef = ref<InstanceType<typeof GreenButton> | null>(null)
 const isBuy = ref(false)
+const isAnimation = ref(false)
 async function handleBtnClick() {
+  if (isAnimation.value)
+    return
+  isAnimation.value = true
   const goodsListTemp = [...itemInfoList.value]
   console.log(itemInfoList.value, 'itemInfoList')
   // 如果列表不为空，将第一个元素移动到最后
@@ -56,11 +69,11 @@ async function handleBtnClick() {
     // 将没有TaskTargetScore或TaskTargetScore小于currentSocre的项移到数组后面
     goodsListTemp.sort((a, b) => {
       // 如果a没有TaskTargetScore或TaskTargetScore小于currentSocre，则排在后面
-      if (!a.TaskTargetScore || a.TaskTargetScore <= currentSocre.value) {
+      if (!a.TaskTargetScore || a.TaskTargetScore <= (a.TaskScore || 0)) {
         return 1
       }
       // 如果b没有TaskTargetScore或TaskTargetScore小于currentSocre，则排在后面
-      if (!b.TaskTargetScore || b.TaskTargetScore <= currentSocre.value) {
+      if (!b.TaskTargetScore || b.TaskTargetScore <= (b.TaskScore || 0)) {
         return -1
       }
       // 如果两者都有TaskTargetScore且都大于currentSocre，则保持原有顺序
@@ -73,83 +86,18 @@ async function handleBtnClick() {
   console.log('handleBtnClick')
 
   // 执行动画
-  await executeAnimations()
-
   // TODO 购买成功
-  setTimeout(() => {
-    greenButtonRef.value?.triggerAnimation()
-  }, 100)
-  // 动画结束
-  setTimeout(() => {
-    isBuy.value = true
-  }, 3000)
-}
-
-// 动画相关函数
-function animateWithClass(element: Element | null, className: string, duration: number): Promise<void> {
-  return new Promise((resolve) => {
-    if (!element) {
-      resolve()
-      return
-    }
-
-    element.classList.add(className)
-
-    setTimeout(() => {
-      element.classList.remove(className)
-      resolve()
-    }, duration)
-  })
-}
-
-// 使用Map管理元素及其动画
-async function executeAnimations() {
-  // 创建一个动画配置Map
-  const animationConfig = new Map([
-    ['gift-1', {
-      element: document.querySelector('#gift-1'),
-      animations: [
-        { className: 'move-up', duration: 500, phase: 'first' },
-        { className: 'move-to-first', duration: 1000, phase: 'second' },
-      ],
-    }],
-    ['gift-2', {
-      element: document.querySelector('#gift-2'),
-      animations: [
-        { className: 'move-up', duration: 500, phase: 'first' },
-        { className: 'move-to-second', duration: 1000, phase: 'second' },
-      ],
-    }],
-    ['gift-3', {
-      element: document.querySelector('#gift-3'),
-      animations: [
-        { className: 'move-up', duration: 500, phase: 'first' },
-        { className: 'fade-out', duration: 800, phase: 'second' },
-      ],
-    }],
-  ])
-
-  // 过滤出有效的元素配置
-  const validConfigs = Array.from(animationConfig.values())
-    .filter(config => config.element !== null)
-
-  if (validConfigs.length === 0)
-    return
-
-  // 分阶段执行动画
-  const phases = ['first', 'second']
-
-  for (const phase of phases) {
-    // 收集当前阶段的所有动画
-    const phaseAnimations = validConfigs.map((config) => {
-      const animation = config.animations.find(anim => anim.phase === phase)
-      return animation ? animateWithClass(config.element, animation.className, animation.duration) : Promise.resolve()
-    }).filter(Boolean)
-
-    // 并行执行当前阶段的所有动画
-    if (phaseAnimations.length > 0) {
-      await Promise.all(phaseAnimations)
-    }
+  try {
+    greenButtonRef.value?.triggerAnimationWithCallback(() => {
+      isBuy.value = true
+      isAnimation.value = true
+    })
+  }
+  catch (error) {
+    console.error(error)
+  }
+  finally {
+    isAnimation.value = false
   }
 }
 
@@ -183,7 +131,7 @@ const iconProps = computed(() => {
 
 const bubblePosition = {
   top: '-0.5rem',
-  right: '-0.42rem',
+  right: '-0.2rem',
   translateX: '50%',
   translateY: '0',
 }
@@ -193,7 +141,7 @@ const bubblePosition = {
   <div class="relative max-h-[calc(100vh+80px)] min-h-[calc(100vh-420px)] flex flex-col items-center text-32">
     <div
       class="w-full flex flex-none shrink-0 flex-col items-center justify-center bg-cover bg-center pt-190"
-      :style="{ backgroundImage: `url(${getPGImg(productInfo?.Pic[0])})`,
+      :style="{ backgroundImage: `url(${bgImg})`,
                 backgroundSize: '120% auto',
                 backgroundPosition: 'center top 10%',
                 backgroundRepeat: 'no-repeat' }"
@@ -258,7 +206,7 @@ const bubblePosition = {
     </div>
     <div
       class="bg-sacle-w-120 h-108 w-full flex flex-shrink-0 justify-center bg-cover bg-center"
-      :style="{ backgroundImage: `url(${getPGImg(productInfo?.Pic[1])})`,
+      :style="{ backgroundImage: `url(${redBarImg})`,
       }"
     >
       <div
@@ -281,8 +229,8 @@ const bubblePosition = {
         >
           <GreenButton
             ref="greenButtonRef"
-            radius="24px"
-            border-width="2px"
+            radius="0.24rem"
+            border-width="0.02rem"
             :score="vipScore"
             :score-add="vipScoreAdd"
             score-show
@@ -344,7 +292,7 @@ const bubblePosition = {
 
                   <div
                     class="absolute left-0 top-0 h-full overflow-hidden"
-                    :style="{ width: `${currentSocre / item.TaskTargetScore * 100}%` }"
+                    :style="{ width: `${item.TaskScore || 0 / item.TaskTargetScore * 100}%` }"
                   >
                     <img
                       :src="imgMap.processImg"
@@ -352,7 +300,7 @@ const bubblePosition = {
                     >
                   </div>
                   <div class="absolute left-1/2 top-1/2 w-271 f-c text-22 text-white text-stroke-3 text-stroke-[#426676] paint-order -translate-x-1/2 -translate-y-1/2">
-                    {{ currentSocre }} / {{ item.TaskTargetScore }}
+                    {{ item.TaskScore || 0 }} / {{ item.TaskTargetScore }}
                   </div>
                 </div>
               </div>
@@ -362,7 +310,7 @@ const bubblePosition = {
                 :src="getPGImg(item.Props?.[0]?.Icon)"
                 class="w-58"
               >
-              <div class="absolute bottom-0 left-1/2 f-c translate-y-1/2 text-28 text-stroke-2 text-stroke-[#4d4d4d] -translate-x-1/2">
+              <div class="absolute bottom-0 left-1/2 f-c translate-y-1/2 text-28 text-stroke-3 text-stroke-[#4d4d4d] paint-order -translate-x-1/2">
                 {{ item.Props?.[0]?.Text }}
               </div>
             </div>

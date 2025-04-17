@@ -2,8 +2,10 @@
 import type { DailyLoginItemInfo, ProductInfo } from '@/types'
 import { getProductListApi } from '@/api'
 import GreenButton from '@/components/GreenButton.vue'
+import IconWithText from '@/components/IconWithText.vue'
 import { getPGImg } from '@/utils'
-import { ref } from 'vue'
+import { findImagePath } from '@/utils/imageUtils'
+import { computed, ref } from 'vue'
 
 const dailyLoginItemInfo = ref<DailyLoginItemInfo[]>([])
 const productInfo = ref<ProductInfo>()
@@ -19,6 +21,9 @@ async function getDailyLoginData() {
   console.log(res, 'res')
 }
 getDailyLoginData()
+const bgImg = computed(() => {
+  return findImagePath('Package_bg.png', productInfo.value?.Pic)
+})
 
 function getImageUrl(name: string) {
   return new URL(`../../assets/images/gifts/dailyLogin/${name}`, import.meta.url).href
@@ -76,7 +81,7 @@ const bubblePosition = {
 </script>
 
 <template>
-  <div class="relative mb-70 w-full f-c flex-col">
+  <div class="relative mb-70 min-h-800 w-full f-c flex-col">
     <img
       :src="imgMap.bgImg"
       alt=""
@@ -93,36 +98,48 @@ const bubblePosition = {
         </template>
       </CountDown>
     </div>
-    <div
-      class="absolute right-70 top-1/2 h-138 w-137 f-c flex-col translate-y-35"
-      :style="{ backgroundImage: `url(${imgMap.discountImg})` }"
-    >
-      <div class="ml-20 mt-10 flex flex-col rotate-[15deg] items-center justify-center text-43 text-white text-stroke-4 text-stroke-[#ad145b] paint-order">
-        <div>
-          30%
-        </div>
-        <div class="-mt-10">
-          OFF
+    <div class="absolute right-70 top-1/2 h-138 w-137 translate-y-45">
+      <div class="relative h-full w-full f-c flex-col">
+        <img
+          :src="imgMap.discountImg"
+          alt=""
+          class="absolute left-0 top-0 h-full w-full"
+        >
+        <div class="ml-15 mt-10 flex flex-col rotate-[15deg] items-center justify-center text-43 text-white text-stroke-4 text-stroke-[#ad145b] paint-order">
+          <div>
+            {{ dailyLoginItemInfo[0]?.Addition }}%
+          </div>
+          <div class="-mt-10">
+            OFF
+          </div>
         </div>
       </div>
     </div>
-    <div class="absolute left-1/2 top-60 f-c -translate-x-1/2">
+    <!-- <div class="absolute left-1/2 top-60 f-c -translate-x-1/2">
       <img
         :src="imgMap.textImg"
         alt=""
       >
-    </div>
-    <div class="absolute left-1/2 top-240 h-46 w-356 f-c rounded-20 bg-[#000000] bg-opacity-24 text-30 text-stroke-2 text-stroke-[#0a273d] -translate-x-1/2">
+    </div> -->
+    <div class="absolute left-1/2 top-240 h-46 w-356 f-c rounded-20 bg-[#000000] bg-opacity-24 text-30 text-stroke-3 text-stroke-[#0a273d] paint-order -translate-x-1/2">
       Only one chance
     </div>
     <div class="absolute bottom-200 left-1/2 h-126 w-590 f-c -translate-x-1/2">
-      <div class="h-97 flex items-center justify-evenly gap-15">
+      <div class="h-97 flex items-center justify-evenly gap-20">
         <div
           v-for="(gift, index) in dailyLoginItemInfo[0]?.Props"
           :key="index"
-          class="relative h-full flex flex-col items-center"
+          class="relative h-full flex items-center"
         >
-          <img
+          <IconWithText
+            :icon-url="getPGImg(gift.Icon)"
+            :text="gift.Text"
+            :text-size="42"
+            :icon-height="90"
+            :bottom="-10"
+            text-class="text-stroke-3 text-stroke-[#4d1202] paint-order"
+          />
+          <!-- <img
             :src="getPGImg(gift.Icon)"
             alt=""
             class="h-full"
@@ -132,19 +149,19 @@ const bubblePosition = {
             class="text-42 text-white text-stroke-3 text-stroke-[#4d1202] paint-order -mt-40"
           >
             {{ gift.Text }}
-          </div>
+          </div> -->
         </div>
       </div>
     </div>
     <div class="absolute bottom-100 left-1/2 h-126 w-590 f-c -translate-x-1/2">
       <div class="relative h-97 flex items-center justify-center gap-15 text-48 color-[#fff0de] text-stroke-3 text-stroke-[#4d1202] paint-order">
-        $5.00
-        <div class="absolute bottom-1/2 translate-y-1/2 text-30 text-white color-[#fbcaa7] text-stroke-3 text-stroke-[#4d1202] paint-order -right-120">
+        ${{ dailyLoginItemInfo[0]?.Price }}
+        <!-- <div class="absolute bottom-1/2 translate-y-1/2 text-30 text-white color-[#fbcaa7] text-stroke-3 text-stroke-[#4d1202] paint-order -right-120">
           <span class="relative">
             $15.00
             <span class="absolute left-0 top-1/2 h-3 w-full rotate-[-5deg] bg-[#f30404] -translate-y-1/2" />
           </span>
-        </div>
+        </div> -->
       </div>
     </div>
     <div class="absolute bottom-35 left-1/2 h-96 w-317 f-c -translate-x-1/2">
@@ -154,10 +171,10 @@ const bubblePosition = {
       >
         <GreenButton
           ref="greenButtonRef"
-          radius="24px"
+          radius="0.24rem"
           :score="productInfo?.Props[0].VipScore"
           score-show
-          :bubble-position="bubblePosition"
+          :single-bubble-position="bubblePosition"
         >
           <div class="relative text-50">
             <!-- 底层：只有阴影的文字 -->
@@ -165,12 +182,12 @@ const bubblePosition = {
               class="absolute inset-0"
               style="text-shadow: 0px 3px 0px #bcfb6b; color: transparent;"
             >
-              {{ dailyLoginItemInfo[0]?.Price }}
+              Buy now
             </div>
 
             <!-- 顶层：只有渐变的文字 -->
             <div class="gradient-text-with-shadow relative">
-              {{ dailyLoginItemInfo[0]?.Price }}
+              Buy now
             </div>
           </div>
         </GreenButton>

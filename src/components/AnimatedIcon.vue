@@ -125,6 +125,8 @@ onMounted(() => {
     emit('animationComplete')
   })
 })
+// TODO
+const fontFamily = ref('font-en')
 </script>
 
 <template>
@@ -132,6 +134,7 @@ onMounted(() => {
     v-show="animationActive"
     ref="iconRef"
     class="animated-icon"
+    :style="{ fontFamily }"
   >
     <div class="relative h-100 w-100 flex flex-col items-center justify-center">
       <img
@@ -141,7 +144,7 @@ onMounted(() => {
       >
       <div
         v-if="score"
-        class="text-24 text-white text-stroke-black paint-order"
+        class="absolute bottom-0 left-1/2 text-24 text-white text-stroke-black -translate-x-1/2 -translate-y-15"
       >
         +{{ score }}
       </div>

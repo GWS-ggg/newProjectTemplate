@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { useGiftStore } from '@/store/modules/giftStore'
+import { useLoginStore } from '@/store/modules/loginStore'
+import { getPGImg } from '@/utils'
 import { FreeMode } from 'swiper/modules'
 // 导入Swiper组件和模块
 import { Swiper, SwiperSlide } from 'swiper/vue'
@@ -8,18 +10,6 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import 'swiper/css'
 import 'swiper/css/free-mode'
 
-interface GiftPackage {
-  id: number
-  image: string
-  countdown: {
-    hours: number
-    minutes: number
-    seconds: number
-  }
-  tag?: 'Hot' | 'Sale' | null
-  tagColor?: string
-}
-
 // 动态导入图片的函数
 function getImageUrl(name: string) {
   return new URL(`../assets/images/GiftScrollBar/${name}`, import.meta.url).href
@@ -27,19 +17,18 @@ function getImageUrl(name: string) {
 
 // 使用 Pinia store
 const giftStore = useGiftStore()
-const { setCurrentPackage } = useGiftStore()
+const { setCurrentGiftId } = useGiftStore()
 
-const currentPackageId = computed(() => {
-  return giftStore.currentPackageId
+const currentGiftId = computed(() => {
+  return giftStore.currentGiftId
 })
-function handleSetCurrentPackage(packageId: number) {
-  setCurrentPackage(packageId)
-  console.log(currentPackageId.value)
+function handleSetCurrentGiftId(giftId: number) {
+  setCurrentGiftId(giftId)
+  console.log(currentGiftId.value)
 }
 
 // Swiper模块定义
 const modules = [FreeMode]
-
 // 示例数据
 const giftPackages = ref([
   {
@@ -104,34 +93,13 @@ const giftPackages = ref([
     countdown: { hours: 19, minutes: 20, seconds: 10 },
     tag: null,
   },
+  {
+    id: 11,
+    image: getImageUrl('icon_3选1.png'),
+    countdown: { hours: 19, minutes: 20, seconds: 10 },
+    tag: null,
+  },
 ])
-
-// 格式化时间，确保两位数显示
-function formatTime(time: number): string {
-  return time < 10 ? `0${time}` : `${time}`
-}
-
-// 倒计时逻辑
-let timer: number | null = null
-
-function updateCountdown() {
-  giftPackages.value.forEach((pkg) => {
-    // 这里只是示例，实际应用中您可能需要基于结束时间计算剩余时间
-    // 这个简化版本不会真正减少时间
-  })
-}
-
-onMounted(() => {
-  // 设置定时器，每秒更新一次倒计时
-  timer = window.setInterval(updateCountdown, 1000)
-})
-
-onBeforeUnmount(() => {
-  // 组件卸载前清除定时器
-  if (timer) {
-    clearInterval(timer)
-  }
-})
 </script>
 
 <template>
@@ -150,17 +118,26 @@ onBeforeUnmount(() => {
       class="gift-swiper w-full pl-18"
     >
       <SwiperSlide
-        v-for="(pkg, index) in giftPackages"
+        v-for="(pkg, index) in giftStore.currentShopListInfo"
         :key="pkg.id"
         class="gift-slide"
       >
         <div class="relative mb-20 flex items-center justify-center">
           <div class="absolute left-0 z-20 z-30 w-full f-c -bottom-19">
             <div class="relative h-30 w-106 f-c border-2 border-[#3e9ebc] rounded-full border-solid bg-[#daecef] text-center text-22 text-[#385673] font-medium">
-              {{ formatTime(pkg.countdown.hours) }}.{{ formatTime(pkg.countdown.minutes) }}.{{
-                formatTime(pkg.countdown.seconds) }}
+              <CountDown
+                :end-time="pkg.Expire"
+                text-class="text-22 text-[#385673]"
+              >
+                <template #default="{ hours, minutes, seconds }">
+                  {{ hours }}:{{ minutes }}:{{ seconds }}
+                </template>
+                <template #loading>
+                  Loading...
+                </template>
+              </CountDown>
               <img
-                v-if="pkg.id !== currentPackageId"
+                v-if="pkg.id !== giftStore.currentGiftId"
                 src="@/assets/images/GiftScrollBar/img_入口未选择遮盖.png"
                 alt=""
                 class="absolute left-0 top-0 z-30 h-full w-full rounded-13"
@@ -171,11 +148,11 @@ onBeforeUnmount(() => {
           <!-- Gift package items -->
           <div
             class="relative mx-23 h-82 w-106 flex cursor-pointer items-center"
-            :class="{ 'scale-animation': pkg.id === currentPackageId }"
-            @click="handleSetCurrentPackage(pkg.id)"
+            :class="{ 'scale-animation': pkg.id === giftStore.currentGiftId }"
+            @click="handleSetCurrentGiftId(pkg.id)"
           >
             <!-- 礼包标签 (Hot/Sale) -->
-            <div
+            <!-- <div
               v-if="pkg.tag"
               class="absolute left-0 top-0 z-50 transform rounded-md text-16 text-white font-bold"
             >
@@ -199,7 +176,7 @@ onBeforeUnmount(() => {
                   {{ pkg.tag }}
                 </div>
               </div>
-            </div>
+            </div> -->
 
             <!-- 礼包图片容器 -->
             <div class="relative h-full w-full">
@@ -210,13 +187,13 @@ onBeforeUnmount(() => {
               >
               <!-- 礼包图片 -->
               <img
-                :src="pkg.image"
+                :src="getPGImg(pkg.BannerPic)"
                 alt="Gift package"
                 class="absolute left-0 top-0 z-20 w-full object-cover object-top"
                 style="clip-path: inset(2px);"
               >
               <img
-                v-if="pkg.id !== currentPackageId"
+                v-if="pkg.id !== giftStore.currentGiftId"
                 src="@/assets/images/GiftScrollBar/img_入口未选择遮盖.png"
                 alt=""
                 class="absolute left-0 top-0 z-20 h-full w-full rounded-13"

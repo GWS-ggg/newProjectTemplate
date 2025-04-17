@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import type { WheelGiftItemInfo } from '@/types'
+import type { ProductInfo, WheelGiftItemInfo } from '@/types'
 import { getProductListApi } from '@/api/index'
 
 import CountDown from '@/components/CountDown.vue'
 
 import GreenButton from '@/components/GreenButton.vue'
 import { getPGImg } from '@/utils'
+
+import { findImagePath } from '@/utils/imageUtils'
 
 import { computed, ref } from 'vue'
 
@@ -85,7 +87,6 @@ const angles = [
   135, // 4点钟方向
 ]
 
-const productImgs = ref<string[]>([])
 const wheelGiftList = ref<WheelGiftItemInfo[]>([])
 const vipScore = ref(0)
 // 当前选中的礼包
@@ -93,16 +94,16 @@ const currentGiftId = ref(0)
 const currentGift = computed(() => {
   return wheelGiftList.value.find(item => item.id === currentGiftId.value)
 })
-
+const productInfo = ref<ProductInfo>()
 async function getWheelGiftList() {
   const res = await getProductListApi({
     appid: '616876868660610',
     uid: '102191',
     producttype: 3,
   })
-  productImgs.value = [res.ProductInfo?.Pic as string]
+
   vipScore.value = res.ProductInfo?.Props?.[0]?.VipScore as number
-  console.log(productImgs.value, 'pic')
+  productInfo.value = res.ProductInfo
   wheelGiftList.value = res.ItemInfo as WheelGiftItemInfo[]
   // 添加默认值
   let id = 0
@@ -121,6 +122,13 @@ async function getWheelGiftList() {
 }
 
 getWheelGiftList()
+const bgImg = computed(() => {
+  return findImagePath('bg.png', productInfo.value?.Pic)
+})
+
+const itemBgImg = computed(() => {
+  return findImagePath('item_bg.png', productInfo.value?.Pic)
+})
 
 const greenButtonRef = ref<InstanceType<typeof GreenButton> | null>(null)
 function handleButtonClick() {
@@ -144,7 +152,7 @@ function handleButtonClick() {
       class="w-750"
     > -->
     <img
-      src="../../assets/images/gifts/roulette/背景.jpg"
+      :src="bgImg"
       alt=""
       class="w-750"
     >
@@ -169,7 +177,7 @@ function handleButtonClick() {
         >
           <div class="relative h-full w-full flex items-center justify-center">
             <img
-              :src="imgMap.giftBgImg"
+              :src="itemBgImg"
               alt=""
               class="absolute inset-0 left-1/2 top-1/2 h-120 w-120 -translate-x-1/2 -translate-y-1/2"
             >
@@ -239,7 +247,7 @@ function handleButtonClick() {
         End in 20:00:00
       </div> -->
       <CountDown
-        :end-time="currentGift?.ExpireTime"
+        :end-time="productInfo?.ExpireTime"
         class="text-26 text-[#d9cdb9] text-stroke-1 text-stroke-[#164b2e]"
       >
         <template #default="{ hours, minutes, seconds }">

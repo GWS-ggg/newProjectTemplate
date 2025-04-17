@@ -6,7 +6,7 @@ export interface GiftResponseData {
 export interface ProductInfo {
   Title: string
   Content: string
-  Pic: string
+  Pic: string[]
   Key: number
   Price: number
   Discount: number
@@ -146,6 +146,7 @@ export interface DailyLoginItemInfo {
   Limit: number
   BuyTimes?: number
   Props: Array<Prop>
+  Addition: number
 }
 
 export interface SixSegmentItemInfo {

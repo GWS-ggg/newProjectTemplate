@@ -6,6 +6,7 @@ import IconWithText from '@/components/IconWithText.vue'
 import { useAnimatableRefs } from '@/hooks/useButtonRefs'
 import { animateWithClass, getPGImg } from '@/utils'
 
+import { findImagePath } from '@/utils/imageUtils'
 import { computed, nextTick, ref, watchEffect } from 'vue'
 
 const itemInfoList = ref<ThreeSegmentNItemInfo[]>([])
@@ -33,6 +34,18 @@ async function getThreeSegmentNData() {
   console.log('res', res)
 }
 getThreeSegmentNData()
+const giftCellBg1Img = computed(() => {
+  return findImagePath('gift_cell_bg_1.png', productInfo.value?.Pic)
+})
+const giftCellBg2Img = computed(() => {
+  return findImagePath('gift_cell_bg_2.png', productInfo.value?.Pic)
+})
+const giftCellBg3Img = computed(() => {
+  return findImagePath('gift_cell_bg_3.png', productInfo.value?.Pic)
+})
+const giftCellBgList = computed(() => {
+  return [giftCellBg1Img.value, giftCellBg2Img.value, giftCellBg3Img.value]
+})
 
 function getImageUrl(name: string) {
   return new URL(`../../assets/images/gifts/threeSegmentN/${name}`, import.meta.url).href
@@ -272,7 +285,7 @@ async function handleAnimation(currentGift: ThreeSegmentNItemInfo) {
     <div class="mt-30 text-[#fff] text-stroke-1 text-stroke-[#19093e]">
       <CountDown
         :end-time="productInfo?.ExpireTime"
-        text-class="px-20 py-10 text-29 text-stroke-3 text-stroke-[#19093e] paint-order"
+        text-class="px-20  text-29 text-stroke-3 text-stroke-[#19093e] paint-order"
       >
         <template #default="{ hours, minutes, seconds }">
           END IN  {{ hours }}:{{ minutes }}:{{ seconds }}
@@ -290,7 +303,7 @@ async function handleAnimation(currentGift: ThreeSegmentNItemInfo) {
     >
       <div class="w-710">
         <img
-          :src="imgMap.bg1Img"
+          :src="giftCellBgList[item.id % 3]"
           alt=""
           class="w-full"
         >
@@ -303,9 +316,10 @@ async function handleAnimation(currentGift: ThreeSegmentNItemInfo) {
             :key="index"
           >
             <IconWithText
-              :icon-url="icon.Icon"
+              :icon-url="getPGImg(icon.Icon)"
               :text="icon.Text"
               :bottom="-10"
+              :icon-height="120"
             />
           </template>
         </div>
@@ -314,12 +328,12 @@ async function handleAnimation(currentGift: ThreeSegmentNItemInfo) {
         <GreenButton
           v-show="item.BuyTimes === 0"
           :ref="el => setRef(el, item.id)"
-          radius="20px"
+          radius="0.36rem"
           :score="productInfo?.Props[0].VipScore"
           score-show
           @click="handlePurchaseButton(item)"
         >
-          <div class="relative text-40 text-[#fff] text-stroke-2 text-stroke-[#164b2e]">
+          <div class="relative text-40 text-[#fff] text-stroke-3 text-stroke-[#164b2e] paint-order">
             {{ item?.Price ? item?.Price : 'FREE' }}
             <img
               v-if="item.Price === 0 && item.sortId !== 1"

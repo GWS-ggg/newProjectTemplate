@@ -1,5 +1,5 @@
 import type { GiftResponseData, TabInfo } from '@/types'
-import type { LoginInfo } from './types'
+import type { LoginInfo, ShopListInfo } from './types'
 import request from '@/utils/request'
 
 // 获取指定礼包数据
@@ -42,6 +42,19 @@ export function getTabInfoApi(params: {
   > {
   return request({
     url: '/localpay/official/order',
+    method: 'post',
+    params,
+  })
+}
+
+// 获取礼包列表
+export function getShopListInfoApi(params: {
+  uid: string
+}): Promise<
+    ShopListInfo
+  > {
+  return request({
+    url: '/localpay/official/shoplist',
     method: 'post',
     params,
   })

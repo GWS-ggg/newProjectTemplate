@@ -5,16 +5,18 @@ import { getProductListApi } from '@/api'
 import { useAnimatableRefs } from '@/hooks/useButtonRefs'
 import { getPGImg } from '@/utils'
 
-import { computed, ref } from 'vue'
+import { findImagePath } from '@/utils/imageUtils'
+
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 
 function getImageUrl(name: string) {
   return new URL(`../../assets/images/gifts/newThreeChoiceOne/${name}`, import.meta.url).href
 }
 
 const imgMap = {
-  bg1Img: getImageUrl('1.png'),
-  bg2Img: getImageUrl('2.png'),
-  bg3Img: getImageUrl('3.png'),
+  bg1Img: getImageUrl('1 copy 2.png'),
+  bg2Img: getImageUrl('2 copy 2.png'),
+  bg3Img: getImageUrl('3 copy 2.png'),
   gift1Icon1Img: getImageUrl('体力3.png'),
   gift1Icon2Img: getImageUrl('药水魔力瓶.png'),
   gift1Icon3Img: getImageUrl('钻石1.png'),
@@ -29,7 +31,15 @@ const imgMap = {
   btnSmallImg: getImageUrl('按钮.png'),
   maskImg: getImageUrl('上锁半透明蒙版.png'),
   lockImg: getImageUrl('三选一礼包_0005_suo-拷贝-3.png'),
+  mask1Img: getImageUrl('img_三选一1.png'),
+  mask2Img: getImageUrl('img_三选一2.png'),
+  mask3Img: getImageUrl('img_三选一3.png'),
 }
+const _imgList = [
+  imgMap.bg1Img,
+  imgMap.bg2Img,
+  imgMap.bg3Img,
+]
 
 // 接口保留但因暂未使用而注释
 interface _Gift {
@@ -95,11 +105,6 @@ interface _Gift {
 //   },
 // ])
 
-const bgImgList = ref<string[]>([
-  imgMap.bg1Img,
-  imgMap.bg2Img,
-  imgMap.bg3Img,
-])
 const { setRef, triggerAnimation } = useAnimatableRefs()
 
 const activeGiftId = ref(0)
@@ -118,6 +123,111 @@ function handleClickBuyAll(giftPackage: ThreeChoiceOneGiftItemInfo) {
 
 const productInfo = ref<ProductInfo>()
 const itemInfoList = ref<ThreeChoiceOneGiftItemInfo[]>([])
+
+const displayItemInfoList = computed(() => {
+  return itemInfoList.value.slice(0, 3)
+})
+const bubblePosition = {
+  top: '-0.4rem',
+  right: '-0.1rem',
+  translateX: '50%',
+  translateY: '0',
+}
+
+const maskList = ref<string[]>([
+  imgMap.mask1Img,
+  imgMap.mask2Img,
+  imgMap.mask3Img,
+])
+// 存储图片原始尺寸
+const imageSizes = reactive<Record<string, { width: number, height: number }>>({})
+
+// 根据设计图基准宽度计算缩放比例
+const baseWidth = 750 // 设计图基准宽度
+const windowWidth = ref(window.innerWidth)
+// 响应式更新窗口宽度
+onMounted(() => {
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 750) {
+      windowWidth.value = 750
+    }
+    else {
+      windowWidth.value = window.innerWidth
+    }
+  })
+})
+
+// 计算当前缩放比例
+const scale = computed(() => {
+  return windowWidth.value / baseWidth
+})
+
+// 图片加载完成后的处理函数
+function onImageLoad(event: Event, img: string): void {
+  const imgElement = event.target as HTMLImageElement
+  // 获取并存储图片原始尺寸
+  imageSizes[img] = {
+    width: imgElement.naturalWidth,
+    height: imgElement.naturalHeight,
+  }
+  console.log(`图片 ${img} 加载完成，原始尺寸: ${imageSizes[img].width}x${imageSizes[img].height}`)
+}
+
+// 计算图片缩放后的样式
+function getScaledImageStyle(img: string): any {
+  if (!imageSizes[img]) {
+    return {}
+  }
+
+  const originalWidth = imageSizes[img].width
+  const originalHeight = imageSizes[img].height
+
+  // 使用计算出的缩放比例
+  const scaledWidth = originalWidth * scale.value
+  const scaledHeight = originalHeight * scale.value
+
+  // 转换为rem单位
+  return {
+    width: pxToRem(scaledWidth),
+    height: pxToRem(scaledHeight),
+  }
+}
+
+// 强制触发图片尺寸更新的计数器
+const updateCounter = ref(0)
+// 当窗口大小变化时，强制更新图片尺寸
+watch(scale, () => {
+  updateCounter.value++
+})
+
+function pxToRem(px: number): string {
+  return `${px / getRootFontSize()}rem`
+}
+function getRootFontSize(): number {
+  return Number.parseFloat(window.getComputedStyle(document.documentElement).fontSize)
+}
+const bgImg1 = computed(() => {
+  console.log(productInfo.value?.Pic, 'productInfo.value?.Pic')
+  return findImagePath('gift_cell_bg_1.png', productInfo.value?.Pic)
+})
+const bgImg2 = computed(() => {
+  return findImagePath('gift_cell_bg_2.png', productInfo.value?.Pic)
+})
+const bgImg3 = computed(() => {
+  return findImagePath('gift_cell_bg_3.png', productInfo.value?.Pic)
+})
+// 将 bgImgList 从 ref 改为 computed
+const bgImgList = computed(() => {
+  const list = [
+    bgImg1.value,
+    bgImg2.value,
+    bgImg3.value,
+  ]
+
+  return list
+})
+
+// 数据加载函数
 async function getProductList() {
   const res = await getProductListApi({
     appid: '616876868660610',
@@ -125,6 +235,7 @@ async function getProductList() {
     producttype: 5,
   })
   productInfo.value = res.ProductInfo
+  console.log(productInfo.value?.Pic, 'productInfo.value?.Pic')
   itemInfoList.value = res.ItemInfo as ThreeChoiceOneGiftItemInfo[]
   let idNum = 0
   itemInfoList.value.forEach((item) => {
@@ -136,23 +247,18 @@ async function getProductList() {
       item.Price = 0
     }
   })
-}
-const displayItemInfoList = computed(() => {
-  return itemInfoList.value.slice(0, 3)
-})
-getProductList()
 
-const bubblePosition = {
-  top: '-0.4rem',
-  right: '-0.1rem',
-  translateX: '50%',
-  translateY: '0',
+  // 当数据加载完成后，输出bgImgList的值，用于调试
+  console.log('数据加载完成后的bgImgList:', bgImgList.value)
 }
+
+// 调用获取数据的函数
+getProductList()
 </script>
 
 <template>
   <div class="relative mb-30 f-c flex-col text-29">
-    <div class="mt-30 text-29 text-stroke-2 text-stroke-[#19093e] paint-order">
+    <div class="mt-30 text-29 text-stroke-3 text-stroke-[#19093e] paint-order">
       Only one purchase can be made !
     </div>
     <div class="min-h-789 w-700 flex items-end justify-center">
@@ -163,31 +269,46 @@ const bubblePosition = {
         :class="giftPackage.id ? `z-${giftPackage.id}` : 'z-20'"
         @click="handleClickGift(giftPackage)"
       >
-        <img
-          :src="bgImgList[giftPackage.id]"
-          alt=""
-          class="w-233"
-        >
+        <div class="flex">
+          <img
+            :src="bgImgList[giftPackage.id]"
+            alt=""
+            :style="getScaledImageStyle(bgImgList[giftPackage.id])"
+            @load="onImageLoad($event, bgImgList[giftPackage.id])"
+          >
+        </div>
+
         <transition name="mask-lock">
           <img
             v-show="giftPackage.id !== activeGiftId"
-            class="absolute bottom-300 left-1/2 z-40 w-170 -translate-x-1/2"
+            class="absolute bottom-300 left-1/2 z-40 w-160 -translate-x-1/2"
             :src="imgMap.lockImg"
             alt=""
           >
         </transition>
         <transition name="mask-overlay">
+          <!-- <div
+            v-show="giftPackage.id !== activeGiftId"
+            class="mask-overlay absolute bottom-0 left-1/2 z-30 w-174 rounded-14 -translate-x-1/2"
+          >
+            <img
+              :src="maskList[giftPackage.id]"
+              alt=""
+              class="ml-4 w-174 -mb-8"
+            >
+          </div> -->
+
           <div
             v-show="giftPackage.id !== activeGiftId"
-            class="mask-overlay absolute bottom-20 left-1/2 z-30 w-170 f-c rounded-14 bg-[#253c6b] -translate-x-1/2"
+            class="mask-overlay absolute bottom-16 left-1/2 z-30 w-160 f-c rounded-14 bg-[#000] opacity-23 -translate-x-1/2"
             :class="[
-              giftPackage.id === 0 ? 'h-540' : giftPackage.id === 1 ? 'h-591' : 'h-647',
+              giftPackage.id === 0 ? 'h-492' : giftPackage.id === 1 ? 'h-538' : 'h-589',
             ]"
           />
         </transition>
         <div
-          class="absolute bottom-105 left-0 z-20 w-full flex flex-col items-center justify-end"
-          :class="giftPackage.id === 0 ? 'h-455' : giftPackage.id === 1 ? 'h-506' : 'h-562'"
+          class="absolute bottom-105 left-1/2 z-20 w-170 flex flex-col items-center justify-end -translate-x-1/2"
+          :class="giftPackage.id === 0 ? 'h-400' : giftPackage.id === 1 ? 'h-450' : 'h-500'"
         >
           <div class="flex flex-1 flex-col items-center justify-evenly gap-20">
             <div
@@ -207,10 +328,10 @@ const bubblePosition = {
           </div>
         </div>
         <div class="absolute bottom-30 left-0 z-30 w-full flex flex-col items-center justify-end">
-          <div class="z-50 h-55 w-155">
+          <div class="z-50 h-55 w-135">
             <GreenButton
               :ref="(el: any) => setRef(el, giftPackage.id)"
-              radius="24px"
+              radius="0.24rem"
               :score="productInfo?.Props?.[0]?.VipScore"
               score-show
               :single-bubble-position="bubblePosition"
@@ -231,7 +352,7 @@ const bubblePosition = {
     >
       <GreenButton
         :ref="(el: any) => setRef(el, 3)"
-        radius="32px"
+        radius="0.32rem"
         :score="productInfo?.Props?.[0]?.VipScore"
         score-show
       >
@@ -285,7 +406,7 @@ const bubblePosition = {
 
 /* 蒙版遮罩动画 */
 .mask-overlay {
-  opacity: 0.67;
+
   transition: all 0.3s ease;
 }
 

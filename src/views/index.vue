@@ -3,6 +3,7 @@ import BackBtn from '@/components/BackBtn.vue'
 import GiftList from '@/components/GiftList.vue'
 import GiftScrollBar from '@/components/GiftScrollBar.vue'
 import WelfareHeader from '@/components/WelfareHeader.vue'
+import { useGiftStore } from '@/store/modules/giftStore'
 import { useLoginStore } from '@/store/modules/loginStore'
 import { ref } from 'vue'
 
@@ -13,7 +14,9 @@ const fontFamily = ref('font-en')
 const bgImg = ref(getImageUrl('img_背景_下.png'))
 
 const { getLoginInfo } = useLoginStore()
+const { getShopListInfo } = useGiftStore()
 getLoginInfo('102191')
+getShopListInfo('102191')
 </script>
 
 <template>

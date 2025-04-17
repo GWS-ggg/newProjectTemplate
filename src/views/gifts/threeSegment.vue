@@ -4,10 +4,12 @@ import { getProductListApi } from '@/api'
 import GreenButton from '@/components/GreenButton.vue'
 import { useAnimatableRefs } from '@/hooks/useButtonRefs'
 import { animateWithClass, getPGImg } from '@/utils'
+import { findImagePath } from '@/utils/imageUtils'
 import { computed, nextTick, ref } from 'vue'
 
 const itemInfoList = ref<ThreeSegmentItemInfo[]>([])
 const productInfo = ref<ProductInfo>()
+const bgImgList = ref<string[]>([])
 async function getThreeSegmentData() {
   const res = await getProductListApi({
     appid: '616876868660610',
@@ -16,6 +18,12 @@ async function getThreeSegmentData() {
   })
   productInfo.value = res.ProductInfo
   itemInfoList.value = res.ItemInfo as ThreeSegmentItemInfo[]
+  bgImgList.value = [
+    getPGImg(productInfo.value?.Pic[0] as string),
+    getPGImg(productInfo.value?.Pic[1] as string),
+    getPGImg(productInfo.value?.Pic[2] as string),
+  ]
+  console.log('bgImgList', bgImgList.value)
   // 处理item数据 添加id BuyTimes Price
   let idNum = 0
   itemInfoList.value.forEach((item) => {
@@ -30,6 +38,18 @@ async function getThreeSegmentData() {
   console.log('res', res)
 }
 getThreeSegmentData()
+const giftCellBg1Img = computed(() => {
+  return findImagePath('complete_bg_1.png', productInfo.value?.Pic)
+})
+const giftCellBg2Img = computed(() => {
+  return findImagePath('complete_bg_2.png', productInfo.value?.Pic)
+})
+const giftCellBg3Img = computed(() => {
+  return findImagePath('complete_bg_3.png', productInfo.value?.Pic)
+})
+const giftCellBgList = computed(() => {
+  return [giftCellBg1Img.value, giftCellBg2Img.value, giftCellBg3Img.value]
+})
 
 function getImageUrl(name: string) {
   return new URL(`../../assets/images/gifts/threeSegment/${name}`, import.meta.url).href
@@ -131,7 +151,7 @@ async function handlePurchaseButton(item: ThreeSegmentItemInfo) {
     <div class="mt-30 text-[#fff] text-stroke-1 text-stroke-[#19093e]">
       <CountDown
         :end-time="productInfo?.ExpireTime"
-        text-class="px-20 py-10 text-29 text-stroke-3 text-stroke-[#19093e] paint-order"
+        text-class="px-20 text-29 text-stroke-3 text-stroke-[#19093e] paint-order"
       >
         <template #default="{ hours, minutes, seconds }">
           END IN  {{ hours }}:{{ minutes }}:{{ seconds }}
@@ -149,7 +169,7 @@ async function handlePurchaseButton(item: ThreeSegmentItemInfo) {
     >
       <div class="w-710">
         <img
-          :src="item.BuyTimes === 0 ? imgMap.bg1Img : imgMap.bg1OkImg"
+          :src="item.BuyTimes === 0 ? imgMap.bg1Img : giftCellBgList[item.id]"
           alt=""
           class="w-full"
         >
@@ -163,7 +183,7 @@ async function handlePurchaseButton(item: ThreeSegmentItemInfo) {
               :key="index"
             >
               <IconWithText
-                :icon-url="icon.Icon"
+                :icon-url="getPGImg(icon.Icon)"
                 :text="icon.Text"
                 :icon-height="120"
                 :bottom="-10"
@@ -177,11 +197,11 @@ async function handlePurchaseButton(item: ThreeSegmentItemInfo) {
         >
           <GreenButton
             :ref="el => setRef(el, item.id)"
-            radius="20px"
+            radius="0.36rem"
             :score="productInfo?.Props[0].VipScore"
             score-show
           >
-            <div class="relative text-40 text-[#fff] text-stroke-2 text-stroke-[#164b2e]">
+            <div class="relative text-40 text-[#fff] text-stroke-3 text-stroke-[#164b2e] paint-order">
               {{ item.Price ? item.Price : 'FREE' }}
               <img
                 v-if="item.Price === 0 && currentGiftId !== item.id"
