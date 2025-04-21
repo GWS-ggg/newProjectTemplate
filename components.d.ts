@@ -20,10 +20,12 @@ declare module 'vue' {
     IconList: typeof import('./src/components/IconList.vue')['default']
     IconWithText: typeof import('./src/components/IconWithText.vue')['default']
     Popup: typeof import('./src/components/Popup.vue')['default']
+    PopupBubble: typeof import('./src/components/PopupBubble.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     ScaledImage: typeof import('./src/components/ScaledImage.vue')['default']
     StretchableBackground: typeof import('./src/components/StretchableBackground.vue')['default']
+    TransitionImage: typeof import('./src/components/TransitionImage.vue')['default']
     WelfareHeader: typeof import('./src/components/WelfareHeader.vue')['default']
   }
 }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ProductInfo, ThreeSegmentItemInfo } from '@/types'
+import type { ProductInfo, Prop, ThreeSegmentItemInfo } from '@/types'
 import { getProductListApi } from '@/api'
 import GreenButton from '@/components/GreenButton.vue'
 import { useAnimatableRefs } from '@/hooks/useButtonRefs'
@@ -7,6 +7,7 @@ import { animateWithClass, formatPrice, getPGImg } from '@/utils'
 import { findImagePath } from '@/utils/imageUtils'
 import { computed, nextTick, ref } from 'vue'
 
+const emits = defineEmits(['boxClick'])
 const itemInfoList = ref<ThreeSegmentItemInfo[]>([])
 const productInfo = ref<ProductInfo>()
 const bgImgList = ref<string[]>([])
@@ -18,6 +19,8 @@ async function getThreeSegmentData() {
   })
   productInfo.value = res.ProductInfo
   itemInfoList.value = res.ItemInfo as ThreeSegmentItemInfo[]
+  itemInfoList.value[0].Props[0].PropID = 2030428
+  itemInfoList.value[0].Props[0].PropType = 11
   bgImgList.value = [
     getPGImg(productInfo.value?.Pic[0] as string),
     getPGImg(productInfo.value?.Pic[1] as string),
@@ -144,6 +147,9 @@ async function handlePurchaseButton(item: ThreeSegmentItemInfo) {
   item.BuyTimes = 1
   await animateWithClass(giftElement, 'flip-active', 600)
 }
+function handleBoxClick(prop: Prop, event: MouseEvent) {
+  emits('boxClick', prop, event)
+}
 </script>
 
 <template>
@@ -187,6 +193,7 @@ async function handlePurchaseButton(item: ThreeSegmentItemInfo) {
                 :text="icon.Text"
                 :icon-height="120"
                 :bottom="-10"
+                @click="handleBoxClick(icon, $event)"
               />
             </template>
           </div>

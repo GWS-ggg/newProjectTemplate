@@ -25,7 +25,7 @@ async function getSixSegmentData() {
   })
   productInfo.value = res.ProductInfo
   itemInfoList.value = res.ItemInfo as SixSegmentItemInfo[]
-  itemInfoList.value = itemInfoList.value.slice(0, 7)
+  itemInfoList.value = itemInfoList.value.slice(0, 9)
   currentScore.value = res.ProductInfo?.TaskScore ?? 0
   targetScore.value = res.ProductInfo?.TaskTargetScore ?? 0
   // 处理item数据 添加id BuyTimes Price
@@ -47,6 +47,21 @@ const collectBgImg = computed(() => {
 })
 const collectPropImg = computed(() => {
   return findImagePath('collectProp.png', productInfo.value?.Pic)
+})
+
+const giftCellBg1Img = getImageUrl('gift_cell_bg_1.png')
+const giftCellBgImgList = ref<string[]>([])
+watchEffect(() => {
+  giftCellBgImgList.value = [
+    findImagePath('gift_cell_bg_2.png', productInfo.value?.Pic),
+    findImagePath('gift_cell_bg_3.png', productInfo.value?.Pic),
+    findImagePath('gift_cell_bg_4.png', productInfo.value?.Pic),
+    findImagePath('gift_cell_bg_5.png', productInfo.value?.Pic),
+    findImagePath('gift_cell_bg_6.png', productInfo.value?.Pic),
+    findImagePath('gift_cell_bg_7.png', productInfo.value?.Pic),
+    findImagePath('gift_cell_bg_8.png', productInfo.value?.Pic),
+  ]
+  giftCellBgImgList.value = giftCellBgImgList.value.filter(item => item !== '')
 })
 
 interface Goods {
@@ -239,6 +254,18 @@ const scoreDisplayRef = ref<HTMLElement | null>(null)
 // 使用组合式函数管理按钮引用
 const { setRef, triggerAnimation } = useAnimatableRefs()
 
+const animatedBgImgShow = ref(false)
+// 背景图切换
+function getBgImgUrl(sortId: number, id: number) {
+  if (animatedBgImgShow.value && sortId === 2) {
+    return giftCellBg1Img
+  }
+  if (sortId === 1) {
+    return giftCellBg1Img
+  }
+  return giftCellBgImgList.value[id % giftCellBgImgList.value.length]
+}
+
 // 处理购买礼包后的动画效果
 async function handleGiftPurchase(gift: SixSegmentItemInfo) {
   // 查找礼包在显示列表中的索引
@@ -252,10 +279,10 @@ async function handleGiftPurchase(gift: SixSegmentItemInfo) {
 
   // 1. 应用消失动画
   const giftElement = document.querySelector(`#gift-${gift.sortId}`)
+  animatedBgImgShow.value = true
   if (giftElement) {
     await animateWithClass(giftElement, 'fade-out', 500)
   }
-
   // 2. 根据礼包位置应用不同的动画
   const gift2 = document.querySelector('#gift-2')
   const gift3 = document.querySelector('#gift-3')
@@ -280,7 +307,7 @@ async function handleGiftPurchase(gift: SixSegmentItemInfo) {
   // 等待所有动画完成
   if (animationPromises.length > 0)
     await Promise.all(animationPromises)
-
+  animatedBgImgShow.value = false
   // 3. 标记礼包为已购买
   const currentGift = itemInfoList.value[giftIndex]
   currentGift.BuyTimes = 1
@@ -440,10 +467,16 @@ function getScoreInfo(props: Array<{
         :class="`${noBuyGiftNum > 6 ? `item-${gift.sortId}` : `item-${index + 1}`}`"
       >
         <div
-          class="grid-item fade-in relative h-full w-full bg-cover bg-center bg-no-repeat"
+          class="grid-item fade-in relative h-full bg-cover bg-center bg-no-repeat"
           :class="{ purchased: gift.BuyTimes === 1 }"
-          :style="{ 'backgroundImage': `url(${imgMap.pinkBgImg})`, 'animation-delay': `${getAnimationDelay(gift.sortId as number)}` }"
+          :style="{ 'animation-delay': `${getAnimationDelay(gift.sortId as number)}` }"
         >
+          <img
+            class="absolute left-0 top-0 h-full"
+            :class="{ 'img-changing': animatedBgImgShow && gift.sortId === 2 }"
+            :src="getBgImgUrl(gift.sortId as number, gift.id as number)"
+            alt=""
+          >
           <div class="relative flex flex-col">
             <div class="mt-50 f-c">
               <div
@@ -835,5 +868,39 @@ function getScoreInfo(props: Array<{
   display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
+}
+
+/* 设置基本过渡效果 */
+// .img-transition {
+//   transition: opacity cubic-bezier(0.895, 0.03, 0.685, 0.22) ease;
+// }
+
+/* 添加关键帧动画 */
+@keyframes fadeIn {
+  from { opacity: 0.5; }
+  to { opacity: 1; }
+}
+
+/* 使用animation-fill-mode: backwards确保动画开始前应用初始状态 */
+// .img-transition {
+//   animation: fadeIn 0.8s ease-in-out;
+// }
+
+/* 移除之前的所有动画规则，使用单一简洁的方案 */
+.img-changing {
+  /* 使用animation替代transition */
+  animation: bgFade 1s ease-out forwards;
+}
+
+@keyframes bgFade {
+  /* 从当前状态开始，避免初始值跳变 */
+  from {
+    filter: brightness(0.9);
+    transform: scale(1.01);
+  }
+  to {
+    filter: brightness(1);
+    transform: scale(1);
+  }
 }
 </style>

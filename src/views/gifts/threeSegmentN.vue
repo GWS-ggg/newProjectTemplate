@@ -34,18 +34,27 @@ async function getThreeSegmentNData() {
   console.log('res', res)
 }
 getThreeSegmentNData()
-const giftCellBg1Img = computed(() => {
-  return findImagePath('gift_cell_bg_1.png', productInfo.value?.Pic)
+const giftCellBg1Img = getImageUrl('gift_cell_bg_1.png')
+
+const giftCellBgList = ref<string[]>([])
+watchEffect(() => {
+  giftCellBgList.value = [
+    findImagePath('gift_cell_bg_2.png', productInfo.value?.Pic),
+    findImagePath('gift_cell_bg_3.png', productInfo.value?.Pic),
+  ]
 })
-const giftCellBg2Img = computed(() => {
-  return findImagePath('gift_cell_bg_2.png', productInfo.value?.Pic)
-})
-const giftCellBg3Img = computed(() => {
-  return findImagePath('gift_cell_bg_3.png', productInfo.value?.Pic)
-})
-const giftCellBgList = computed(() => {
-  return [giftCellBg1Img.value, giftCellBg2Img.value, giftCellBg3Img.value]
-})
+
+const animatedBgImgShow = ref(false)
+// 背景图切换
+function getBgImgUrl(sortId: number, id: number) {
+  if (animatedBgImgShow.value && sortId === 2) {
+    return giftCellBg1Img
+  }
+  if (sortId === 1) {
+    return giftCellBg1Img
+  }
+  return giftCellBgList.value[id % giftCellBgList.value.length]
+}
 
 function getImageUrl(name: string) {
   return new URL(`../../assets/images/gifts/threeSegmentN/${name}`, import.meta.url).href
@@ -237,6 +246,7 @@ async function handlePurchaseButton(currentGift: ThreeSegmentNItemInfo) {
 }
 
 async function handleAnimation(currentGift: ThreeSegmentNItemInfo) {
+  animatedBgImgShow.value = true
   // 1. 触发按钮动画
   triggerAnimation(currentGift.id)
 
@@ -255,7 +265,7 @@ async function handleAnimation(currentGift: ThreeSegmentNItemInfo) {
       elements.map(el => animateWithClass(el, 'move-up', 500)),
     )
   }
-
+  animatedBgImgShow.value = false
   // 4. 清理动画类并更新数据
   document.querySelectorAll('.gift-container').forEach((el) => {
     el.classList.remove('fade-out', 'move-up')
@@ -303,7 +313,8 @@ async function handleAnimation(currentGift: ThreeSegmentNItemInfo) {
     >
       <div class="w-710">
         <img
-          :src="giftCellBgList[item.id % 3]"
+          :src="getBgImgUrl(item.sortId as number, item.id)"
+          :class="{ 'img-changing': animatedBgImgShow && item.sortId === 2 }"
           alt=""
           class="w-full"
         >
@@ -432,6 +443,23 @@ async function handleAnimation(currentGift: ThreeSegmentNItemInfo) {
   }
   to {
     opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.img-changing {
+  /* 使用animation替代transition */
+  animation: bgFade 1s ease-out forwards;
+}
+
+@keyframes bgFade {
+  /* 从当前状态开始，避免初始值跳变 */
+  from {
+    filter: brightness(0.9);
+    transform: scale(1.01);
+  }
+  to {
+    filter: brightness(1);
     transform: scale(1);
   }
 }

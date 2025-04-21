@@ -1,17 +1,23 @@
 <script setup lang="ts">
-import type { onePlusTwoGiftItemInfo, ProductInfo } from '@/types'
+import type { onePlusTwoGiftItemInfo, ProductInfo, Prop } from '@/types'
 import { getProductListApi } from '@/api'
 
 import GreenButton from '@/components/GreenButton.vue'
 import IconWithText from '@/components/IconWithText.vue'
+import PopupBubble from '@/components/PopupBubble.vue'
+
+import { useEmitBoxClick } from '@/hooks'
 
 import { useAnimatableRefs } from '@/hooks/useButtonRefs'
 
+import { useBoxStore } from '@/store/modules/boxStore'
 import { animateWithClass, formatPrice, getPGImg } from '@/utils'
 
 import { findImagePath } from '@/utils/imageUtils'
 import { computed, nextTick, ref, watchEffect } from 'vue'
 
+const emits = defineEmits(['boxClick'])
+const { handleBoxClick } = useEmitBoxClick(emits)
 function getImageUrl(name: string) {
   return new URL(`../../assets/images/gifts/1+2/${name}`, import.meta.url).href
 }
@@ -448,6 +454,7 @@ async function handleGiftAnimation(giftPackage: onePlusTwoGiftItemInfo) {
           class="h-full"
           :src="getPGImg(productInfo?.Props?.[0]?.Icon)"
           alt=""
+          @click="(event) => handleBoxClick(productInfo?.Props?.[0] as Prop, event)"
         >
       </div>
     </div>
@@ -489,6 +496,7 @@ async function handleGiftAnimation(giftPackage: onePlusTwoGiftItemInfo) {
                     class="h-100"
                     :src="getPGImg(goods.Icon)"
                     alt=""
+                    @click="(event) => handleBoxClick(goods, event)"
                   >
                   <span
                     v-if="goods.Text"

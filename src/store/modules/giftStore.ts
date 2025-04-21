@@ -25,12 +25,6 @@ export const useGiftStore = defineStore('gift', () => {
 
     // 创建一个新数组，确保响应式触发
     const newTabInfo = [...res.TabInfo]
-    newTabInfo.push({
-      BannerPic: 'newChooseThree/2/gift_icon.png',
-      ProductType: 7,
-      Expire: 1747734900,
-      id: 7,
-    })
     newTabInfo.sort((a, b) => a.ProductType - b.ProductType)
     let idNum = 0
     newTabInfo.forEach((item) => {

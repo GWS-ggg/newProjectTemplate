@@ -1,11 +1,10 @@
 <script setup>
-const emits = defineEmits(['popupClose'])
+const emits = defineEmits(['close'])
+const open = defineModel({ required: true, type: Boolean })
 
-const isVisble = defineModel({ required: true, type: Boolean })
-
-// 移动端点击蒙版后 关闭
-function onClickfadeClose() {
-  emits('popupClose')
+// 点击蒙层关闭
+function handleMaskClick() {
+  emits('close')
 }
 </script>
 
@@ -14,15 +13,15 @@ function onClickfadeClose() {
     <teleport to="body">
       <transition name="mask">
         <div
-          v-if="isVisble"
-          class="fixed left-0 top-0 z-40 h-screen w-full bg-zinc-700/80"
-          @click="onClickfadeClose"
+          v-if="open"
+          class="fixed left-0 top-0 z-400 h-screen w-full bg-zinc-700/80"
+          @click="handleMaskClick"
         />
       </transition>
       <transition name="popup">
         <div
-          v-if="isVisble"
-          class="fixed bottom-0 z-50 w-screen overflow-hidden rounded-t-24 bg-white"
+          v-if="open"
+          class="fixed bottom-0 z-500 w-screen overflow-hidden rounded-t-24 bg-white"
         >
           <slot />
         </div>

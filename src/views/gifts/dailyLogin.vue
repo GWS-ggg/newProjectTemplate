@@ -5,7 +5,9 @@ import GreenButton from '@/components/GreenButton.vue'
 import IconWithText from '@/components/IconWithText.vue'
 import { formatPrice, getPGImg } from '@/utils'
 import { findImagePath } from '@/utils/imageUtils'
-import { computed, ref } from 'vue'
+import { computed, inject, ref } from 'vue'
+
+const emits = defineEmits(['openPopup'])
 
 const dailyLoginItemInfo = ref<DailyLoginItemInfo[]>([])
 const productInfo = ref<ProductInfo>()
@@ -68,7 +70,9 @@ const _giftList = ref<Gift[]>([
   },
 ])
 const greenButtonRef = ref<InstanceType<typeof GreenButton> | null>(null)
+
 function handleBtnClick() {
+  emits('openPopup')
   greenButtonRef.value?.triggerAnimation()
   console.log(greenButtonRef.value, 'greenButtonRef')
 }
@@ -180,7 +184,7 @@ const bubblePosition = {
             <!-- 底层：只有阴影的文字 -->
             <div
               class="absolute inset-0"
-              style="text-shadow: 0px 3px 0px #bcfb6b; color: transparent;"
+              style="text-shadow: 0px 0.03rem 0px #bcfb6b; color: transparent;"
             >
               Buy now
             </div>

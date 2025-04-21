@@ -135,6 +135,9 @@ const giftPackages = ref([
                 <template #loading>
                   Loading...
                 </template>
+                <template #finished>
+                  Over
+                </template>
               </CountDown>
               <img
                 v-if="pkg.id !== giftStore.currentGiftId"

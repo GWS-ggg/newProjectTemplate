@@ -1,5 +1,8 @@
 <script setup lang="ts">
+import type { BoxData } from '@/api/types'
+import type { Prop } from '@/types'
 import type { Component } from 'vue'
+import { useBoxStore } from '@/store/modules/boxStore'
 import { useGiftStore } from '@/store/modules/giftStore'
 import onePlusTwo from '@/views/gifts/1+2.vue'
 import battlePass from '@/views/gifts/battlePass.vue'
@@ -9,10 +12,11 @@ import newThreeChoiceOne from '@/views/gifts/newThreeChoiceOne.vue'
 import roulette from '@/views/gifts/roulette.vue'
 import sixSegment from '@/views/gifts/sixSegment.vue'
 import stepGift from '@/views/gifts/stepGift.vue'
+
 import threeChoiceOne from '@/views/gifts/threeChoiceOne.vue'
 import threeSegment from '@/views/gifts/threeSegment.vue'
 import threeSegmentN from '@/views/gifts/threeSegmentN.vue'
-import { computed, onMounted, provide, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 
 const giftStore = useGiftStore()
 
@@ -99,16 +103,39 @@ onMounted(() => {
   }
 })
 
-// 支付pop开关
-const isVisblePopup = ref(false)
-function showPopup() {
-  isVisblePopup.value = true
+// 弹窗状态
+const popupOpen = ref(false)
+
+// 打开弹窗
+function openPopup() {
+  popupOpen.value = true
 }
-function onClosePopup() {
-  isVisblePopup.value = false
+function closePopup() {
+  popupOpen.value = false
 }
-provide('isVisblePopup', isVisblePopup)
-provide('showPopup', showPopup)
+const boxStore = useBoxStore()
+const showPopupBubble = ref(false)
+const popupTargetElement = ref<HTMLElement | null>(null)
+const boxData = ref<BoxData | null>(null)
+const currentProp = ref<Prop | null>(null)
+async function handleBoxClick(prop: Prop, event: MouseEvent) {
+  console.log(prop)
+  if (prop.PropType !== 11) {
+    return
+  }
+  currentProp.value = prop
+
+  // 设置弹框目标元素和内容
+  popupTargetElement.value = event.currentTarget as HTMLElement
+
+  // 显示弹框
+  showPopupBubble.value = true
+
+  boxData.value = await boxStore.getBoxData(prop.PropID)
+  // boxData.value.Props.pop()
+
+  console.log(boxData.value)
+}
 </script>
 
 <template>
@@ -121,19 +148,26 @@ provide('showPopup', showPopup)
       <KeepAlive :include="cachedComponentNames">
         <component
           :is="currentGiftComponent"
-          @show-popup="showPopup"
+          @open-popup="openPopup"
+          @box-click="handleBoxClick"
         />
       </KeepAlive>
     </Transition>
+    <Popup
+      v-model="popupOpen"
+      @close="closePopup"
+    >
+      <div class="z-1000 min-h-[60vh] bg-[#fff]">
+        test 支付
+      </div>
+    </Popup>
+    <PopupBubble
+      v-model="showPopupBubble"
+      :box-data="boxData"
+      :target="popupTargetElement"
+      :prop="currentProp"
+    />
   </div>
-  <Popup
-    :is-visble="isVisblePopup"
-    @popup-close="onClosePopup"
-  >
-    <div>
-      test 支付
-    </div>
-  </Popup>
 </template>
 
 <style lang="scss" scoped>

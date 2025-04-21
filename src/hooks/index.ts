@@ -1,4 +1,5 @@
 export * from './useButtonRefs'
 export * from './useDataPreload'
+export * from './useEmitBoxClick'
 export * from './useImagePreload'
 export * from './useImageScale'

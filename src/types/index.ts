@@ -129,7 +129,7 @@ export interface ThreeChoiceOneGiftItemInfo {
   Props: Array<Prop>
 }
 
-interface Prop {
+export interface Prop {
   PropID: number
   PropType: number
   DeltaCount: number
@@ -184,4 +184,23 @@ export interface ThreeSegmentItemInfo {
   Limit: number
   BuyTimes?: number
   Props: Array<Prop>
+}
+
+export interface BoxProps {
+  PropID: number
+  PropType: number
+  DeltaCount: number
+  Icon: string
+  Text: string
+  Scale: number
+  PreviewMinCount?: number
+  PreviewMaxCount?: number
+  MaxRollCount?: number
+  BoxMiniCount?: number
+  BoxCurOpenCount?: number
+}
+
+export interface BoxInfo {
+  BoxType: number
+  Pic: string[]
 }
