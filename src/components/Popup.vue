@@ -21,7 +21,7 @@ function handleMaskClick() {
       <transition name="popup">
         <div
           v-if="open"
-          class="fixed bottom-0 z-500 w-screen overflow-hidden rounded-t-24 bg-white"
+          class="fixed bottom-0 left-1/2 z-500 max-w-750 w-screen transform overflow-hidden rounded-t-24 bg-white -translate-x-1/2"
         >
           <slot />
         </div>
@@ -48,6 +48,6 @@ function handleMaskClick() {
 
 .popup-enter-from,
 .popup-leave-to {
-  transform: translateY(100%);
+  transform:  translate(-50%, 100%);
 }
 </style>

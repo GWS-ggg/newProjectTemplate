@@ -3,14 +3,16 @@ import type { ProductInfo, Prop, ThreeSegmentItemInfo } from '@/types'
 import { getProductListApi } from '@/api'
 import GreenButton from '@/components/GreenButton.vue'
 import { useAnimatableRefs } from '@/hooks/useButtonRefs'
+import { useBuyOrder } from '@/hooks/useBuyOrder'
 import { animateWithClass, formatPrice, getPGImg } from '@/utils'
 import { findImagePath } from '@/utils/imageUtils'
 import { computed, nextTick, ref } from 'vue'
 
-const emits = defineEmits(['boxClick'])
+const emits = defineEmits(['boxClick', 'openPopup'])
 const itemInfoList = ref<ThreeSegmentItemInfo[]>([])
 const productInfo = ref<ProductInfo>()
 const bgImgList = ref<string[]>([])
+const { handleBuyOrder } = useBuyOrder()
 async function getThreeSegmentData() {
   const res = await getProductListApi({
     appid: '616876868660610',
@@ -145,6 +147,7 @@ async function handlePurchaseButton(item: ThreeSegmentItemInfo) {
   const giftElement = document.querySelector(`#gift-${item.id}`)
   console.log(giftElement, 'giftElement')
   item.BuyTimes = 1
+  await handleBuyOrder(item.Key || 0, item.TradeProductID || 0, item.SkuID, item.ExchangeID)
   await animateWithClass(giftElement, 'flip-active', 600)
 }
 function handleBoxClick(prop: Prop, event: MouseEvent) {

@@ -4,6 +4,7 @@ import { getProductListApi } from '@/api/index'
 // 按钮点击动画
 import AnimatedIcon from '@/components/AnimatedIcon.vue'
 
+import { useBuyOrder } from '@/hooks/useBuyOrder'
 import { useScoreElementStore } from '@/store/modules/scoreElement'
 import { formatPrice } from '@/utils'
 import { computed, ref } from 'vue'
@@ -102,10 +103,11 @@ function triggerAnimation(mainRef: any, addRef: any) {
     addRef?.value?.triggerAnimation()
   }
 }
-
+const { handleBuyOrder } = useBuyOrder()
 // 按钮点击事件处理函数
-function handleBtnClick(id: number, itemInfo: BattlePassItemInfo) {
+async function handleBtnClick(id: number, itemInfo: BattlePassItemInfo) {
   console.log('handleBtnClick', id)
+  await handleBuyOrder(itemInfo.Key || 0, itemInfo.TradeProductID || 0, itemInfo.SkuID, itemInfo.ExchangeID)
   if (id === 1) {
     triggerAnimation(animatedIconRef, animatedIconAddRef)
   }

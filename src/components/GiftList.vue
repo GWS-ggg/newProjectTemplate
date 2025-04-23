@@ -1,38 +1,48 @@
 <script setup lang="ts">
 import type { BoxData } from '@/api/types'
-import type { Prop } from '@/types'
-import type { Component } from 'vue'
+import type { OrderPopupInfo, Prop } from '@/types'
+import type { AsyncComponentLoader, Component } from 'vue'
+import { useBuyOrder } from '@/hooks/useBuyOrder'
 import { useBoxStore } from '@/store/modules/boxStore'
 import { useGiftStore } from '@/store/modules/giftStore'
+import { formatPrice } from '@/utils'
 import onePlusTwo from '@/views/gifts/1+2.vue'
 import battlePass from '@/views/gifts/battlePass.vue'
 import dailyLogin from '@/views/gifts/dailyLogin.vue'
 import newBattlePass from '@/views/gifts/newBattlePass.vue'
 import newThreeChoiceOne from '@/views/gifts/newThreeChoiceOne.vue'
 import roulette from '@/views/gifts/roulette.vue'
+
 import sixSegment from '@/views/gifts/sixSegment.vue'
 import stepGift from '@/views/gifts/stepGift.vue'
-
 import threeChoiceOne from '@/views/gifts/threeChoiceOne.vue'
 import threeSegment from '@/views/gifts/threeSegment.vue'
 import threeSegmentN from '@/views/gifts/threeSegmentN.vue'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue'
+
+// 定义一个接口，描述子组件应该具有的方法
+interface GiftComponent {
+  onPaymentSuccess?: () => void
+}
 
 const giftStore = useGiftStore()
 
-// 组件映射对象，方便获取组件
-const componentMap: Record<number, Component> = {
-  1: stepGift,
-  2: newBattlePass,
-  3: roulette,
-  4: onePlusTwo,
-  5: newThreeChoiceOne,
-  6: dailyLogin,
-  7: sixSegment,
-  8: threeSegmentN,
-  9: threeSegment,
-  10: threeChoiceOne,
+// 使用异步组件动态导入
+const componentLoaders: Record<number, AsyncComponentLoader> = {
+  1: () => import('@/views/gifts/stepGift.vue'),
+  2: () => import('@/views/gifts/newBattlePass.vue'),
+  3: () => import('@/views/gifts/roulette.vue'),
+  4: () => import('@/views/gifts/1+2.vue'),
+  5: () => import('@/views/gifts/newThreeChoiceOne.vue'),
+  6: () => import('@/views/gifts/dailyLogin.vue'),
+  7: () => import('@/views/gifts/sixSegment.vue'),
+  8: () => import('@/views/gifts/threeSegmentN.vue'),
+  9: () => import('@/views/gifts/threeSegment.vue'),
+  10: () => import('@/views/gifts/threeChoiceOne.vue'),
 }
+
+// 组件映射对象，预加载当前组件
+const componentMap: Record<number, Component> = {}
 
 // 组件名称映射，用于 KeepAlive include
 const componentNames: Record<number, string> = {
@@ -48,8 +58,24 @@ const componentNames: Record<number, string> = {
   10: 'ThreeChoiceOne',
 }
 
+// 预加载当前需要的组件
+function preloadComponent(id: number) {
+  if (!componentMap[id] && componentLoaders[id]) {
+    componentMap[id] = defineAsyncComponent({
+      loader: componentLoaders[id],
+      // 可选：添加加载状态组件
+      loadingComponent: {
+        template: '<div class="loading-placeholder">加载中...</div>',
+      },
+      delay: 200, // 延迟显示加载组件的时间
+    })
+  }
+  return componentMap[id]
+}
+
 const currentGiftComponent = computed(() => {
-  return componentMap[giftStore.currentGiftInfo?.ProductType || 1] || null
+  const currentType = giftStore.currentGiftInfo?.ProductType || 1
+  return preloadComponent(currentType) || null
 })
 
 // 记录最近访问的组件ID，限制为最近5个
@@ -106,9 +132,16 @@ onMounted(() => {
 // 弹窗状态
 const popupOpen = ref(false)
 
-// 打开弹窗
-function openPopup() {
+const orderPopupInfo = ref<OrderPopupInfo>({
+  price: 0,
+  key: 0,
+  tradeProductId: 0,
+  skuId: '',
+  exchangeId: 0,
+})
+function openPopup(orderInfo: OrderPopupInfo) {
   popupOpen.value = true
+  orderPopupInfo.value = orderInfo
 }
 function closePopup() {
   popupOpen.value = false
@@ -118,23 +151,119 @@ const showPopupBubble = ref(false)
 const popupTargetElement = ref<HTMLElement | null>(null)
 const boxData = ref<BoxData | null>(null)
 const currentProp = ref<Prop | null>(null)
+const realShowPopupBubble = ref(false)
 async function handleBoxClick(prop: Prop, event: MouseEvent) {
-  console.log(prop)
   if (prop.PropType !== 11) {
     return
   }
-  currentProp.value = prop
+  // 如果弹窗已经显示，不执行
+  if (showPopupBubble.value)
+    return
+  console.log(prop)
 
-  // 设置弹框目标元素和内容
+  // 重置显示状态
+  realShowPopupBubble.value = false
+
+  // 存储当前prop和目标元素
+  currentProp.value = prop
   popupTargetElement.value = event.currentTarget as HTMLElement
 
-  // 显示弹框
+  // 先获取宝箱数据
+  boxData.value = await boxStore.getBoxData(prop.PropID)
+  console.log(boxData.value)
+
+  // 设置modelValue为true，但不显示弹窗（通过realShow控制可见性）
+  // 这会触发组件挂载并开始计算位置
   showPopupBubble.value = true
 
-  boxData.value = await boxStore.getBoxData(prop.PropID)
-  // boxData.value.Props.pop()
+  // 使用稍长的延时，确保DOM已渲染并且位置已经充分计算
+  // 前100ms用于DOM渲染和初始位置计算
+  // 后100ms用于确保内容加载后的位置校正
+  setTimeout(() => {
+    // 显示弹窗
+    realShowPopupBubble.value = true
+  }, 300)
+}
+function closePopupBubble() {
+  realShowPopupBubble.value = false
+  showPopupBubble.value = false
+}
+interface PayChannel {
+  payType: number
+  name: string
+  extra: number
+  level: number
+  icon: string
+}
 
-  console.log(boxData.value)
+const payChannels = ref<PayChannel[]>([
+  {
+    payType: 23002,
+    name: 'Alipay',
+    extra: 10,
+    level: 1,
+    icon: 'https://mprogram-static.forevernine.com/ovsite/icon2/alipay.png',
+  },
+  {
+    payType: 23001,
+    name: 'WeChatPay',
+    extra: 10,
+    level: 1,
+    icon: 'https://mprogram-static.forevernine.com/ovsite/icon2/weixin.png',
+  },
+  {
+    payType: 23003,
+    name: 'ApplePay',
+    extra: 10,
+    level: 1,
+    icon: 'https://mprogram-static.forevernine.com/ovsite/icon2/apple.png',
+  },
+  {
+    payType: 23004,
+    name: 'GooglePay',
+    extra: 10,
+    level: 1,
+    icon: 'https://mprogram-static.forevernine.com/ovsite/icon2/geogle.png',
+  },
+  {
+    payType: 230010,
+    name: 'Cards',
+    extra: 10,
+    level: 1,
+    icon: 'https://mprogram-static.forevernine.com/cdn/img/cards.jpeg',
+  },
+  {
+    payType: 23,
+    name: 'Payermax',
+    extra: 10,
+    level: 1,
+    icon: 'https://mprogram-static.forevernine.com/ovsite/icon2/payermax.png',
+  },
+  {
+    payType: 20,
+    name: 'PayPal',
+    extra: 10,
+    level: 1,
+    icon: 'https://mprogram-static.forevernine.com/ovsite/icon2/paypal.png',
+  },
+])
+// 添加引用，用于触发事件
+const giftComponentRef = ref<GiftComponent | null>(null)
+const selectedPayChannel = ref<PayChannel | null>(payChannels.value[0])
+const { handleBuyOrder } = useBuyOrder()
+async function handlePayOrder() {
+  const res = await handleBuyOrder(orderPopupInfo.value.key, orderPopupInfo.value.tradeProductId, orderPopupInfo.value.skuId, orderPopupInfo.value.exchangeId)
+  if (res) {
+    // 检查方法是否存在
+    if (giftComponentRef.value && typeof giftComponentRef.value.onPaymentSuccess === 'function') {
+      giftComponentRef.value.onPaymentSuccess()
+    }
+    console.log('下单成功', res)
+  }
+  else {
+    console.log('下单失败', res)
+  }
+  closePopup()
 }
 </script>
 
@@ -148,6 +277,7 @@ async function handleBoxClick(prop: Prop, event: MouseEvent) {
       <KeepAlive :include="cachedComponentNames">
         <component
           :is="currentGiftComponent"
+          ref="giftComponentRef"
           @open-popup="openPopup"
           @box-click="handleBoxClick"
         />
@@ -157,8 +287,40 @@ async function handleBoxClick(prop: Prop, event: MouseEvent) {
       v-model="popupOpen"
       @close="closePopup"
     >
-      <div class="z-1000 min-h-[60vh] bg-[#fff]">
-        test 支付
+      <div class="relative z-1000 max-h-[80vh] min-h-[60vh] bg-[#fff] p-20 pb-120">
+        <div class="w-full overflow-y-auto rounded-20 bg-[#f8f8f8] p-20 text-24">
+          <div class="mb-20 color-[#666666]">
+            支付方式
+          </div>
+          <div class="w-full flex flex-col gap-20">
+            <div
+              v-for="channel in payChannels"
+              :key="channel.payType"
+              class="f-c cursor-pointer gap-10 border border-[#fff] rounded-10 border-solid bg-[#fff] py-5"
+              :class="{ 'bg-[#fff8f8]  border-[#ED6504]!': selectedPayChannel?.payType === channel.payType }"
+              @click="selectedPayChannel = channel"
+            >
+              <img
+                :src="channel.icon"
+                class="h-48"
+              >
+            </div>
+          </div>
+        </div>
+        <div class="absolute bottom-0 left-0 right-0 h-100 w-full bg-[#f8f8f8] px-15">
+          <div class="h-full w-full flex items-center justify-between text-32">
+            <div class="color-[#666666]">
+              合计:
+              <span class="color-[#ED6504]">{{ formatPrice(orderPopupInfo.price) }} </span>
+            </div>
+            <div
+              class="mr-10 h-54 w-200 f-c cursor-pointer rounded-25 bg-[#ED6504] text-32 color-[#fff]"
+              @click="handlePayOrder"
+            >
+              立即支付
+            </div>
+          </div>
+        </div>
       </div>
     </Popup>
     <PopupBubble
@@ -166,6 +328,8 @@ async function handleBoxClick(prop: Prop, event: MouseEvent) {
       :box-data="boxData"
       :target="popupTargetElement"
       :prop="currentProp"
+      :real-show="realShowPopupBubble"
+      @close="closePopupBubble"
     />
   </div>
 </template>

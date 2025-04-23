@@ -10,6 +10,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  realShow: {
+    type: Boolean,
+    default: false,
+  },
   boxData: {
     type: Object as PropType<BoxData>,
     default: null,
@@ -24,13 +28,15 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue', 'close'])
 
 const position = ref({ top: '0rem', left: '0rem' })
 // 为箭头位置设置一个安全的默认值，确保始终有值
 const arrowPositionLeft = ref('50%') // 默认箭头居中
 // 添加标志变量，用于跟踪是否是第一次点击
 const isFirstClick = ref(true)
+// 用于跟踪是否是页面刷新后的首次加载
+const isFirstTimeLoad = ref(true)
 
 // 计算当前设备的rem基准值
 function getRootFontSize(): number {
@@ -93,150 +99,172 @@ const gridStyle = computed(() => {
     }
   }
 })
+const bubbleElement = ref<HTMLElement | null>(null)
+
+// 存储所有的timeout IDs，以便能在组件卸载时清除
+const positionTimeouts: ReturnType<typeof setTimeout>[] = []
 
 // 更新弹框位置
 function updatePosition() {
-  if (!props.target)
+  if (!props.modelValue || !props.target) {
+    // 如果没有目标元素或气泡不显示，将箭头设置在默认位置
+    arrowPositionLeft.value = '50%'
     return
-
-  const targetRect = props.target.getBoundingClientRect()
-  const bubbleElement = document.querySelector('.popup-bubble') as HTMLElement | null
-
-  // 由于在初次计算时可能还没有渲染完成，所以使用一个预估高度
-  let bubbleHeight = bubbleElement?.offsetHeight || 100
-  let bubbleWidth = bubbleElement?.offsetWidth || 600
-
-  // 防止获取到0，导致计算错误
-  if (bubbleHeight < 10)
-    bubbleHeight = 100
-  if (bubbleWidth < 10)
-    bubbleWidth = 600
-
-  // 计算气泡应该在元素的正上方
-  const topPosition = targetRect.top - bubbleHeight - 20 // 20px的额外间距给箭头
-
-  // 计算目标元素的中心点
-  const targetCenterX = targetRect.left + (targetRect.width / 2)
-
-  // 计算气泡的左侧位置，使其水平居中对齐
-  const leftPosition = targetCenterX - (bubbleWidth / 2)
-
-  // 设置位置
-  position.value = {
-    top: pxToRem(Math.max(0, topPosition)), // 确保不会显示在页面顶部以外
-    left: pxToRem(Math.max(0, Math.min(leftPosition, window.innerWidth - bubbleWidth))), // 同时限制左右边界 // 确保不会超出左边界
   }
 
-  // 先设置一个默认的箭头位置（在气泡中间）
-  arrowPositionLeft.value = '50%'
+  // 获取目标元素尺寸
+  const targetRect = props.target.getBoundingClientRect()
+  console.log(targetRect, 'targetRect')
 
-  // 使用延时确保DOM完全渲染后再次计算位置
-  setTimeout(() => {
-    nextTick(() => {
-      try {
-        const bubbleRect = bubbleElement?.getBoundingClientRect()
-        console.log(bubbleRect, 'bubbleRect')
-        if (bubbleRect && bubbleRect.width > 0) {
-          // 确保有有效的宽度值
-          // arrowPositionLeft.value = pxToRem(bubbleRect.width / 2)
+  // 使用nextTick确保DOM完全更新
+  nextTick(() => {
+    // 安全检查，避免组件已被卸载的情况
+    if (!props.modelValue || !props.target)
+      return
 
-          // 重新计算位置，确保弹窗位置准确
-          if (bubbleRect.height > 10 && (Math.abs(bubbleRect.height - bubbleHeight) > 10 || Math.abs(bubbleRect.width - bubbleWidth) > 10)) {
-            // 计算新位置
-            const newTopPosition = targetRect.top - bubbleRect.height - 20
-            const newLeftPosition = targetCenterX - (bubbleRect.width / 2)
+    if (!bubbleElement.value)
+      return
 
-            // 更新位置
-            position.value = {
-              top: pxToRem(Math.max(0, newTopPosition)),
-              left: pxToRem(Math.max(0, newLeftPosition)),
-            }
-          }
-        }
+    // 获取最新的目标位置
+    const latestTargetRect = props.target.getBoundingClientRect()
+
+    // 计算目标元素的中心点位置
+    const targetCenterX = latestTargetRect.left + (latestTargetRect.width / 2)
+
+    // 计算宝箱元素的尺寸
+    let bubbleWidth = 600 // 默认宽度
+    let bubbleHeight = 300 // 默认高度
+
+    // 获取气泡元素已渲染的实际尺寸
+    const bubbleRect = bubbleElement.value.getBoundingClientRect()
+
+    // 只有当气泡真实渲染后，才更新尺寸（避免获取到0值）
+    if (bubbleRect.width > 10 && bubbleRect.height > 10) {
+      bubbleWidth = bubbleRect.width
+      bubbleHeight = bubbleRect.height
+    }
+
+    // 计算气泡应该在元素的正上方的位置
+    const topPosition = latestTargetRect.top - bubbleHeight - 20 // 20px的额外间距给箭头
+
+    // 计算气泡的左侧位置，使其水平居中对齐
+    const leftPosition = targetCenterX - (bubbleWidth / 2)
+
+    // 确保不会超出屏幕边界
+    const actualLeftPosition = Math.max(10, Math.min(leftPosition, window.innerWidth - bubbleWidth - 10))
+
+    // 设置最终位置
+    position.value = {
+      top: pxToRem(Math.max(10, topPosition)), // 确保不会显示在页面顶部以外
+      left: pxToRem(actualLeftPosition), // 确保不会超出左右边界
+    }
+
+    // 计算箭头位置：箭头应该位于目标元素的中心点上方
+    try {
+      // 箭头位置 = 目标元素中心点 - 气泡左侧位置
+      const arrowLeft = targetCenterX - actualLeftPosition
+
+      // 确保 arrowLeft 是有效的数字
+      if (!Number.isNaN(arrowLeft) && Number.isFinite(arrowLeft)) {
+        arrowPositionLeft.value = pxToRem(arrowLeft)
       }
-      catch (error) {
-        console.error('计算箭头位置出错:', error)
+      else {
+        // 如果计算结果无效，使用默认值
+        arrowPositionLeft.value = '50%'
       }
-    })
-  }, 10) // 等待50毫秒确保DOM已完全渲染
+    }
+    catch (error) {
+      console.error('计算箭头位置出错:', error)
+      // 出错时使用默认值
+      arrowPositionLeft.value = '50%'
+    }
+  })
 }
 
 // 处理文档点击事件
-function handleDocumentClick(event: MouseEvent) {
+function handleDocumentClick() {
   if (!props.modelValue)
     return
 
-  console.log('close')
   // 获取点击的元素
-  const clickedElement = event.target as HTMLElement
+  // const clickedElement = event.target as HTMLElement
 
-  // 检查是否点击在target目标元素上
-  const isClickOnTarget = props.target && props.target.contains(clickedElement)
+  // 检查是否点击在弹窗内部
+  // const isClickInBubble = bubbleElement.value && bubbleElement.value.contains(clickedElement)
 
+  // 如果点击在弹窗内部，不关闭弹窗（允许用户交互弹窗内容）
+  // if (isClickInBubble) {
+  //   console.log('click inside bubble, not closing')
+  //   return
+  // }
+
+  // 如果是第一次点击（刚刚打开弹窗的点击），不处理
   if (isFirstClick.value) {
     // 第一次点击，只设置标志，不关闭弹窗
     isFirstClick.value = false
     console.log('first click, not closing')
   }
   else {
-    // 第二次点击，如果不是点击在target元素上，才关闭弹窗
-    if (!isClickOnTarget) {
-      console.log('second click, closing')
-      emit('update:modelValue', false)
-      isFirstClick.value = true
-    }
-    else {
-      console.log('click on target, not closing')
-    }
+    // 第二次点击任何位置（包括当前宝箱），都关闭弹窗
+    console.log('second click, closing')
+    emit('close')
+    isFirstClick.value = true
   }
-  // // 获取点击的元素
-  // const clickedElement = event.target as HTMLElement
-  // // 获取弹窗元素
-  // const bubbleElement = document.querySelector('.popup-bubble')
-
-  // // 检查目标元素是否为弹窗的一部分或者是触发弹窗的元素
-  // if (bubbleElement && !bubbleElement.contains(clickedElement)
-  //   && (!props.target || !props.target.contains(clickedElement))) {
-  //   // 如果不是，发送事件关闭弹窗
-  //   emit('update:modelValue', false)
-  // }
 }
 
 // 监听目标元素位置变化
 onMounted(() => {
-  updatePosition()
   window.addEventListener('resize', updatePosition)
   window.addEventListener('scroll', updatePosition)
   // 添加点击事件监听
   document.addEventListener('click', handleDocumentClick)
+
+  // 监听window的load事件，确保所有资源加载完成后再计算位置
+  window.addEventListener('load', () => {
+    // 重置首次加载标志
+    isFirstTimeLoad.value = true
+  })
 })
 
-// 在组件销毁时移除事件监听
+// 在组件销毁时移除事件监听和清除所有timeout
 onUnmounted(() => {
   window.removeEventListener('resize', updatePosition)
   window.removeEventListener('scroll', updatePosition)
   // 移除点击事件监听
   document.removeEventListener('click', handleDocumentClick)
+
+  // 清除所有pending的timeout
+  positionTimeouts.forEach(id => clearTimeout(id))
 })
 
-// 监听props.target的变化
-watch(() => props.target, () => {
-  nextTick(() => {
-    updatePosition()
-  })
-}, { immediate: true })
-
-// 监听显示状态变化
+// 监听显示状态变化，在显示状态改变时准确更新位置
 watch(() => props.modelValue, (newVal: boolean) => {
   if (newVal) {
-    // 弹框显示时更新位置
-    nextTick(() => {
+    // 弹框显示时设置一次位置，确保CSS过渡生效
+    if (props.target) {
+      // 初始定位
       updatePosition()
-    })
-    // 弹框显示时重置点击标志
+
+      // 使用两次延时更新，确保位置准确
+      // 第一次延时是为了等待DOM完全渲染
+      const timeoutId1 = setTimeout(() => {
+        updatePosition()
+
+        // 第二次延时确保内容加载后再次校正位置
+        const timeoutId2 = setTimeout(() => {
+          updatePosition()
+        }, 50)
+
+        positionTimeouts.push(timeoutId2)
+      }, 10)
+
+      positionTimeouts.push(timeoutId1)
+    }
+    // 弹框显示时重置点击标志，以支持点击事件处理逻辑
     isFirstClick.value = true
   }
 })
+
 function formatCount(count: number) {
   if (count < 1000) {
     return count
@@ -256,29 +284,83 @@ function formatCount(count: number) {
 const fontFamily = ref('font-en')
 const progress = ref(50)
 const total = ref(100)
+
+const arrowAfterStyle = computed(() => {
+  return {
+    '--arrow-left-position': arrowPositionLeft.value || '50%',
+  }
+})
 </script>
 
 <template>
   <Teleport to="body">
-    <Transition
-      enter-active-class="transition-all duration-300 ease-out"
-      leave-active-class="transition-all duration-300 ease-in"
+    <div
+      v-show="modelValue"
+      ref="bubbleElement"
+      class="popup-bubble bg-outer pointer-events-auto fixed z-99999 h-auto max-w-750 border-2 border-[#233f59] rounded-13 border-solid p-15 text-20 text-[#fff] text-stroke-2 text-stroke-[#464646] will-change-transform paint-order"
+      :class="{ 'popup-animation': realShow }"
+      :style="{ ...computedStyle, fontFamily, ...arrowAfterStyle, visibility: realShow ? 'visible' : 'hidden' }"
     >
       <div
-        v-if="modelValue"
-        class="popup-bubble bg-outer pointer-events-auto fixed z-99999 h-auto max-w-750 border-2 border-[#233f59] rounded-13 border-solid p-15 text-20 text-[#fff] text-stroke-2 text-stroke-[#464646] paint-order"
-        :style="{ ...computedStyle, fontFamily }"
-        @click.stop
+        v-if="boxData?.BoxInfo.BoxType === 1"
+        class="grid gap-15"
+        :style="gridStyle"
       >
         <div
-          v-if="boxData?.BoxInfo.BoxType === 1"
+          v-for="(item, index) in boxData?.Props"
+          :key="index"
+          class="bg-inner relative h-128 w-128 flex flex-col items-center justify-center rounded-13 bg-[#86c8d5]"
+        >
+          <img
+            :src="getPGImg(item.Icon)"
+            alt=""
+            class="h-76"
+          >
+          <div class="mt-5 flex flex-nowrap items-center justify-center text-23">
+            <div
+              v-if="item.PreviewMinCount && item.PreviewMaxCount"
+              class="whitespace-nowrap"
+            >
+              {{ formatCount(item.PreviewMinCount) }} - {{ formatCount(item.PreviewMaxCount) }}
+            </div>
+            <div v-else>
+              {{ item.Text }}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        v-if="boxData?.BoxInfo.BoxType === 2"
+        class="min-h-251 flex flex-col gap-15"
+      >
+        <div class="bg-inner h-104 w-full f-c">
+          <img
+            :src="getPGImg(boxData?.Props[2].Icon)"
+            alt=""
+            class="mr-16 h-full -mt-20"
+          >
+          <div class="flex flex-col items-start text-23">
+            <div class="text-21 color-[#464646] leading-36">
+              1 out of 10 chests contains a
+            </div>
+
+            <div class="dual-color-text relative text-40 text-stroke-2 text-stroke-[#8c4a03] paint-order">
+              <span
+                class="absolute inset-0 text-[#8c4a03]"
+                style="text-shadow: 0px 0.03rem 0px 0px #8c4a03"
+              >JOKER CARD</span>
+              <span class="gold-gradient-text relative z-10">JOKER CARD</span>
+            </div>
+          </div>
+        </div>
+        <div
           class="grid gap-15"
           :style="gridStyle"
         >
           <div
             v-for="(item, index) in boxData?.Props"
             :key="index"
-            class="bg-inner relative h-128 w-128 flex flex-col items-center justify-center rounded-13 bg-[#86c8d5]"
+            class="bg-inner relative h-128 w-128 flex flex-col items-center justify-center rounded-13"
           >
             <img
               :src="getPGImg(item.Icon)"
@@ -298,145 +380,93 @@ const total = ref(100)
             </div>
           </div>
         </div>
-        <div
-          v-if="boxData?.BoxInfo.BoxType === 2"
-          class="flex flex-col gap-15"
+      </div>
+      <div
+        v-if="boxData?.BoxInfo.BoxType === 3"
+        class="relative min-h-284"
+      >
+        <img
+          :src="getPGImg(boxData?.BoxInfo.Pic[0])"
+          alt=""
+          class="w-475"
         >
-          <div class="bg-inner h-104 w-full f-c">
-            <img
-              :src="getPGImg(boxData?.Props[2].Icon)"
-              alt=""
-              class="mr-16 h-full -mt-20"
-            >
-            <div class="flex flex-col items-start text-23">
-              <div class="text-21 color-[#464646] leading-36">
-                1 out of 10 chests contains a
-              </div>
-
-              <div class="dual-color-text relative text-40 text-stroke-2 text-stroke-[#8c4a03] paint-order">
-                <span
-                  class="absolute inset-0 text-[#8c4a03]"
-                  style="text-shadow: 0px 0.03rem 0px 0px #8c4a03"
-                >JOKER CARD</span>
-                <span class="gold-gradient-text relative z-10">JOKER CARD</span>
-              </div>
-            </div>
-          </div>
+        <div class="absolute bottom-10 left-17 h-90 w-440 flex items-center justify-evenly">
           <div
-            class="grid gap-15"
-            :style="gridStyle"
+            v-for="(item, index) in boxData?.Props"
+            :key="index"
+            class="relative flex flex-col items-center justify-center"
           >
-            <div
-              v-for="(item, index) in boxData?.Props"
-              :key="index"
-              class="bg-inner relative h-128 w-128 flex flex-col items-center justify-center rounded-13"
+            <img
+              :src="getPGImg(item.Icon)"
+              alt=""
+              class="h-60"
             >
-              <img
-                :src="getPGImg(item.Icon)"
-                alt=""
-                class="h-76"
-              >
-              <div class="mt-5 flex flex-nowrap items-center justify-center text-23">
-                <div
-                  v-if="item.PreviewMinCount && item.PreviewMaxCount"
-                  class="whitespace-nowrap"
-                >
-                  {{ formatCount(item.PreviewMinCount) }} - {{ formatCount(item.PreviewMaxCount) }}
-                </div>
-                <div v-else>
-                  {{ item.Text }}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div
-          v-if="boxData?.BoxInfo.BoxType === 3"
-          class="relative"
-        >
-          <img
-            :src="getPGImg(boxData?.BoxInfo.Pic[0])"
-            alt=""
-            class="w-475"
-          >
-          <div class="absolute bottom-10 left-17 h-90 w-440 flex items-center justify-evenly">
-            <div
-              v-for="(item, index) in boxData?.Props"
-              :key="index"
-              class="relative flex flex-col items-center justify-center"
-            >
-              <img
-                :src="getPGImg(item.Icon)"
-                alt=""
-                class="h-60"
-              >
-              <div class="flex flex-nowrap items-center justify-center text-24 -mt-10">
-                <div
-                  v-if="item.PreviewMinCount && item.PreviewMaxCount"
-                  class="whitespace-nowrap"
-                >
-                  {{ formatCount(item.PreviewMinCount) }} - {{ formatCount(item.PreviewMaxCount) }}
-                </div>
-                <div v-else>
-                  {{ item.Text }}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div
-          v-if="boxData?.BoxInfo.BoxType === 4"
-          class="relative"
-        >
-          <img
-            :src="getPGImg(boxData?.BoxInfo.Pic[0])"
-            alt=""
-            class="w-543"
-          >
-          <img
-            :src="getPGImg(boxData?.BoxInfo.Pic[1])"
-            alt=""
-            class="absolute left-1/2 top-30 h-200 -translate-x-1/2"
-          >
-          <div class="absolute left-1/2 top-230 f-c text-36 text-stroke-2 text-stroke-[#203e51] paint-order -translate-x-1/2">
-            <div class="color-[#ffed22]">
-              x{{ boxData?.Props[0].DeltaCount }}&nbsp;
-            </div>
-            <div>
-              Cards
-            </div>
-          </div>
-          <div class="absolute bottom-3 left-0 h-53 w-full flex items-center justify-evenly rounded-b-13 bg-[#000] opacity-20" />
-          <div class="absolute bottom-3 left-0 h-53 w-full f-c">
-            <!-- 进度条容器 -->
-            <div class="progress-mask relative h-23 w-306 f-c overflow-hidden rounded-full">
-              <!-- 进度条填充部分 -->
+            <div class="flex flex-nowrap items-center justify-center text-24 -mt-10">
               <div
-                class="progress-bar absolute left-0 top-0 h-full f-c rounded-l-full"
-                :style="{ width: `${progress / total * 100}%` }"
-              />
-
-              <div class="z-10 text-22 text-[#d8ffff] font-medium drop-shadow-md">
-                {{ progress }}/{{ total }}
+                v-if="item.PreviewMinCount && item.PreviewMaxCount"
+                class="whitespace-nowrap"
+              >
+                {{ formatCount(item.PreviewMinCount) }} - {{ formatCount(item.PreviewMaxCount) }}
               </div>
-
-              <!-- 光泽效果 -->
-              <!-- <div class="absolute left-0 top-0 h-1/2 w-full rounded-t-full bg-white bg-opacity-15" /> -->
+              <div v-else>
+                {{ item.Text }}
+              </div>
             </div>
-            <img
-              :src="getPGImg(prop?.Icon)"
-              alt=""
-              class="absolute left-85 top-0 z-30 h-53"
-            >
-            <img
-              :src="getPGImg(boxData?.Props[0].Icon)"
-              alt=""
-              class="absolute right-85 top-0 z-30 h-53"
-            >
           </div>
         </div>
       </div>
-    </Transition>
+      <div
+        v-if="boxData?.BoxInfo.BoxType === 4"
+        class="relative min-h-331"
+      >
+        <img
+          :src="getPGImg(boxData?.BoxInfo.Pic[0])"
+          alt=""
+          class="w-543"
+        >
+        <img
+          :src="getPGImg(boxData?.BoxInfo.Pic[1])"
+          alt=""
+          class="absolute left-1/2 top-30 h-200 -translate-x-1/2"
+        >
+        <div class="absolute left-1/2 top-230 f-c text-36 text-stroke-2 text-stroke-[#203e51] paint-order -translate-x-1/2">
+          <div class="color-[#ffed22]">
+            x{{ boxData?.Props[0].DeltaCount }}&nbsp;
+          </div>
+          <div>
+            Cards
+          </div>
+        </div>
+        <div class="absolute bottom-3 left-0 h-53 w-full flex items-center justify-evenly rounded-b-13 bg-[#000] opacity-20" />
+        <div class="absolute bottom-3 left-0 h-53 w-full f-c">
+          <!-- 进度条容器 -->
+          <div class="progress-mask relative h-23 w-306 f-c overflow-hidden rounded-full">
+            <!-- 进度条填充部分 -->
+            <div
+              class="progress-bar absolute left-0 top-0 h-full f-c rounded-l-full"
+              :style="{ width: `${progress / total * 100}%` }"
+            />
+
+            <div class="z-10 text-22 text-[#d8ffff] font-medium drop-shadow-md">
+              {{ progress }}/{{ total }}
+            </div>
+
+            <!-- 光泽效果 -->
+            <!-- <div class="absolute left-0 top-0 h-1/2 w-full rounded-t-full bg-white bg-opacity-15" /> -->
+          </div>
+          <img
+            :src="getPGImg(prop?.Icon)"
+            alt=""
+            class="absolute left-85 top-0 z-30 h-53"
+          >
+          <img
+            :src="getPGImg(boxData?.Props[0].Icon)"
+            alt=""
+            class="absolute right-85 top-0 z-30 h-53"
+          >
+        </div>
+      </div>
+    </div>
   </Teleport>
 </template>
 
@@ -447,7 +477,7 @@ const total = ref(100)
   position: absolute;
   bottom: -0.19rem;
   /* 位于气泡底部下方 */
-  left: v-bind(arrowPositionLeft);
+  left: var(--arrow-left-position, 50%);
   /* 动态定位 */
   width: 0;
   height: 0;
@@ -455,16 +485,10 @@ const total = ref(100)
   border-right: 0.2rem solid transparent;
   border-top: 0.2rem solid #daecef;
   transform: translateX(-50%);
-  /* border-color: linear-gradient(#daecef, #daecef), linear-gradient(0deg,
-      #f7e9d4 0%,
-      #fbeed2 100%),
-    linear-gradient(#cbe5e9,
-      #cbe5e9); */
-  /* 气泡背景色 */
-  /* filter: drop-shadow(0 0.04rem 0.04rem rgba(0, 0, 0, 0.2)); */
-  /* 添加阴影 */
   z-index: 2;
   /* 确保箭头在最前面 */
+  will-change: left;
+  /* transition: left 0.15s ease-out; */
 }
 
 /* 气泡边框箭头 - 使箭头周围有边框效果 */
@@ -472,7 +496,7 @@ const total = ref(100)
   content: '';
   position: absolute;
   bottom: -0.21rem;
-  left: v-bind(arrowPositionLeft);
+  left: var(--arrow-left-position, 50%);
   width: 0;
   height: 0;
   border-left: 0.21rem solid transparent;
@@ -480,11 +504,23 @@ const total = ref(100)
   border-top: 0.21rem solid #233f59;
   transform: translateX(-50%);
   z-index: 1;
+  will-change: left;
+  /* transition: left 0.15s ease-out; */
 }
 
 /* 气泡样式 */
 .popup-bubble {
   position: relative;
+  transform-origin: top;
+  opacity: 0;
+  transform: scale(0.95) translateY(-10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* 添加动画效果 */
+.popup-animation {
+  opacity: 1;
+  transform: scale(1) translateY(0);
 }
 
 /* 确保内容区域正确布局 */

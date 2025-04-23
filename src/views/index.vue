@@ -5,7 +5,7 @@ import GiftScrollBar from '@/components/GiftScrollBar.vue'
 import WelfareHeader from '@/components/WelfareHeader.vue'
 import { useGiftStore } from '@/store/modules/giftStore'
 import { useLoginStore } from '@/store/modules/loginStore'
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 
 function getImageUrl(name: string) {
   return new URL(`../assets/images/gifts/${name}`, import.meta.url).href
@@ -15,8 +15,10 @@ const bgImg = ref(getImageUrl('img_背景_下.png'))
 
 const { getLoginInfo } = useLoginStore()
 const { getShopListInfo } = useGiftStore()
-getLoginInfo('102191')
-getShopListInfo('102191')
+onMounted(() => {
+  getLoginInfo('102191')
+  getShopListInfo('102191')
+})
 </script>
 
 <template>

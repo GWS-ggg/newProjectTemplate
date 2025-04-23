@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import type { DailyLoginItemInfo, ProductInfo } from '@/types'
+import type { DailyLoginItemInfo, OrderPopupInfo, ProductInfo } from '@/types'
 import { getProductListApi } from '@/api'
 import GreenButton from '@/components/GreenButton.vue'
 import IconWithText from '@/components/IconWithText.vue'
+import { useBuyOrder } from '@/hooks/useBuyOrder'
 import { formatPrice, getPGImg } from '@/utils'
 import { findImagePath } from '@/utils/imageUtils'
 import { computed, inject, ref } from 'vue'
@@ -70,12 +71,27 @@ const _giftList = ref<Gift[]>([
   },
 ])
 const greenButtonRef = ref<InstanceType<typeof GreenButton> | null>(null)
-
-function handleBtnClick() {
-  emits('openPopup')
-  greenButtonRef.value?.triggerAnimation()
+async function handleBtnClick() {
+  const orderPopupInfo: OrderPopupInfo = {
+    price: dailyLoginItemInfo.value[0]?.Price || 0,
+    key: dailyLoginItemInfo.value[0]?.Key || 0,
+    tradeProductId: dailyLoginItemInfo.value[0]?.TradeProductID || 0,
+    skuId: dailyLoginItemInfo.value[0]?.SkuID,
+    exchangeId: dailyLoginItemInfo.value[0]?.ExchangeID,
+  }
+  emits('openPopup', orderPopupInfo)
+  // greenButtonRef.value?.triggerAnimation()
   console.log(greenButtonRef.value, 'greenButtonRef')
+  // await handleBuyOrder(dailyLoginItemInfo.value[0]?.Key || 0, dailyLoginItemInfo.value[0]?.TradeProductID || 0, dailyLoginItemInfo.value[0]?.SkuID)
 }
+
+function onPaymentSuccess() {
+  greenButtonRef.value?.triggerAnimation()
+}
+defineExpose({
+  onPaymentSuccess,
+})
+
 const bubblePosition = {
   top: '-0.2rem',
   right: '-0.22rem',

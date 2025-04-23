@@ -21,13 +21,13 @@ service.interceptors.request.use(
       config.data = config.params
       delete config.params
     }
-    console.log('Request Config:', {
-      url: config.url,
-      method: config.method,
-      data: config.data,
-      headers: config.headers,
-    })
-    console.log('config', config)
+    // console.log('Request Config:', {
+    //   url: config.url,
+    //   method: config.method,
+    //   data: config.data,
+    //   headers: config.headers,
+    // })
+    // console.log('config', config)
     return config
   },
   (error) => {
@@ -49,7 +49,7 @@ service.interceptors.response.use(
    * You can also judge the status by HTTP Status Code
    */
   (response) => {
-    console.log('Response:', response)
+    // console.log('Response:', response)
     const res = response.data
     // if the custom code is not 200, it is judged as an error.
     // TODO

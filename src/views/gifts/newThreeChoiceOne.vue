@@ -3,43 +3,45 @@ import type { ProductInfo, ThreeChoiceOneGiftItemInfo } from '@/types'
 
 import { getProductListApi } from '@/api'
 import { useAnimatableRefs } from '@/hooks/useButtonRefs'
+import { useBuyOrder } from '@/hooks/useBuyOrder'
+
 import { formatPrice, getPGImg } from '@/utils'
 
 import { findImagePath } from '@/utils/imageUtils'
 
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 
-function getImageUrl(name: string) {
-  return new URL(`../../assets/images/gifts/newThreeChoiceOne/${name}`, import.meta.url).href
-}
-
-const imgMap = {
-  bg1Img: getImageUrl('1 copy 2.png'),
-  bg2Img: getImageUrl('2 copy 2.png'),
-  bg3Img: getImageUrl('3 copy 2.png'),
-  gift1Icon1Img: getImageUrl('体力3.png'),
-  gift1Icon2Img: getImageUrl('药水魔力瓶.png'),
-  gift1Icon3Img: getImageUrl('钻石1.png'),
-  gift2Icon1Img: getImageUrl('体力3.png'),
-  gift2Icon2Img: getImageUrl('卡牌宝箱33.png'),
-  gift2Icon3Img: getImageUrl('Bet-Blast-低级-礼包活动icon.png'),
-  gift3Icon1Img: getImageUrl('体力3.png'),
-  gift3Icon2Img: getImageUrl('魔法宝箱.png'),
-  gift3Icon3Img: getImageUrl('天降buff-礼包活动icon.png'),
-  gift3Icon4Img: getImageUrl('卡牌收益buff-礼包活动icon.png'),
-  btnImg: getImageUrl('btn_三选一礼包按钮.png'),
-  btnSmallImg: getImageUrl('按钮.png'),
-  maskImg: getImageUrl('上锁半透明蒙版.png'),
-  lockImg: getImageUrl('三选一礼包_0005_suo-拷贝-3.png'),
-  mask1Img: getImageUrl('img_三选一1.png'),
-  mask2Img: getImageUrl('img_三选一2.png'),
-  mask3Img: getImageUrl('img_三选一3.png'),
-}
-const _imgList = [
-  imgMap.bg1Img,
-  imgMap.bg2Img,
-  imgMap.bg3Img,
-]
+// function getImageUrl(name: string) {
+//   return new URL(`../../assets/images/gifts/newThreeChoiceOne/${name}`, import.meta.url).href
+// }
+// const lockImg = getImageUrl('三选一礼包_0005_suo-拷贝-3.png')
+// const imgMap = {
+//   bg1Img: getImageUrl('1 copy 2.png'),
+//   bg2Img: getImageUrl('2 copy 2.png'),
+//   bg3Img: getImageUrl('3 copy 2.png'),
+//   gift1Icon1Img: getImageUrl('体力3.png'),
+//   gift1Icon2Img: getImageUrl('药水魔力瓶.png'),
+//   gift1Icon3Img: getImageUrl('钻石1.png'),
+//   gift2Icon1Img: getImageUrl('体力3.png'),
+//   gift2Icon2Img: getImageUrl('卡牌宝箱33.png'),
+//   gift2Icon3Img: getImageUrl('Bet-Blast-低级-礼包活动icon.png'),
+//   gift3Icon1Img: getImageUrl('体力3.png'),
+//   gift3Icon2Img: getImageUrl('魔法宝箱.png'),
+//   gift3Icon3Img: getImageUrl('天降buff-礼包活动icon.png'),
+//   gift3Icon4Img: getImageUrl('卡牌收益buff-礼包活动icon.png'),
+//   btnImg: getImageUrl('btn_三选一礼包按钮.png'),
+//   btnSmallImg: getImageUrl('按钮.png'),
+//   maskImg: getImageUrl('上锁半透明蒙版.png'),
+//   lockImg: getImageUrl('三选一礼包_0005_suo-拷贝-3.png'),
+//   mask1Img: getImageUrl('img_三选一1.png'),
+//   mask2Img: getImageUrl('img_三选一2.png'),
+//   mask3Img: getImageUrl('img_三选一3.png'),
+// }
+// const _imgList = [
+//   imgMap.bg1Img,
+//   imgMap.bg2Img,
+//   imgMap.bg3Img,
+// ]
 
 // 接口保留但因暂未使用而注释
 interface _Gift {
@@ -47,66 +49,8 @@ interface _Gift {
   iconImg: string
   title?: string
 }
-
-// const giftList1 = ref<Gift[]>([
-//   {
-//     id: 1,
-//     iconImg: imgMap.gift1Icon1Img,
-//     title: '750',
-//   },
-//   {
-//     id: 2,
-//     iconImg: imgMap.gift1Icon2Img,
-//     title: '20K',
-//   },
-//   {
-//     id: 3,
-//     iconImg: imgMap.gift1Icon3Img,
-//     title: '200',
-//   },
-// ])
-
-// const giftList2 = ref<Gift[]>([
-//   {
-//     id: 1,
-//     iconImg: imgMap.gift2Icon1Img,
-//     title: '1600',
-//   },
-//   {
-//     id: 2,
-//     iconImg: imgMap.gift2Icon2Img,
-//   },
-//   {
-//     id: 3,
-//     iconImg: imgMap.gift2Icon3Img,
-//     title: '10min',
-//   },
-// ])
-
-// const giftList3 = ref<Gift[]>([
-//   {
-//     id: 1,
-//     iconImg: imgMap.gift3Icon1Img,
-//     title: '2100',
-//   },
-//   {
-//     id: 2,
-//     iconImg: imgMap.gift3Icon2Img,
-//   },
-//   {
-//     id: 3,
-//     iconImg: imgMap.gift3Icon3Img,
-//     title: '10min',
-//   },
-//   {
-//     id: 4,
-//     iconImg: imgMap.gift3Icon4Img,
-//     title: '10min',
-//   },
-// ])
-
 const { setRef, triggerAnimation } = useAnimatableRefs()
-
+const { handleBuyOrder } = useBuyOrder()
 const activeGiftId = ref(0)
 function handleClickGift(giftPackage: ThreeChoiceOneGiftItemInfo) {
   if (activeGiftId.value !== giftPackage.id) {
@@ -114,10 +58,19 @@ function handleClickGift(giftPackage: ThreeChoiceOneGiftItemInfo) {
     return
   }
   activeGiftId.value = giftPackage.id
-  triggerAnimation(giftPackage.id)
 }
 
-function handleClickBuyAll(giftPackage: ThreeChoiceOneGiftItemInfo) {
+async function handleClickBuyAll(giftPackage: ThreeChoiceOneGiftItemInfo) {
+  triggerAnimation(giftPackage.id)
+  await handleBuyOrder(giftPackage.Key || 0, giftPackage.TradeProductID || 0, giftPackage.SkuID)
+}
+
+async function handleClickBuySingle(giftPackage: ThreeChoiceOneGiftItemInfo) {
+  if (activeGiftId.value !== giftPackage.id) {
+    activeGiftId.value = giftPackage.id
+    return
+  }
+  await handleBuyOrder(giftPackage.Key || 0, giftPackage.TradeProductID || 0, giftPackage.SkuID)
   triggerAnimation(giftPackage.id)
 }
 
@@ -133,11 +86,11 @@ const bubblePosition = {
   translateX: '50%',
   translateY: '0',
 }
-const _maskList = ref<string[]>([
-  imgMap.mask1Img,
-  imgMap.mask2Img,
-  imgMap.mask3Img,
-])
+// const _maskList = ref<string[]>([
+//   imgMap.mask1Img,
+//   imgMap.mask2Img,
+//   imgMap.mask3Img,
+// ])
 // 存储图片原始尺寸
 const imageSizes = reactive<Record<string, { width: number, height: number }>>({})
 
@@ -284,7 +237,7 @@ getProductList()
           <img
             v-show="giftPackage.id !== activeGiftId"
             class="absolute bottom-300 left-1/2 z-40 w-185 -translate-x-1/2"
-            :src="imgMap.lockImg"
+            src="@/assets/images/gifts/newThreeChoiceOne/lock.png"
             alt=""
           >
         </transition>
@@ -338,6 +291,7 @@ getProductList()
               score-show
               :single-bubble-position="bubblePosition"
               :mask-show="giftPackage.id !== activeGiftId"
+              @click="handleClickBuySingle(giftPackage)"
             >
               <div class="text-29 text-stroke-2 text-stroke-[#164b2e] paint-order">
                 {{ formatPrice(giftPackage.Price || 0) }}
@@ -359,7 +313,7 @@ getProductList()
         score-show
       >
         <div class="text-33 text-stroke-2 text-stroke-[#164b2e] paint-order">
-          BUY ALL {{ formatPrice(itemInfoList[3].Price || 0) }}
+          BUY ALL {{ formatPrice(itemInfoList[3]?.Price || 0) }}
         </div>
       </GreenButton>
     </div>

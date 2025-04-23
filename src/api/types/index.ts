@@ -16,8 +16,18 @@ export interface ShopListItem {
   BannerPic?: string
   Expire: number
   ProductType: number
+  Tag?: number
 }
 export interface BoxData {
   Props: BoxProps[]
   BoxInfo: BoxInfo
+}
+
+export interface BuyOrderInfoRequest {
+  appid: string
+  uid: string
+  key: number
+  skuid?: string
+  tradeproductid: number
+  exchangeid?: number
 }

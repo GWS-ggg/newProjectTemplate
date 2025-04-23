@@ -155,31 +155,31 @@ const giftPackages = ref([
             @click="handleSetCurrentGiftId(pkg.id)"
           >
             <!-- 礼包标签 (Hot/Sale) -->
-            <!-- <div
-              v-if="pkg.tag"
+            <div
+              v-if="pkg.Tag"
               class="absolute left-0 top-0 z-50 transform rounded-md text-16 text-white font-bold"
             >
               <div class="relative -ml-2 -mt-2">
                 <img
-                  v-if="pkg.tag === 'Hot'"
+                  v-if="pkg.Tag === 1"
                   src="@/assets/images/GiftScrollBar/img_热卖_标签.png"
                   alt="标签"
                   class="w-50"
                 >
                 <img
-                  v-if="pkg.tag === 'Sale'"
+                  v-if="pkg.Tag === 2"
                   src="@/assets/images/GiftScrollBar/img_打折_标签.png"
                   alt="标签"
                   class="w-50"
                 >
                 <div
-                  class="absolute top-6 z-10 w-full f-c text-16 color-[#f6f0e5] font-medium text-stroke-3 text-stroke-[#88140f] paint-order -left-6 -rotate-45"
-                  :class="{ 'text-stroke-[#147f05]!': pkg.tag === 'Hot' }"
+                  class="absolute top-6 z-10 w-full f-c text-16 color-[#f6f0e5] font-medium text-stroke-2 text-stroke-[#88140f] paint-order -left-6 -rotate-45"
+                  :class="{ 'text-stroke-[#147f05]!': pkg.Tag === 1 }"
                 >
-                  {{ pkg.tag }}
+                  {{ pkg.Tag === 1 ? 'Sale' : 'Hot' }}
                 </div>
               </div>
-            </div> -->
+            </div>
 
             <!-- 礼包图片容器 -->
             <div class="relative h-full w-full">

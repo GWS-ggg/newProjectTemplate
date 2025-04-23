@@ -12,6 +12,7 @@ export interface ProductInfo {
   Discount: number
   SkuID: string
   TradeProductID: number
+  ExchangeID?: number
   Props: Array<{
     PropID?: number
     PropType?: number
@@ -36,6 +37,7 @@ export interface ItemInfo {
   Pic?: string
   SkuID?: string
   TradeProductID?: number
+  ExchangeID?: number
   BuyTimes?: number
   Props?: Array<{
     PropID?: number
@@ -68,6 +70,7 @@ export interface BattlePassItemInfo {
   SkuID: string
   TradeProductID: number
   BuyTimes?: number
+  ExchangeID?: number
   Props: Array<{
     VipScore: number
   }>
@@ -84,6 +87,7 @@ export interface WheelGiftItemInfo {
   Price: number
   SkuID: string
   TradeProductID: number
+  ExchangeID?: number
   Limit: number
   BuyTimes: number
   Props?: Array<{
@@ -102,6 +106,7 @@ export interface onePlusTwoGiftItemInfo {
   Title: string
   Key: number
   TradeProductID: number
+  ExchangeID?: number
   SkuID?: string
   Limit: number
   Price?: number
@@ -122,6 +127,7 @@ export interface ThreeChoiceOneGiftItemInfo {
   id: number
   Key: number
   TradeProductID: number
+  ExchangeID?: number
   SkuID?: string
   Limit: number
   Price?: number
@@ -143,6 +149,7 @@ export interface DailyLoginItemInfo {
   Price: number
   SkuID: string
   TradeProductID: number
+  ExchangeID?: number
   Limit: number
   BuyTimes?: number
   Props: Array<Prop>
@@ -156,6 +163,7 @@ export interface SixSegmentItemInfo {
   Price: number
   SkuID: string
   TradeProductID: number
+  ExchangeID?: number
   Limit: number
   BuyTimes?: number
   Props: Array<Prop>
@@ -169,6 +177,7 @@ export interface ThreeSegmentNItemInfo {
   Price: number
   SkuID: string
   TradeProductID: number
+  ExchangeID?: number
   Limit: number
   BuyTimes?: number
   Props: Array<Prop>
@@ -181,6 +190,7 @@ export interface ThreeSegmentItemInfo {
   Price: number
   SkuID: string
   TradeProductID: number
+  ExchangeID?: number
   Limit: number
   BuyTimes?: number
   Props: Array<Prop>
@@ -203,4 +213,11 @@ export interface BoxProps {
 export interface BoxInfo {
   BoxType: number
   Pic: string[]
+}
+export interface OrderPopupInfo {
+  price: number
+  key: number
+  tradeProductId: number
+  skuId?: string
+  exchangeId?: number
 }
