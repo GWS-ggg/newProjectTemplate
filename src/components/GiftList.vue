@@ -187,10 +187,12 @@ function openPopup(orderInfo: OrderPopupInfo) {
   orderPopupInfo.value = orderInfo
   // 价格为0  直接下单？
   if (orderInfo.price === 0) {
-    if (giftComponentRef.value && typeof giftComponentRef.value.triggerSuccessAnimation === 'function') {
-      console.log('onPaymentSuccess')
-      giftComponentRef.value.triggerSuccessAnimation()
-    }
+    setTimeout(() => {
+      if (giftComponentRef.value && typeof giftComponentRef.value.triggerSuccessAnimation === 'function') {
+        console.log('onPaymentSuccess')
+        giftComponentRef.value.triggerSuccessAnimation()
+      }
+    }, 50)
     return
   }
   popupOpen.value = true

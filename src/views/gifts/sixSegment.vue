@@ -240,7 +240,22 @@ const arrowsReappear = ref(false)
 // 用于控制新添加礼包的动画延迟
 const newDelay = ref(false)
 
-const animatedIcon = ref<InstanceType<typeof AnimatedIcon> | null>(null)
+const currentGift = ref<SixSegmentItemInfo>()
+const animatedIconRef = ref<InstanceType<typeof AnimatedIcon> | null>(null)
+const scoreTargetRef = ref<HTMLElement | null>(null)
+const scoreTargetRefMap = ref<Record<number, HTMLElement>>({})
+function setScoreTargetRef(el: any, id: number) {
+  scoreTargetRefMap.value[id] = el
+}
+
+const currentGiftScore = computed(() => {
+  const item = itemInfoList.value.find(item => item.id === currentGift.value?.id)
+  if (item?.Price === 0) {
+    return 0
+  }
+  return item?.Props.find(prop => prop.PropID === 270001)?.DeltaCount || 0
+})
+
 const iconImg = ref('')
 iconImg.value = imgMap.processIconLeftImg
 const glowImg = ref('')
@@ -324,7 +339,6 @@ async function handleGiftPurchase(gift: SixSegmentItemInfo) {
   await new Promise(resolve => setTimeout(resolve, 150))
   arrowsVisible.value = true
 }
-const currentGift = ref<SixSegmentItemInfo>()
 async function handleButtonClick(gift: SixSegmentItemInfo) {
   console.log('gift', gift)
   if (isAnimating.value)
@@ -353,7 +367,12 @@ async function triggerSuccessAnimation() {
   try {
     // 触发按钮积分动画
     triggerAnimation(currentGift.value?.id)
-
+    // 触发积分动画
+    animatedIconRef.value?.triggerAnimation()
+    currentScore.value += currentGiftScore.value
+    if (currentScore.value >= targetScore.value) {
+      currentScore.value = targetScore.value
+    }
     // 等待积分动画完成
     if (noBuyGiftNum.value > 6) {
       // 延迟执行礼包购买动画，与按钮动画保持同步
@@ -429,6 +448,7 @@ function getScoreInfo(props: Array<{
         </div>
 
         <img
+          ref="scoreTargetRef"
           class="absolute bottom-1/2 left-1/2 h-90 translate-y-1/2 -translate-x-1/2"
           :src="collectPropImg"
           alt=""
@@ -439,7 +459,7 @@ function getScoreInfo(props: Array<{
         <div class="progress-mask relative h-48 w-450 f-c overflow-hidden border-6 border-[#ffc529] rounded-full border-solid">
           <!-- 进度条填充部分 -->
           <div
-            class="progress-bar absolute left-0 top-0 h-full f-c rounded-full"
+            class="progress-bar absolute left-0 top-0 h-full f-c rounded-20"
             :style="{ width: `${(currentScore / targetScore) * 100}%` }"
           />
 
@@ -547,6 +567,7 @@ function getScoreInfo(props: Array<{
               </div>
               <div
                 v-if="gift.Price !== 0 "
+                :ref="el => setScoreTargetRef(el, gift.id)"
                 class="relative h-59 w-94 f-e flex-col bg-cover bg-center bg-no-repeat"
                 :style="{ backgroundImage: `url(${collectBgImg})` }"
               >
@@ -574,11 +595,16 @@ function getScoreInfo(props: Array<{
         </div>
       </div>
     </div>
-    <AnimatedIcon
-      ref="animatedIcon"
-      :icon-url="iconImg"
-      :glow-url="glowImg"
-    />
+    <Teleport to="body">
+      <!-- 第一个按钮的动画组件 -->
+      <AnimatedIcon
+        ref="animatedIconRef"
+        :icon-url="collectPropImg"
+        :score="currentGiftScore"
+        :start-element="scoreTargetRefMap[currentGift?.id as number]"
+        :target-element="scoreTargetRef"
+      />
+    </Teleport>
   </div>
 </template>
 

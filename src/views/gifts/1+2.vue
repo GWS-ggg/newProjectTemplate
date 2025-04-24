@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import type { onePlusTwoGiftItemInfo, OrderPopupInfo, ProductInfo, Prop } from '@/types'
 import { getProductListApi } from '@/api'
-
+import AnimatedIcon from '@/components/AnimatedIcon.vue'
 import GreenButton from '@/components/GreenButton.vue'
 import IconWithText from '@/components/IconWithText.vue'
 import PopupBubble from '@/components/PopupBubble.vue'
 
 import { useEmitBoxClick } from '@/hooks'
-
 import { useAnimatableRefs } from '@/hooks/useButtonRefs'
 
 import { useBoxStore } from '@/store/modules/boxStore'
@@ -306,8 +305,21 @@ function getPrice(giftPackage: onePlusTwoGiftItemInfo) {
   }
   return formatPrice(giftPackage.Price || 0)
 }
-const { setRef, triggerAnimation } = useAnimatableRefs()
+
 const currentGift = ref<onePlusTwoGiftItemInfo>()
+
+const animatedIconRef = ref<InstanceType<typeof AnimatedIcon> | null>(null)
+const scoreTargetRef = ref<HTMLElement | null>(null)
+const scoreTargetRefMap = ref<Record<number, HTMLElement>>({})
+function setScoreTargetRef(el: any, id: number) {
+  scoreTargetRefMap.value[id] = el
+}
+const currentGiftScore = computed(() => {
+  const item = itemInfoList.value.find(item => item.id === currentGift.value?.id)
+  return item?.Props.find(prop => prop.PropID === 270001)?.DeltaCount || 0
+})
+
+const { setRef, triggerAnimation } = useAnimatableRefs()
 async function handleButtonClick(giftPackage: onePlusTwoGiftItemInfo) {
   console.log(giftPackage.sortId)
   if (giftPackage.sortId !== 1) {
@@ -347,7 +359,13 @@ function triggerSuccessAnimation() {
 
     // 触发按钮动画
     triggerAnimation(currentGift.value?.id)
-
+    console.log('test')
+    // 进度条动画 + 积分新增
+    animatedIconRef.value?.triggerAnimation()
+    currentScore.value += currentGiftScore.value
+    if (currentScore.value >= targetScore.value) {
+      currentScore.value = targetScore.value
+    }
     // 礼包动画
     setTimeout(() => {
       if (noBuyGiftNum.value > 3 && currentGift.value) {
@@ -432,8 +450,9 @@ async function handleGiftAnimation(giftPackage: onePlusTwoGiftItemInfo) {
             :src="imgMap.circle"
             alt=""
           > -->
-          <div class="h-64 w-64 border-8 border-[#ffc529] rounded-full rounded-full border-solid bg-[#1b1142]" />
+          <div class="h-64 w-64 border-8 border-[#ffc529] rounded-full border-solid bg-[#1b1142]" />
           <img
+            ref="scoreTargetRef"
             class="absolute bottom-1/2 left-1/2 h-90 translate-y-1/2 -translate-x-1/2"
             :src="collectionIconImg"
             alt=""
@@ -450,7 +469,7 @@ async function handleGiftAnimation(giftPackage: onePlusTwoGiftItemInfo) {
         <div class="progress-mask relative h-48 w-450 f-c overflow-hidden border-6 border-[#ffc529] rounded-full border-solid">
           <!-- 进度条填充部分 -->
           <div
-            class="progress-bar absolute left-0 top-0 h-full f-c rounded-full"
+            class="progress-bar absolute left-0 top-0 h-full f-c rounded-20"
             :style="{ width: `${(currentScore / targetScore) * 100}%` }"
           />
 
@@ -498,7 +517,10 @@ async function handleGiftAnimation(giftPackage: onePlusTwoGiftItemInfo) {
               class="absolute bottom-30 right-0 z-30 h-50 w-92 f-c flex-col bg-cover bg-center"
               :style="{ backgroundImage: `url(${labelImg})` }"
             >
-              <div class="f-c flex-col -mt-10">
+              <div
+                :ref="el => setScoreTargetRef(el, giftPackage.id)"
+                class="f-c flex-col -mt-10"
+              >
                 <IconWithText
                   :icon-url="collectionIconImg"
                   :text="getScoreInfo(giftPackage.Props)?.DeltaCount.toString()"
@@ -576,6 +598,18 @@ async function handleGiftAnimation(giftPackage: onePlusTwoGiftItemInfo) {
         >
       </template>
     </div>
+
+    <!-- 动画图标组件 - 使用单个Teleport包裹所有AnimatedIcon组件 -->
+    <Teleport to="body">
+      <!-- 第一个按钮的动画组件 -->
+      <AnimatedIcon
+        ref="animatedIconRef"
+        :icon-url="collectionIconImg"
+        :score="currentGiftScore"
+        :start-element="scoreTargetRefMap[currentGift?.id as number]"
+        :target-element="scoreTargetRef"
+      />
+    </Teleport>
   </div>
 </template>
 
@@ -725,7 +759,7 @@ async function handleGiftAnimation(giftPackage: onePlusTwoGiftItemInfo) {
   //   linear-gradient(#952158,
   //     #952158);
   // box-shadow: inset 0px 2px 2px 0px
-  // 	rgba(27, 17, 68, 0.69);
+  // rgba(27, 17, 68, 0.69);
   border-radius: 11px;
   opacity: 1;
 }
@@ -740,6 +774,7 @@ async function handleGiftAnimation(giftPackage: onePlusTwoGiftItemInfo) {
       #751f56);
   background-blend-mode: normal,
     normal;
+  transition: width 0.5s ease; /* 添加宽度过渡动画 */
 }
 
 // .gift-container {
