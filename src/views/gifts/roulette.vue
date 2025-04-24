@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ProductInfo, WheelGiftItemInfo } from '@/types'
+import type { OrderPopupInfo, ProductInfo, WheelGiftItemInfo } from '@/types'
 import { getProductListApi } from '@/api/index'
 
 import CountDown from '@/components/CountDown.vue'
@@ -11,6 +11,7 @@ import { findImagePath } from '@/utils/imageUtils'
 
 import { computed, ref } from 'vue'
 
+const emits = defineEmits(['openPopup'])
 function getImageUrl(name: string) {
   return new URL(`../../assets/images/gifts/roulette/${name}`, import.meta.url).href
 }
@@ -90,9 +91,11 @@ const angles = [
 const wheelGiftList = ref<WheelGiftItemInfo[]>([])
 const vipScore = ref(0)
 // 当前选中的礼包
-const currentGiftId = ref(0)
 const currentGift = computed(() => {
-  return wheelGiftList.value.find(item => item.id === currentGiftId.value)
+  return wheelGiftList.value.find(item => item.BuyTimes === 0)
+})
+const currentGiftId = computed(() => {
+  return currentGift.value?.id || 0
 })
 const productInfo = ref<ProductInfo>()
 async function getWheelGiftList() {
@@ -114,10 +117,7 @@ async function getWheelGiftList() {
     item.id = id
     id++
   })
-  const defaultGift = wheelGiftList.value.find(item => item.BuyTimes === 0)
-  if (defaultGift && defaultGift.id !== undefined) {
-    currentGiftId.value = defaultGift.id
-  }
+
   console.log(res)
 }
 
@@ -129,19 +129,28 @@ const bgImg = computed(() => {
 const itemBgImg = computed(() => {
   return findImagePath('item_bg.png', productInfo.value?.Pic)
 })
-
 const greenButtonRef = ref<InstanceType<typeof GreenButton> | null>(null)
 function handleButtonClick() {
   console.log('handleButtonClick')
-  setTimeout(() => {
-    greenButtonRef.value?.triggerAnimation()
-  }, 200)
+  const orderPopupInfo: OrderPopupInfo = {
+    price: currentGift.value?.Price || 0,
+    key: currentGift.value?.Key || 0,
+    tradeProductId: currentGift.value?.TradeProductID || 0,
+    skuId: currentGift.value?.SkuID,
+    exchangeId: currentGift.value?.ExchangeID,
+  }
+  emits('openPopup', orderPopupInfo)
+}
 
+function triggerSuccessAnimation() {
   if (currentGift.value) {
     currentGift.value.BuyTimes = 1
-    currentGiftId.value++
   }
+  greenButtonRef.value?.triggerAnimation()
 }
+defineExpose({
+  triggerSuccessAnimation,
+})
 </script>
 
 <template>

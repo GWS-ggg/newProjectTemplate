@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { onePlusTwoGiftItemInfo, ProductInfo, Prop } from '@/types'
+import type { onePlusTwoGiftItemInfo, OrderPopupInfo, ProductInfo, Prop } from '@/types'
 import { getProductListApi } from '@/api'
 
 import GreenButton from '@/components/GreenButton.vue'
@@ -16,7 +16,7 @@ import { animateWithClass, formatPrice, getPGImg } from '@/utils'
 import { findImagePath } from '@/utils/imageUtils'
 import { computed, nextTick, ref, watchEffect } from 'vue'
 
-const emits = defineEmits(['boxClick'])
+const emits = defineEmits(['boxClick', 'openPopup'])
 const { handleBoxClick } = useEmitBoxClick(emits)
 function getImageUrl(name: string) {
   return new URL(`../../assets/images/gifts/1+2/${name}`, import.meta.url).href
@@ -310,17 +310,34 @@ function getPrice(giftPackage: onePlusTwoGiftItemInfo) {
   return formatPrice(giftPackage.Price || 0)
 }
 const { setRef, triggerAnimation } = useAnimatableRefs()
-
+const currentGift = ref<onePlusTwoGiftItemInfo>()
 async function handleButtonClick(giftPackage: onePlusTwoGiftItemInfo) {
   console.log(giftPackage.sortId)
   if (giftPackage.sortId !== 1) {
     return
   }
+  currentGift.value = giftPackage
+  const orderPopupInfo: OrderPopupInfo = {
+    price: giftPackage.Price || 0,
+    key: giftPackage.Key || 0,
+    tradeProductId: giftPackage.TradeProductID || 0,
+    skuId: giftPackage.SkuID,
+    exchangeId: giftPackage.ExchangeID,
+  }
+  emits('openPopup', orderPopupInfo)
+}
 
-  if (isAnimating.value) {
+function handlePlusAnimation() {
+  showPlus.value = false
+  setTimeout(() => {
+    showPlus.value = true
+  }, 1500) // 2秒后重新显示
+}
+
+function triggerSuccessAnimation() {
+  if (isAnimating.value || !currentGift.value) {
     return
   }
-
   isAnimating.value = true
 
   try {
@@ -332,15 +349,15 @@ async function handleButtonClick(giftPackage: onePlusTwoGiftItemInfo) {
     handlePlusAnimation()
 
     // 触发按钮动画
-    triggerAnimation(giftPackage.id)
+    triggerAnimation(currentGift.value?.id)
 
     // 礼包动画
     setTimeout(() => {
-      if (noBuyGiftNum.value > 3) {
-        handleGiftAnimation(giftPackage)
+      if (noBuyGiftNum.value > 3 && currentGift.value) {
+        handleGiftAnimation(currentGift.value)
       }
       else {
-        const selectedGift = itemInfoList.value.find(item => item.id === giftPackage.id)
+        const selectedGift = itemInfoList.value.find(item => item.id === currentGift.value?.id)
         if (selectedGift) {
           selectedGift.BuyTimes = 1
         }
@@ -354,13 +371,9 @@ async function handleButtonClick(giftPackage: onePlusTwoGiftItemInfo) {
     isAnimating.value = false
   }
 }
-
-function handlePlusAnimation() {
-  showPlus.value = false
-  setTimeout(() => {
-    showPlus.value = true
-  }, 1500) // 2秒后重新显示
-}
+defineExpose({
+  triggerSuccessAnimation,
+})
 async function handleGiftAnimation(giftPackage: onePlusTwoGiftItemInfo) {
   const giftElement = document.querySelector(`#gift-${giftPackage.sortId}`)
   // 第一块礼包消失动画
@@ -481,7 +494,7 @@ async function handleGiftAnimation(giftPackage: onePlusTwoGiftItemInfo) {
                   :icon-url="collectionIconImg"
                   :text="getScoreInfo(giftPackage.Props)?.DeltaCount.toString()"
                   :icon-height="90"
-                  :bottom="-15"
+                  :bottom="-5"
                   :text-size="32"
                 />
               </div>
@@ -491,7 +504,7 @@ async function handleGiftAnimation(giftPackage: onePlusTwoGiftItemInfo) {
                 v-for="(goods, index) in getPorpsInfo(giftPackage.Props)"
                 :key="index"
               >
-                <div class="flex flex-col items-center">
+                <div class="relative flex flex-col items-center">
                   <img
                     class="h-100"
                     :src="getPGImg(goods.Icon)"
@@ -500,7 +513,7 @@ async function handleGiftAnimation(giftPackage: onePlusTwoGiftItemInfo) {
                   >
                   <span
                     v-if="goods.Text"
-                    class="text-stroke-black -mt-25"
+                    class="absolute text-36 text-stroke-black -bottom-10"
                   >
                     {{ goods.Text }}
                   </span>
@@ -509,7 +522,7 @@ async function handleGiftAnimation(giftPackage: onePlusTwoGiftItemInfo) {
             </div>
           </div>
 
-          <div class="relative z-30 mt-10 h-90 w-200">
+          <div class="relative z-30 mt-25 h-90 w-200">
             <GreenButton
               v-show="giftPackage.BuyTimes === 0"
               :ref="el => setRef(el, giftPackage.id)"

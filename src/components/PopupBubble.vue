@@ -3,7 +3,7 @@ import type { BoxData } from '@/api/types'
 import type { Prop } from '@/types'
 import type { PropType } from 'vue'
 import { getPGImg } from '@/utils'
-import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, watch, watchEffect } from 'vue'
 
 const props = defineProps({
   modelValue: {
@@ -67,13 +67,28 @@ const computedStyle = computed(() => {
   }
 })
 
+const typeTwoMaxRollCountItem = computed(() => {
+  if (props.boxData?.BoxInfo.BoxType !== 2) {
+    return null
+  }
+  return props.boxData?.Props.find(item => item.MaxRollCount)
+})
+const typeTwoOtherItem = computed(() => {
+  if (props.boxData?.BoxInfo.BoxType !== 2) {
+    return null
+  }
+  return props.boxData?.Props.filter(item => !item.MaxRollCount)
+})
+
 // 计算网格布局样式
 const gridStyle = computed(() => {
   if (!props.boxData || !props.boxData.Props)
     return {}
 
-  const propsLength = props.boxData.Props.length
-
+  let propsLength = props.boxData.Props.length
+  if (props.boxData?.BoxInfo.BoxType === 2) {
+    propsLength = typeTwoOtherItem.value?.length || 0
+  }
   // 根据不同数量决定布局
   if (propsLength <= 4) {
     // 一行显示
@@ -335,13 +350,13 @@ const arrowAfterStyle = computed(() => {
       >
         <div class="bg-inner h-104 w-full f-c">
           <img
-            :src="getPGImg(boxData?.Props[2].Icon)"
+            :src="getPGImg(typeTwoMaxRollCountItem?.Icon)"
             alt=""
             class="mr-16 h-full -mt-20"
           >
           <div class="flex flex-col items-start text-23">
             <div class="text-21 color-[#464646] leading-36">
-              1 out of 10 chests contains a
+              1 out of {{ typeTwoMaxRollCountItem?.MaxRollCount }} chests contains a
             </div>
 
             <div class="dual-color-text relative text-40 text-stroke-2 text-stroke-[#8c4a03] paint-order">
@@ -358,7 +373,7 @@ const arrowAfterStyle = computed(() => {
           :style="gridStyle"
         >
           <div
-            v-for="(item, index) in boxData?.Props"
+            v-for="(item, index) in typeTwoOtherItem"
             :key="index"
             class="bg-inner relative h-128 w-128 flex flex-col items-center justify-center rounded-13"
           >

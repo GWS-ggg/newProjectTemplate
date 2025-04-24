@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ItemInfo, ProductInfo } from '@/types'
+import type { ItemInfo, OrderPopupInfo, ProductInfo } from '@/types'
 import { buyOrderApi, getProductListApi } from '@/api/index'
 
 import GreenButton from '@/components/GreenButton.vue'
@@ -9,6 +9,7 @@ import { formatPrice, getPGImg } from '@/utils'
 import { findImagePath } from '@/utils/imageUtils'
 import { computed, ref } from 'vue'
 
+const emits = defineEmits(['openPopup'])
 function getImageUrl(name: string) {
   return new URL(`../../assets/images/gifts/stepGift/${name}`, import.meta.url).href
 }
@@ -57,12 +58,21 @@ const imgMap: Record<string, string> = {
 const greenButtonRef = ref<InstanceType<typeof GreenButton> | null>(null)
 const isBuy = ref(false)
 const isAnimation = ref(false)
-const { handleBuyOrder } = useBuyOrder()
 async function handleBtnClick() {
   if (isAnimation.value)
     return
+  const orderPopupInfo: OrderPopupInfo = {
+    price: productInfo.value?.Price || 0,
+    key: productInfo.value?.Key || 0,
+    tradeProductId: productInfo.value?.TradeProductID || 0,
+    skuId: productInfo.value?.SkuID,
+    exchangeId: productInfo.value?.ExchangeID,
+  }
+  emits('openPopup', orderPopupInfo)
+}
+
+function triggerSuccessAnimation() {
   isAnimation.value = true
-  await handleBuyOrder(productInfo.value?.Key || 0, productInfo.value?.TradeProductID || 0, productInfo.value?.SkuID, productInfo.value?.ExchangeID)
   const goodsListTemp = [...itemInfoList.value]
   console.log(itemInfoList.value, 'itemInfoList')
   // 如果列表不为空，将第一个元素移动到最后
@@ -102,6 +112,9 @@ async function handleBtnClick() {
     isAnimation.value = false
   }
 }
+defineExpose({
+  triggerSuccessAnimation,
+})
 
 const scoreTarget = ref<HTMLElement | null>(null)
 

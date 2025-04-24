@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ProductInfo, SixSegmentItemInfo } from '@/types'
+import type { OrderPopupInfo, ProductInfo, SixSegmentItemInfo } from '@/types'
 
 import { getProductListApi } from '@/api'
 import AnimatedIcon from '@/components/AnimatedIcon.vue'
@@ -10,6 +10,7 @@ import { animateWithClass, formatPrice, getPGImg } from '@/utils'
 import { findImagePath } from '@/utils/imageUtils'
 import { computed, nextTick, ref, watchEffect } from 'vue'
 
+const emits = defineEmits(['openPopup'])
 function getImageUrl(name: string) {
   return new URL(`../../assets/images/gifts/sixSegment/${name}`, import.meta.url).href
 }
@@ -25,6 +26,7 @@ async function getSixSegmentData() {
   })
   productInfo.value = res.ProductInfo
   itemInfoList.value = res.ItemInfo as SixSegmentItemInfo[]
+  // TODO
   itemInfoList.value = itemInfoList.value.slice(0, 9)
   currentScore.value = res.ProductInfo?.TaskScore ?? 0
   targetScore.value = res.ProductInfo?.TaskTargetScore ?? 0
@@ -325,7 +327,7 @@ async function handleGiftPurchase(gift: SixSegmentItemInfo) {
   await new Promise(resolve => setTimeout(resolve, 150))
   arrowsVisible.value = true
 }
-
+const currentGift = ref<SixSegmentItemInfo>()
 async function handleButtonClick(gift: SixSegmentItemInfo) {
   console.log('gift', gift)
   if (isAnimating.value)
@@ -334,23 +336,35 @@ async function handleButtonClick(gift: SixSegmentItemInfo) {
   // 只有第一个礼包可以被购买
   if (gift.sortId !== 1)
     return
+  currentGift.value = gift
 
+  const orderPopupInfo: OrderPopupInfo = {
+    price: gift.Price || 0,
+    key: gift.Key || 0,
+    tradeProductId: gift.TradeProductID || 0,
+    skuId: gift.SkuID,
+    exchangeId: gift.ExchangeID,
+  }
+  emits('openPopup', orderPopupInfo)
+}
+
+async function triggerSuccessAnimation() {
+  if (!currentGift.value) {
+    return
+  }
   isAnimating.value = true
   try {
     // 触发按钮积分动画
-    triggerAnimation(gift.id)
+    triggerAnimation(currentGift.value?.id)
 
     // 等待积分动画完成
     if (noBuyGiftNum.value > 6) {
       // 延迟执行礼包购买动画，与按钮动画保持同步
-      await handleGiftPurchase(gift)
+      await handleGiftPurchase(currentGift.value)
     }
     else {
       // 如果礼包数量不足，直接标记为已购买
-      const currentGift = itemInfoList.value.find(item => item.id === gift.id)
-      if (currentGift) {
-        currentGift.BuyTimes = 1
-      }
+      currentGift.value.BuyTimes = 1
     }
 
     // 更新分数
@@ -363,6 +377,9 @@ async function handleButtonClick(gift: SixSegmentItemInfo) {
     isAnimating.value = false
   }
 }
+defineExpose({
+  triggerSuccessAnimation,
+})
 
 function getAnimationDelay(sortId: number) {
   // 新增的礼包快速出来

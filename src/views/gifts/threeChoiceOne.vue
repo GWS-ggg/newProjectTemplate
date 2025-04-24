@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ProductInfo, ThreeChoiceOneGiftItemInfo } from '@/types'
+import type { OrderPopupInfo, ProductInfo, ThreeChoiceOneGiftItemInfo } from '@/types'
 
 import { getProductListApi } from '@/api'
 import { useAnimatableRefs } from '@/hooks/useButtonRefs'
@@ -8,6 +8,8 @@ import { formatPrice, getPGImg } from '@/utils'
 import { findImagePath } from '@/utils/imageUtils'
 
 import { computed, ref } from 'vue'
+
+const emits = defineEmits(['openPopup'])
 
 function getImageUrl(name: string) {
   return new URL(`../../assets/images/gifts/threeChoiceOne/${name}`, import.meta.url).href
@@ -108,11 +110,36 @@ const activeGiftId = ref(0)
 function handleClickGift(giftPackage: ThreeChoiceOneGiftItemInfo) {
   if (activeGiftId.value !== giftPackage.id) {
     activeGiftId.value = giftPackage.id
+  }
+}
+const currentItemInfo = ref<ThreeChoiceOneGiftItemInfo>()
+function handlePayGift(giftPackage: ThreeChoiceOneGiftItemInfo) {
+  if (activeGiftId.value !== giftPackage.id) {
+    activeGiftId.value = giftPackage.id
     return
   }
-  activeGiftId.value = giftPackage.id
-  triggerAnimation(giftPackage.id)
+  currentItemInfo.value = giftPackage
+
+  const orderPopupInfo: OrderPopupInfo = {
+    price: giftPackage.Price || 0,
+    key: giftPackage.Key || 0,
+    tradeProductId: giftPackage.TradeProductID || 0,
+    skuId: giftPackage.SkuID,
+    exchangeId: giftPackage.ExchangeID,
+  }
+  emits('openPopup', orderPopupInfo)
 }
+
+function triggerSuccessAnimation() {
+  if (!currentItemInfo.value) {
+    return
+  }
+  triggerAnimation(currentItemInfo.value.id)
+  currentItemInfo.value.BuyTimes = 1
+}
+defineExpose({
+  triggerSuccessAnimation,
+})
 
 const productInfo = ref<ProductInfo>()
 const itemInfoList = ref<ThreeChoiceOneGiftItemInfo[]>([])
@@ -217,7 +244,11 @@ const bubblePosition = {
           </div>
         </div>
         <div class="absolute bottom-30 left-0 z-30 w-full flex flex-col items-center justify-end">
-          <div class="z-50 h-55 w-155">
+          <div
+            v-show="giftPackage.BuyTimes === 0"
+            class="z-50 h-55 w-155"
+            @click="handlePayGift(giftPackage)"
+          >
             <GreenButton
               :ref="(el: any) => setRef(el, giftPackage.id)"
               radius="0.24rem"
@@ -230,6 +261,16 @@ const bubblePosition = {
                 {{ formatPrice(giftPackage.Price || 0) }}
               </div>
             </GreenButton>
+          </div>
+          <div
+            v-show="giftPackage.BuyTimes === 1"
+            class="fade-in f-c"
+          >
+            <img
+              class="h-55"
+              src="@/assets/images/common/icon_ok.png"
+              alt=""
+            >
           </div>
         </div>
       </div>

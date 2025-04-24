@@ -221,3 +221,62 @@ export interface OrderPopupInfo {
   skuId?: string
   exchangeId?: number
 }
+
+export interface ReqBaseParams {
+  appid: string
+  version: string
+  fn_uid: string
+  fn_deviceid: string
+  zoneid: number
+  roleid: string
+  is_gs: number
+  token: string
+  os: string
+  game_platform?: 'app' | 'h5'
+  ts: number
+}
+export interface PayInfo extends Record<string, string | number | undefined> {
+  price: string
+  params: string
+  desc: string
+  pid: string
+  title: string
+  game_appid: string
+  game_openid: string
+  content_type: string
+  trade_type?: string
+  method?: string
+  zone_id: number
+  role_id: string
+}
+export type PayOrderReq = PayInfo & ReqBaseParams
+export interface PayOrderRes {
+  fntype14: string
+  orderid: string
+  paymethod: string
+}
+
+export interface OrderStatusReq {
+  order_id: string
+}
+export interface OrderStatusRes {
+  status: number
+  transaction_id: string
+  err_msg: string // 错误信息，需要展示
+}
+
+export interface Pop {
+  visible?: boolean
+  type: string // 'success' | 'error' | 'failed'
+  content: string
+  closeable?: boolean
+  textAlign?: string
+  defaultBtn?: {
+    text: string
+    onClick: () => void
+  }
+  primaryBtn?: {
+    text: string
+    onClick: () => void
+  }
+}

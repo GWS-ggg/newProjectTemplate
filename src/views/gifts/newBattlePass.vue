@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { BattlePassItemInfo } from '@/types'
+import type { BattlePassItemInfo, OrderPopupInfo } from '@/types'
 import { getProductListApi } from '@/api/index'
 // 按钮点击动画
 import AnimatedIcon from '@/components/AnimatedIcon.vue'
@@ -8,6 +8,8 @@ import { useBuyOrder } from '@/hooks/useBuyOrder'
 import { useScoreElementStore } from '@/store/modules/scoreElement'
 import { formatPrice } from '@/utils'
 import { computed, ref } from 'vue'
+
+const emits = defineEmits(['openPopup'])
 
 // 获取积分元素引用
 const { scoreRef } = useScoreElementStore()
@@ -103,20 +105,41 @@ function triggerAnimation(mainRef: any, addRef: any) {
     addRef?.value?.triggerAnimation()
   }
 }
-const { handleBuyOrder } = useBuyOrder()
 // 按钮点击事件处理函数
+const currentItem = ref<BattlePassItemInfo>()
+const currentId = ref(1)
 async function handleBtnClick(id: number, itemInfo: BattlePassItemInfo) {
+  if (itemInfo.BuyTimes === 1) {
+    return
+  }
   console.log('handleBtnClick', id)
-  await handleBuyOrder(itemInfo.Key || 0, itemInfo.TradeProductID || 0, itemInfo.SkuID, itemInfo.ExchangeID)
-  if (id === 1) {
-    triggerAnimation(animatedIconRef, animatedIconAddRef)
-  }
-  else {
-    triggerAnimation(animatedIconRefSecond, animatedIconAddRefSecond)
-  }
+  currentId.value = id
+  currentItem.value = itemInfo
 
-  itemInfo.BuyTimes = 1
+  const orderPopupInfo: OrderPopupInfo = {
+    price: itemInfo.Price || 0,
+    key: itemInfo.Key || 0,
+    tradeProductId: itemInfo.TradeProductID || 0,
+    skuId: itemInfo.SkuID,
+    exchangeId: itemInfo.ExchangeID,
+  }
+  emits('openPopup', orderPopupInfo)
 }
+
+function triggerSuccessAnimation() {
+  if (currentItem.value) {
+    currentItem.value.BuyTimes = 1
+    if (currentId.value === 1) {
+      triggerAnimation(animatedIconRef, animatedIconAddRef)
+    }
+    else {
+      triggerAnimation(animatedIconRefSecond, animatedIconAddRefSecond)
+    }
+  }
+}
+defineExpose({
+  triggerSuccessAnimation,
+})
 
 // 获取商品数据
 async function getProductList() {

@@ -22,7 +22,7 @@ import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue'
 
 // 定义一个接口，描述子组件应该具有的方法
 interface GiftComponent {
-  onPaymentSuccess?: () => void
+  triggerSuccessAnimation?: () => void
 }
 
 const giftStore = useGiftStore()
@@ -129,23 +129,6 @@ onMounted(() => {
   }
 })
 
-// 弹窗状态
-const popupOpen = ref(false)
-
-const orderPopupInfo = ref<OrderPopupInfo>({
-  price: 0,
-  key: 0,
-  tradeProductId: 0,
-  skuId: '',
-  exchangeId: 0,
-})
-function openPopup(orderInfo: OrderPopupInfo) {
-  popupOpen.value = true
-  orderPopupInfo.value = orderInfo
-}
-function closePopup() {
-  popupOpen.value = false
-}
 const boxStore = useBoxStore()
 const showPopupBubble = ref(false)
 const popupTargetElement = ref<HTMLElement | null>(null)
@@ -188,82 +171,44 @@ function closePopupBubble() {
   realShowPopupBubble.value = false
   showPopupBubble.value = false
 }
-interface PayChannel {
-  payType: number
-  name: string
-  extra: number
-  level: number
-  icon: string
+
+// 支付相关
+// 弹窗状态
+const popupOpen = ref(false)
+const giftComponentRef = ref<GiftComponent | null>(null)
+const orderPopupInfo = ref<OrderPopupInfo>({
+  price: 0,
+  key: 0,
+  tradeProductId: 0,
+  skuId: '',
+  exchangeId: 0,
+})
+function openPopup(orderInfo: OrderPopupInfo) {
+  orderPopupInfo.value = orderInfo
+  // 价格为0  直接下单？
+  if (orderInfo.price === 0) {
+    if (giftComponentRef.value && typeof giftComponentRef.value.triggerSuccessAnimation === 'function') {
+      console.log('onPaymentSuccess')
+      giftComponentRef.value.triggerSuccessAnimation()
+    }
+    return
+  }
+  popupOpen.value = true
+}
+function closePopup() {
+  popupOpen.value = false
 }
 
-const payChannels = ref<PayChannel[]>([
-  {
-    payType: 23002,
-    name: 'Alipay',
-    extra: 10,
-    level: 1,
-    icon: 'https://mprogram-static.forevernine.com/ovsite/icon2/alipay.png',
-  },
-  {
-    payType: 23001,
-    name: 'WeChatPay',
-    extra: 10,
-    level: 1,
-    icon: 'https://mprogram-static.forevernine.com/ovsite/icon2/weixin.png',
-  },
-  {
-    payType: 23003,
-    name: 'ApplePay',
-    extra: 10,
-    level: 1,
-    icon: 'https://mprogram-static.forevernine.com/ovsite/icon2/apple.png',
-  },
-  {
-    payType: 23004,
-    name: 'GooglePay',
-    extra: 10,
-    level: 1,
-    icon: 'https://mprogram-static.forevernine.com/ovsite/icon2/geogle.png',
-  },
-  {
-    payType: 230010,
-    name: 'Cards',
-    extra: 10,
-    level: 1,
-    icon: 'https://mprogram-static.forevernine.com/cdn/img/cards.jpeg',
-  },
-  {
-    payType: 23,
-    name: 'Payermax',
-    extra: 10,
-    level: 1,
-    icon: 'https://mprogram-static.forevernine.com/ovsite/icon2/payermax.png',
-  },
-  {
-    payType: 20,
-    name: 'PayPal',
-    extra: 10,
-    level: 1,
-    icon: 'https://mprogram-static.forevernine.com/ovsite/icon2/paypal.png',
-  },
-])
 // 添加引用，用于触发事件
-const giftComponentRef = ref<GiftComponent | null>(null)
-const selectedPayChannel = ref<PayChannel | null>(payChannels.value[0])
-const { handleBuyOrder } = useBuyOrder()
-async function handlePayOrder() {
-  const res = await handleBuyOrder(orderPopupInfo.value.key, orderPopupInfo.value.tradeProductId, orderPopupInfo.value.skuId, orderPopupInfo.value.exchangeId)
-  if (res) {
-    // 检查方法是否存在
-    if (giftComponentRef.value && typeof giftComponentRef.value.onPaymentSuccess === 'function') {
-      giftComponentRef.value.onPaymentSuccess()
+function onPaymentSuccess() {
+  console.log('onPaymentSuccess 11')
+  // 延迟400ms 确保弹窗关闭完再显示动画
+  setTimeout(() => {
+    if (giftComponentRef.value && typeof giftComponentRef.value.triggerSuccessAnimation === 'function') {
+      console.log('onPaymentSuccess')
+      giftComponentRef.value.triggerSuccessAnimation()
     }
-    console.log('下单成功', res)
-  }
-  else {
-    console.log('下单失败', res)
-  }
-  closePopup()
+  }, 400)
 }
 </script>
 
@@ -287,41 +232,11 @@ async function handlePayOrder() {
       v-model="popupOpen"
       @close="closePopup"
     >
-      <div class="relative z-1000 max-h-[80vh] min-h-[60vh] bg-[#fff] p-20 pb-120">
-        <div class="w-full overflow-y-auto rounded-20 bg-[#f8f8f8] p-20 text-24">
-          <div class="mb-20 color-[#666666]">
-            支付方式
-          </div>
-          <div class="w-full flex flex-col gap-20">
-            <div
-              v-for="channel in payChannels"
-              :key="channel.payType"
-              class="f-c cursor-pointer gap-10 border border-[#fff] rounded-10 border-solid bg-[#fff] py-5"
-              :class="{ 'bg-[#fff8f8]  border-[#ED6504]!': selectedPayChannel?.payType === channel.payType }"
-              @click="selectedPayChannel = channel"
-            >
-              <img
-                :src="channel.icon"
-                class="h-48"
-              >
-            </div>
-          </div>
-        </div>
-        <div class="absolute bottom-0 left-0 right-0 h-100 w-full bg-[#f8f8f8] px-15">
-          <div class="h-full w-full flex items-center justify-between text-32">
-            <div class="color-[#666666]">
-              合计:
-              <span class="color-[#ED6504]">{{ formatPrice(orderPopupInfo.price) }} </span>
-            </div>
-            <div
-              class="mr-10 h-54 w-200 f-c cursor-pointer rounded-25 bg-[#ED6504] text-32 color-[#fff]"
-              @click="handlePayOrder"
-            >
-              立即支付
-            </div>
-          </div>
-        </div>
-      </div>
+      <PaySelect
+        :order-popup-info="orderPopupInfo"
+        @payment-success="onPaymentSuccess"
+        @close="closePopup"
+      />
     </Popup>
     <PopupBubble
       v-model="showPopupBubble"

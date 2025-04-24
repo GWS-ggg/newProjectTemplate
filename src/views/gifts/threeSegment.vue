@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ProductInfo, Prop, ThreeSegmentItemInfo } from '@/types'
+import type { OrderPopupInfo, ProductInfo, Prop, ThreeSegmentItemInfo } from '@/types'
 import { getProductListApi } from '@/api'
 import GreenButton from '@/components/GreenButton.vue'
 import { useAnimatableRefs } from '@/hooks/useButtonRefs'
@@ -12,7 +12,6 @@ const emits = defineEmits(['boxClick', 'openPopup'])
 const itemInfoList = ref<ThreeSegmentItemInfo[]>([])
 const productInfo = ref<ProductInfo>()
 const bgImgList = ref<string[]>([])
-const { handleBuyOrder } = useBuyOrder()
 async function getThreeSegmentData() {
   const res = await getProductListApi({
     appid: '616876868660610',
@@ -142,17 +141,34 @@ const { setRef, triggerAnimation } = useAnimatableRefs()
 const currentGiftId = computed(() => {
   return itemInfoList.value.find(item => item.BuyTimes === 0)?.id
 })
-async function handlePurchaseButton(item: ThreeSegmentItemInfo) {
-  triggerAnimation(item.id)
-  const giftElement = document.querySelector(`#gift-${item.id}`)
+const currentItem = ref<ThreeSegmentItemInfo>()
+async function triggerSuccessAnimation() {
+  triggerAnimation(currentItem.value?.id || 0)
+  const giftElement = document.querySelector(`#gift-${currentItem.value?.id}`)
   console.log(giftElement, 'giftElement')
-  item.BuyTimes = 1
-  await handleBuyOrder(item.Key || 0, item.TradeProductID || 0, item.SkuID, item.ExchangeID)
-  await animateWithClass(giftElement, 'flip-active', 600)
+  if (currentItem.value) {
+    currentItem.value.BuyTimes = 1
+    animateWithClass(giftElement, 'flip-active', 600)
+  }
 }
 function handleBoxClick(prop: Prop, event: MouseEvent) {
   emits('boxClick', prop, event)
 }
+function handleBtnClick(item: ThreeSegmentItemInfo) {
+  currentItem.value = item
+  const orderPopupInfo: OrderPopupInfo = {
+    price: item.Price || 0,
+    key: item.Key || 0,
+    tradeProductId: item.TradeProductID || 0,
+    skuId: item.SkuID,
+    exchangeId: item.ExchangeID,
+  }
+  emits('openPopup', orderPopupInfo)
+}
+
+defineExpose({
+  triggerSuccessAnimation,
+})
 </script>
 
 <template>
@@ -203,7 +219,7 @@ function handleBoxClick(prop: Prop, event: MouseEvent) {
         </div>
         <div
           class="absolute bottom-38 left-1/2 z-30 h-100 w-300 -translate-x-1/2"
-          @click="handlePurchaseButton(item)"
+          @click="handleBtnClick(item)"
         >
           <GreenButton
             :ref="el => setRef(el, item.id)"

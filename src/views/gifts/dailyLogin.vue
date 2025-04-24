@@ -20,6 +20,9 @@ async function getDailyLoginData() {
   })
   dailyLoginItemInfo.value = res.ItemInfo as DailyLoginItemInfo[]
   productInfo.value = res.ProductInfo as ProductInfo
+  if (dailyLoginItemInfo.value[0]?.BuyTimes === undefined) {
+    dailyLoginItemInfo.value[0].BuyTimes = 0
+  }
   // dailyLoginItemInfo.value[0].Props[2].Icon = 'box/30.png'
   console.log(res, 'res')
 }
@@ -71,7 +74,10 @@ const _giftList = ref<Gift[]>([
   },
 ])
 const greenButtonRef = ref<InstanceType<typeof GreenButton> | null>(null)
-async function handleBtnClick() {
+function handleBtnClick() {
+  if (dailyLoginItemInfo.value[0]?.BuyTimes === 1) {
+    return
+  }
   const orderPopupInfo: OrderPopupInfo = {
     price: dailyLoginItemInfo.value[0]?.Price || 0,
     key: dailyLoginItemInfo.value[0]?.Key || 0,
@@ -80,16 +86,15 @@ async function handleBtnClick() {
     exchangeId: dailyLoginItemInfo.value[0]?.ExchangeID,
   }
   emits('openPopup', orderPopupInfo)
-  // greenButtonRef.value?.triggerAnimation()
   console.log(greenButtonRef.value, 'greenButtonRef')
-  // await handleBuyOrder(dailyLoginItemInfo.value[0]?.Key || 0, dailyLoginItemInfo.value[0]?.TradeProductID || 0, dailyLoginItemInfo.value[0]?.SkuID)
 }
 
-function onPaymentSuccess() {
+function triggerSuccessAnimation() {
   greenButtonRef.value?.triggerAnimation()
+  dailyLoginItemInfo.value[0].BuyTimes = 1
 }
 defineExpose({
-  onPaymentSuccess,
+  triggerSuccessAnimation,
 })
 
 const bubblePosition = {
@@ -186,6 +191,7 @@ const bubblePosition = {
     </div>
     <div class="absolute bottom-35 left-1/2 h-96 w-317 f-c -translate-x-1/2">
       <div
+        v-show="dailyLoginItemInfo[0]?.BuyTimes === 0"
         class="h-96 w-317"
         @click="handleBtnClick"
       >
@@ -211,6 +217,16 @@ const bubblePosition = {
             </div>
           </div>
         </GreenButton>
+      </div>
+      <div
+        v-show="dailyLoginItemInfo[0]?.BuyTimes && dailyLoginItemInfo[0]?.BuyTimes > 0"
+        class="fade-in f-c"
+      >
+        <img
+          class="h-96"
+          src="@/assets/images/common/icon_ok.png"
+          alt=""
+        >
       </div>
     </div>
   </div>
@@ -262,5 +278,25 @@ const bubblePosition = {
   background: linear-gradient(0deg, #1d6301 0%, #5f9f26 100%);
   border-radius: 34px; /* 略大于按钮的圆角 */
   z-index: -1;
+}
+
+.fade-in {
+  animation: fadeInUp 0.5s ease forwards;
+  animation-delay: 0s; /* 将被内联样式覆盖 */
+}
+
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  80% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 </style>

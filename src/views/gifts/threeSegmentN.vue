@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ProductInfo, ThreeSegmentNItemInfo } from '@/types'
+import type { OrderPopupInfo, ProductInfo, ThreeSegmentNItemInfo } from '@/types'
 import { getProductListApi } from '@/api'
 import GreenButton from '@/components/GreenButton.vue'
 import IconWithText from '@/components/IconWithText.vue'
@@ -9,6 +9,7 @@ import { animateWithClass, formatPrice, getPGImg } from '@/utils'
 import { findImagePath } from '@/utils/imageUtils'
 import { computed, nextTick, ref, watchEffect } from 'vue'
 
+const emits = defineEmits(['openPopup'])
 const itemInfoList = ref<ThreeSegmentNItemInfo[]>([])
 const productInfo = ref<ProductInfo>()
 async function getThreeSegmentNData() {
@@ -214,29 +215,39 @@ watchEffect(() => {
 const { setRef, triggerAnimation } = useAnimatableRefs()
 
 const isAnimating = ref(false)
-
+const currentGift = ref<ThreeSegmentNItemInfo>()
 // 使用async/await实现流畅的动画序列
-async function handlePurchaseButton(currentGift: ThreeSegmentNItemInfo) {
-  if (currentGift.sortId !== 1) {
+async function handlePurchaseButton(gift: ThreeSegmentNItemInfo) {
+  if (gift.sortId !== 1) {
     return
   }
 
   // 防止重复点击
   if (isAnimating.value)
     return
-
+  currentGift.value = gift
+  const orderPopupInfo: OrderPopupInfo = {
+    price: gift.Price || 0,
+    key: gift.Key || 0,
+    tradeProductId: gift.TradeProductID || 0,
+    skuId: gift.SkuID,
+    exchangeId: gift.ExchangeID,
+  }
+  emits('openPopup', orderPopupInfo)
+}
+async function triggerSuccessAnimation() {
+  if (!currentGift.value) {
+    return
+  }
   try {
     isAnimating.value = true
     // 三个礼物以上执行动画
     if (noBuyGiftNum.value > 3) {
-      await handleAnimation(currentGift)
+      await handleAnimation(currentGift.value)
     }
     else {
-      triggerAnimation(currentGift.id)
-      const selectedGift = itemInfoList.value.find(item => item.id === currentGift.id)
-      if (selectedGift) {
-        selectedGift.BuyTimes = 1
-      }
+      triggerAnimation(currentGift.value?.id)
+      currentGift.value.BuyTimes = 1
     }
   }
   finally {
@@ -244,6 +255,9 @@ async function handlePurchaseButton(currentGift: ThreeSegmentNItemInfo) {
     isAnimating.value = false
   }
 }
+defineExpose({
+  triggerSuccessAnimation,
+})
 
 async function handleAnimation(currentGift: ThreeSegmentNItemInfo) {
   animatedBgImgShow.value = true

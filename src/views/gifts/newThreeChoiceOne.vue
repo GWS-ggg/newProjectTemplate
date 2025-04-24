@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ProductInfo, ThreeChoiceOneGiftItemInfo } from '@/types'
+import type { OrderPopupInfo, ProductInfo, ThreeChoiceOneGiftItemInfo } from '@/types'
 
 import { getProductListApi } from '@/api'
 import { useAnimatableRefs } from '@/hooks/useButtonRefs'
@@ -42,6 +42,7 @@ import { computed, onMounted, reactive, ref, watch } from 'vue'
 //   imgMap.bg2Img,
 //   imgMap.bg3Img,
 // ]
+const emits = defineEmits(['openPopup'])
 
 // 接口保留但因暂未使用而注释
 interface _Gift {
@@ -49,9 +50,13 @@ interface _Gift {
   iconImg: string
   title?: string
 }
+const productInfo = ref<ProductInfo>()
+const itemInfoList = ref<ThreeChoiceOneGiftItemInfo[]>([])
+
 const { setRef, triggerAnimation } = useAnimatableRefs()
-const { handleBuyOrder } = useBuyOrder()
+
 const activeGiftId = ref(0)
+const currentItemInfo = ref<ThreeChoiceOneGiftItemInfo>()
 function handleClickGift(giftPackage: ThreeChoiceOneGiftItemInfo) {
   if (activeGiftId.value !== giftPackage.id) {
     activeGiftId.value = giftPackage.id
@@ -59,23 +64,52 @@ function handleClickGift(giftPackage: ThreeChoiceOneGiftItemInfo) {
   }
   activeGiftId.value = giftPackage.id
 }
-
-async function handleClickBuyAll(giftPackage: ThreeChoiceOneGiftItemInfo) {
-  triggerAnimation(giftPackage.id)
-  await handleBuyOrder(giftPackage.Key || 0, giftPackage.TradeProductID || 0, giftPackage.SkuID)
-}
-
 async function handleClickBuySingle(giftPackage: ThreeChoiceOneGiftItemInfo) {
+  if (giftPackage.BuyTimes === 1) {
+    return
+  }
   if (activeGiftId.value !== giftPackage.id) {
     activeGiftId.value = giftPackage.id
     return
   }
-  await handleBuyOrder(giftPackage.Key || 0, giftPackage.TradeProductID || 0, giftPackage.SkuID)
-  triggerAnimation(giftPackage.id)
+  currentItemInfo.value = giftPackage
+  handleBuyOrder(giftPackage)
+}
+async function handleClickBuyAll(giftPackage: ThreeChoiceOneGiftItemInfo) {
+  if (giftPackage.BuyTimes === 1) {
+    return
+  }
+  currentItemInfo.value = giftPackage
+  handleBuyOrder(giftPackage)
+}
+function handleBuyOrder(giftPackage: ThreeChoiceOneGiftItemInfo) {
+  const orderPopupInfo: OrderPopupInfo = {
+    price: giftPackage.Price || 0,
+    key: giftPackage.Key || 0,
+    tradeProductId: giftPackage.TradeProductID || 0,
+    skuId: giftPackage.SkuID,
+    exchangeId: giftPackage.ExchangeID,
+  }
+  emits('openPopup', orderPopupInfo)
 }
 
-const productInfo = ref<ProductInfo>()
-const itemInfoList = ref<ThreeChoiceOneGiftItemInfo[]>([])
+function triggerSuccessAnimation() {
+  console.log(currentItemInfo.value, 'currentItemInfo.value')
+  if (!currentItemInfo.value) {
+    return
+  }
+  console.log(currentItemInfo.value, 'currentItemInfo.value')
+  triggerAnimation(currentItemInfo.value.id)
+  currentItemInfo.value.BuyTimes = 1
+  if (currentItemInfo.value.id === 3) {
+    itemInfoList.value.forEach((item) => {
+      item.BuyTimes = 1
+    })
+  }
+}
+defineExpose({
+  triggerSuccessAnimation,
+})
 
 const displayItemInfoList = computed(() => {
   return itemInfoList.value.slice(0, 3)
@@ -283,7 +317,10 @@ getProductList()
           </div>
         </div>
         <div class="absolute bottom-30 left-0 z-30 w-full flex flex-col items-center justify-end">
-          <div class="z-50 h-55 w-135">
+          <div
+            v-show="giftPackage.BuyTimes === 0"
+            class="z-50 h-55 w-135"
+          >
             <GreenButton
               :ref="(el: any) => setRef(el, giftPackage.id)"
               radius="0.24rem"
@@ -298,6 +335,16 @@ getProductList()
               </div>
             </GreenButton>
           </div>
+          <div
+            v-show="giftPackage.BuyTimes && giftPackage.BuyTimes > 0"
+            class="fade-in f-c"
+          >
+            <img
+              class="h-59"
+              src="@/assets/images/common/icon_ok.png"
+              alt=""
+            >
+          </div>
         </div>
       </div>
     </div>
@@ -306,16 +353,31 @@ getProductList()
       class="z-10 mt-20 h-90 w-400"
       @click="handleClickBuyAll(itemInfoList[3])"
     >
-      <GreenButton
-        :ref="(el: any) => setRef(el, 3)"
-        radius="0.32rem"
-        :score="productInfo?.Props?.[0]?.VipScore"
-        score-show
+      <div
+        v-show="itemInfoList[3]?.BuyTimes === 0"
+        class="h-full w-full"
       >
-        <div class="text-33 text-stroke-2 text-stroke-[#164b2e] paint-order">
-          BUY ALL {{ formatPrice(itemInfoList[3]?.Price || 0) }}
-        </div>
-      </GreenButton>
+        <GreenButton
+          :ref="(el: any) => setRef(el, 3)"
+          radius="0.32rem"
+          :score="productInfo?.Props?.[0]?.VipScore"
+          score-show
+        >
+          <div class="text-33 text-stroke-2 text-stroke-[#164b2e] paint-order">
+            BUY ALL {{ formatPrice(itemInfoList[3]?.Price || 0) }}
+          </div>
+        </GreenButton>
+      </div>
+      <div
+        v-show="itemInfoList[3]?.BuyTimes && itemInfoList[3]?.BuyTimes > 0"
+        class="fade-in h-full f-c"
+      >
+        <img
+          class="h-full"
+          src="@/assets/images/common/icon_ok.png"
+          alt=""
+        >
+      </div>
     </div>
 
     <div class="mt-20 f-c">
@@ -387,5 +449,25 @@ getProductList()
 .mask-lock-leave-to {
   opacity: 0;
   transform: translate(-50%, 0) scale(0.8);
+}
+
+.fade-in {
+  animation: fadeInUp 0.5s ease forwards;
+  animation-delay: 0s; /* 将被内联样式覆盖 */
+}
+
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  80% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 </style>

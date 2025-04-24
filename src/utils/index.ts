@@ -53,3 +53,15 @@ export function animateWithClass(element: Element | null, className: string, dur
 export function formatPrice(price: number) {
   return `$${(price / 100).toFixed(2)}`
 }
+
+// 获取设备类型
+export function getDeviceType(): string {
+  const userAgent = navigator.userAgent.toLowerCase()
+  if (/android/.test(userAgent)) {
+    return 'android'
+  }
+  if (/iphone|ipad|ipod/.test(userAgent)) {
+    return 'ios'
+  }
+  return 'pc'
+}
