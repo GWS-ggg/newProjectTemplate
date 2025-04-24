@@ -3,12 +3,14 @@ import type { DailyLoginItemInfo, OrderPopupInfo, ProductInfo } from '@/types'
 import { getProductListApi } from '@/api'
 import GreenButton from '@/components/GreenButton.vue'
 import IconWithText from '@/components/IconWithText.vue'
+import { useEmitBoxClick } from '@/hooks'
 import { useBuyOrder } from '@/hooks/useBuyOrder'
 import { formatPrice, getPGImg } from '@/utils'
 import { findImagePath } from '@/utils/imageUtils'
 import { computed, inject, ref } from 'vue'
 
-const emits = defineEmits(['openPopup'])
+const emits = defineEmits(['openPopup', 'boxClick'])
+const { handleBoxClick } = useEmitBoxClick(emits)
 
 const dailyLoginItemInfo = ref<DailyLoginItemInfo[]>([])
 const productInfo = ref<ProductInfo>()
@@ -163,6 +165,7 @@ const bubblePosition = {
             :icon-height="90"
             :bottom="-10"
             text-class="text-stroke-3 text-stroke-[#4d1202] paint-order"
+            @click="(event) => handleBoxClick(gift, event)"
           />
           <!-- <img
             :src="getPGImg(gift.Icon)"

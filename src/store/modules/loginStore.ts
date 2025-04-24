@@ -17,9 +17,13 @@ export const useLoginStore = defineStore('login', () => {
     })
     loginInfo.value = res
   }
+  function setLoginInfo(info: LoginInfo) {
+    loginInfo.value = info
+  }
 
   return {
     loginInfo,
     getLoginInfo,
+    setLoginInfo,
   }
 })

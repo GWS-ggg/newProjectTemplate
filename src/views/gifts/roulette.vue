@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { OrderPopupInfo, ProductInfo, WheelGiftItemInfo } from '@/types'
+import type { OrderPopupInfo, ProductInfo, Prop, WheelGiftItemInfo } from '@/types'
 import { getProductListApi } from '@/api/index'
 
 import CountDown from '@/components/CountDown.vue'
@@ -11,7 +11,7 @@ import { findImagePath } from '@/utils/imageUtils'
 
 import { computed, ref } from 'vue'
 
-const emits = defineEmits(['openPopup'])
+const emits = defineEmits(['openPopup', 'boxClick'])
 function getImageUrl(name: string) {
   return new URL(`../../assets/images/gifts/roulette/${name}`, import.meta.url).href
 }
@@ -151,6 +151,9 @@ function triggerSuccessAnimation() {
 defineExpose({
   triggerSuccessAnimation,
 })
+function handleBoxClick(prop: Prop, event: MouseEvent) {
+  emits('boxClick', prop, event)
+}
 </script>
 
 <template>
@@ -204,6 +207,7 @@ defineExpose({
                   :src="getPGImg(gift?.Props?.[0]?.Icon)"
                   alt=""
                   class="w-75"
+                  @click="handleBoxClick(gift?.Props?.[0] as Prop, $event)"
                 >
                 <div
                   v-if="gift?.Props?.[0]?.Text"

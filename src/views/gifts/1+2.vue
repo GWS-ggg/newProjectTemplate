@@ -25,7 +25,7 @@ const okImg = new URL(`../../assets/images/common/icon_ok.png`, import.meta.url)
 
 const imgMap: Record<string, string> = {
   score: getImageUrl('icon_积分.png'),
-  circle: getImageUrl('img_圆.png'),
+  circle: getImageUrl('img_通用积分_bg.png'),
   progress: getImageUrl('img_通用进度条.png'),
   progressBg: getImageUrl('img_通用进度条_bg.png'),
   strip_1: getImageUrl('img_条1_bg.png'),
@@ -300,9 +300,6 @@ watchEffect(() => {
   })
 })
 
-const processBar = computed(() => {
-  return `${currentScore.value / targetScore.value * 100}%`
-})
 function getPrice(giftPackage: onePlusTwoGiftItemInfo) {
   if (giftPackage.Price === 0) {
     return 'FREE'
@@ -430,11 +427,12 @@ async function handleGiftAnimation(giftPackage: onePlusTwoGiftItemInfo) {
     <div class="relative mt-35 flex items-center justify-center">
       <div class="absolute z-10 aspect-square h-64 f-c bg-cover bg-center -left-40 -top-9">
         <div class="relative h-full">
-          <img
+          <!-- <img
             class="h-full"
             :src="imgMap.circle"
             alt=""
-          >
+          > -->
+          <div class="h-64 w-64 border-8 border-[#ffc529] rounded-full rounded-full border-solid bg-[#1b1142]" />
           <img
             class="absolute bottom-1/2 left-1/2 h-90 translate-y-1/2 -translate-x-1/2"
             :src="collectionIconImg"
@@ -444,12 +442,23 @@ async function handleGiftAnimation(giftPackage: onePlusTwoGiftItemInfo) {
       </div>
 
       <div class="relative h-48 f-s bg-cover bg-center text-center text-24">
-        <img
+        <!-- <img
           class="h-full"
           :src="imgMap.progressBg"
           alt=""
-        >
-        <div
+        > -->
+        <div class="progress-mask relative h-48 w-450 f-c overflow-hidden border-6 border-[#ffc529] rounded-full border-solid">
+          <!-- 进度条填充部分 -->
+          <div
+            class="progress-bar absolute left-0 top-0 h-full f-c rounded-full"
+            :style="{ width: `${(currentScore / targetScore) * 100}%` }"
+          />
+
+          <div class="z-10 text-22 text-white font-medium drop-shadow-md">
+            {{ currentScore }}/{{ targetScore }}
+          </div>
+        </div>
+        <!-- <div
           class="absolute left-0 top-0 h-full rounded-full"
           :style="{
             width: processBar,
@@ -460,7 +469,7 @@ async function handleGiftAnimation(giftPackage: onePlusTwoGiftItemInfo) {
         />
         <div class="absolute left-1/2 top-1/2 text-31 -translate-x-1/2 -translate-y-1/2">
           {{ currentScore }} / {{ targetScore }}
-        </div>
+        </div> -->
       </div>
       <div class="absolute right-0 top-1/2 z-10 h-90 f-c translate-x-1/2 -translate-y-1/2">
         <img
@@ -608,6 +617,7 @@ async function handleGiftAnimation(giftPackage: onePlusTwoGiftItemInfo) {
   border-image-slice: 1;
   border-radius: 32px;
 }
+
 .gradient-border {
   position: relative;
   background-image: linear-gradient(0deg,
@@ -631,9 +641,10 @@ async function handleGiftAnimation(giftPackage: onePlusTwoGiftItemInfo) {
   left: 0;
   right: 0;
   bottom: 0;
-  border-radius: 32px; /* 与外层元素相同的圆角 */
+  border-radius: 32px;
+  /* 与外层元素相同的圆角 */
   border: 2px solid transparent;
-  background:  linear-gradient(0deg,
+  background: linear-gradient(0deg,
       #1d6301 0%,
       #5f9f26 100%) border-box;
   -webkit-mask:
@@ -654,6 +665,7 @@ async function handleGiftAnimation(giftPackage: onePlusTwoGiftItemInfo) {
     opacity: 1;
     transform: scale(1);
   }
+
   100% {
     opacity: 0;
     transform: scale(0.3);
@@ -694,14 +706,40 @@ async function handleGiftAnimation(giftPackage: onePlusTwoGiftItemInfo) {
     opacity: 0;
     transform: scale(0.3);
   }
+
   80% {
     opacity: 1;
     transform: scale(1.1);
   }
+
   100% {
     opacity: 1;
     transform: scale(1);
   }
+}
+
+.progress-mask {
+  background-color: #1b1142;
+  // background-image: linear-gradient(#781553,
+  //     #781553),
+  //   linear-gradient(#952158,
+  //     #952158);
+  // box-shadow: inset 0px 2px 2px 0px
+  // 	rgba(27, 17, 68, 0.69);
+  border-radius: 11px;
+  opacity: 1;
+}
+
+.progress-bar {
+  background-image: linear-gradient(0deg,
+      #348001 0%,
+      #51a506 34%,
+      #9bdf18 96%,
+      #7dd317 100%),
+    linear-gradient(#751f56,
+      #751f56);
+  background-blend-mode: normal,
+    normal;
 }
 
 // .gift-container {

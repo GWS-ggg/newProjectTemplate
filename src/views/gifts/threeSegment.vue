@@ -20,8 +20,6 @@ async function getThreeSegmentData() {
   })
   productInfo.value = res.ProductInfo
   itemInfoList.value = res.ItemInfo as ThreeSegmentItemInfo[]
-  itemInfoList.value[0].Props[0].PropID = 2030428
-  itemInfoList.value[0].Props[0].PropType = 11
   bgImgList.value = [
     getPGImg(productInfo.value?.Pic[0] as string),
     getPGImg(productInfo.value?.Pic[1] as string),

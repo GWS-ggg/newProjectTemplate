@@ -1,16 +1,17 @@
 <script setup lang="ts">
-import type { OrderPopupInfo, ProductInfo, SixSegmentItemInfo } from '@/types'
+import type { OrderPopupInfo, ProductInfo, Prop, SixSegmentItemInfo } from '@/types'
 
 import { getProductListApi } from '@/api'
 import AnimatedIcon from '@/components/AnimatedIcon.vue'
-
 import GreenButton from '@/components/GreenButton.vue'
+import { useEmitBoxClick } from '@/hooks'
 import { useAnimatableRefs } from '@/hooks/useButtonRefs'
 import { animateWithClass, formatPrice, getPGImg } from '@/utils'
 import { findImagePath } from '@/utils/imageUtils'
 import { computed, nextTick, ref, watchEffect } from 'vue'
 
-const emits = defineEmits(['openPopup'])
+const emits = defineEmits(['openPopup', 'boxClick'])
+const { handleBoxClick } = useEmitBoxClick(emits)
 function getImageUrl(name: string) {
   return new URL(`../../assets/images/gifts/sixSegment/${name}`, import.meta.url).href
 }
@@ -99,7 +100,7 @@ const imgMap = {
   processBgImg: getImageUrl('img_通用进度条_bg.png'),
   processIconLeftImg: getImageUrl('进度条左侧图标.png'),
   lockImg: getImageUrl('锁.png'),
-  processIconBgImg: getImageUrl('物品圆底.png'),
+  processIconBgImg: getImageUrl('img_通用积分_bg.png'),
   arrowLeftImg: getImageUrl('新N段式礼包-超级碗_0007_圆角矩形-1-拷贝-3.png'),
   arrowRightImg: getImageUrl('新N段式礼包-超级碗_0009_圆角矩形-1-拷贝-5.png'),
   arrowDownImg: getImageUrl('新N段式礼包-超级碗_0008_圆角矩形-1-拷贝-4.png'),
@@ -238,10 +239,6 @@ const arrowsVisible = ref(true)
 const arrowsReappear = ref(false)
 // 用于控制新添加礼包的动画延迟
 const newDelay = ref(false)
-
-const processBar = computed(() => {
-  return `${currentScore.value / targetScore.value * 100}%`
-})
 
 const animatedIcon = ref<InstanceType<typeof AnimatedIcon> | null>(null)
 const iconImg = ref('')
@@ -428,11 +425,7 @@ function getScoreInfo(props: Array<{
           ref="scoreDisplayRef"
           class="relative h-full w-full"
         >
-          <img
-            class="h-full"
-            :src="imgMap.processIconBgImg"
-            alt=""
-          >
+          <div class="h-64 w-64 border-8 border-[#ffc529] rounded-full rounded-full border-solid bg-[#1b1142]" />
         </div>
 
         <img
@@ -443,22 +436,16 @@ function getScoreInfo(props: Array<{
       </div>
 
       <div class="relative h-48 f-s bg-cover bg-center text-center text-24">
-        <img
-          class="h-full"
-          :src="imgMap.processBgImg"
-          alt=""
-        >
-        <div
-          class="absolute left-0 top-0 h-full rounded-full"
-          :style="{
-            width: processBar,
-            backgroundImage: `url(${imgMap.processImg})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'left center',
-          }"
-        />
-        <div class="absolute left-1/2 top-1/2 text-31 -translate-x-1/2 -translate-y-1/2">
-          {{ currentScore }} / {{ targetScore }}
+        <div class="progress-mask relative h-48 w-450 f-c overflow-hidden border-6 border-[#ffc529] rounded-full border-solid">
+          <!-- 进度条填充部分 -->
+          <div
+            class="progress-bar absolute left-0 top-0 h-full f-c rounded-full"
+            :style="{ width: `${(currentScore / targetScore) * 100}%` }"
+          />
+
+          <div class="z-10 text-22 text-white font-medium drop-shadow-md">
+            {{ currentScore }}/{{ targetScore }}
+          </div>
         </div>
       </div>
       <div class="absolute right-0 top-1/2 z-10 h-90 f-c translate-x-1/2 -translate-y-1/2">
@@ -466,11 +453,12 @@ function getScoreInfo(props: Array<{
           class="h-full"
           :src="getPGImg(productInfo?.Props[0]?.Icon as string)"
           alt=""
+          @click="(event) => handleBoxClick(productInfo?.Props[0] as Prop, event)"
         >
       </div>
     </div>
     <div
-      class="grid-container grid grid-cols-2 mt-20 gap-22"
+      class="grid-container grid grid-cols-2 mt-30 gap-22"
       :class="{
         'arrows-hidden': !arrowsVisible,
         'arrows-reappear': arrowsReappear,
@@ -495,14 +483,19 @@ function getScoreInfo(props: Array<{
             alt=""
           >
           <div class="relative flex flex-col">
-            <div class="mt-50 f-c">
+            <div class="mt-20 f-c">
               <div
                 v-for="(good, goodIndex) in getPorpsInfo(gift.Props)"
                 :key="goodIndex"
-                class="h-90 w-100 f-e flex-col bg-cover bg-center bg-no-repeat"
-                :style="{ backgroundImage: `url(${getPGImg(good.Icon)})` }"
+                class="relative h-120 f-e flex-col"
               >
-                <div class="text-34 text-stroke-2 text-stroke-[#464646] paint-order -mb-10">
+                <img
+                  class="h-full"
+                  :src="getPGImg(good.Icon)"
+                  alt=""
+                  @click="(event) => handleBoxClick(good, event)"
+                >
+                <div class="absolute bottom-0 left-1/2 text-34 text-stroke-2 text-stroke-[#464646] paint-order -mb-10 -translate-x-1/2">
                   {{ good.Text }}
                 </div>
               </div>
@@ -919,5 +912,31 @@ function getScoreInfo(props: Array<{
     filter: brightness(1);
     transform: scale(1);
   }
+}
+
+  .progress-mask {
+  background-color: #1b1142;
+  // background-image: linear-gradient(#781553,
+  //     #781553),
+  //   linear-gradient(#952158,
+  //     #952158);
+  // box-shadow: inset 0px -3px 7px 0px rgba(44, 13, 73, 0.64),
+  //   inset 0px 2px 7px 0px rgba(1, 13, 20, 0.42);
+  box-shadow: inset 0px 2px 2px 0px
+  rgba(27, 17, 68, 0.69);
+  border-radius: 11px;
+  opacity: 1;
+}
+
+.progress-bar {
+background-image: linear-gradient(0deg,
+    #348001 0%,
+    #51a506 34%,
+    #9bdf18 96%,
+    #7dd317 100%),
+  linear-gradient(#751f56,
+    #751f56);
+background-blend-mode: normal,
+  normal;
 }
 </style>

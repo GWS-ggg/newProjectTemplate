@@ -2,6 +2,7 @@
 import type { OrderPopupInfo, ProductInfo, ThreeChoiceOneGiftItemInfo } from '@/types'
 
 import { getProductListApi } from '@/api'
+import { useEmitBoxClick } from '@/hooks'
 import { useAnimatableRefs } from '@/hooks/useButtonRefs'
 import { formatPrice, getPGImg } from '@/utils'
 
@@ -9,7 +10,8 @@ import { findImagePath } from '@/utils/imageUtils'
 
 import { computed, ref } from 'vue'
 
-const emits = defineEmits(['openPopup'])
+const emits = defineEmits(['openPopup', 'boxClick'])
+const { handleBoxClick } = useEmitBoxClick(emits)
 
 function getImageUrl(name: string) {
   return new URL(`../../assets/images/gifts/threeChoiceOne/${name}`, import.meta.url).href
@@ -236,6 +238,7 @@ const bubblePosition = {
                 class="h-90"
                 :src="getPGImg(prop.Icon)"
                 alt=""
+                @click="(event) => handleBoxClick(prop, event)"
               >
               <div class="text-31 text-stroke-2 text-stroke-[#464646] paint-order -mt-15">
                 {{ prop.Text }}

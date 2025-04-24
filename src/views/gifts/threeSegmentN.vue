@@ -3,13 +3,15 @@ import type { OrderPopupInfo, ProductInfo, ThreeSegmentNItemInfo } from '@/types
 import { getProductListApi } from '@/api'
 import GreenButton from '@/components/GreenButton.vue'
 import IconWithText from '@/components/IconWithText.vue'
+import { useEmitBoxClick } from '@/hooks'
 import { useAnimatableRefs } from '@/hooks/useButtonRefs'
 import { animateWithClass, formatPrice, getPGImg } from '@/utils'
 
 import { findImagePath } from '@/utils/imageUtils'
 import { computed, nextTick, ref, watchEffect } from 'vue'
 
-const emits = defineEmits(['openPopup'])
+const emits = defineEmits(['openPopup', 'boxClick'])
+const { handleBoxClick } = useEmitBoxClick(emits)
 const itemInfoList = ref<ThreeSegmentNItemInfo[]>([])
 const productInfo = ref<ProductInfo>()
 async function getThreeSegmentNData() {
@@ -345,6 +347,7 @@ async function handleAnimation(currentGift: ThreeSegmentNItemInfo) {
               :text="icon.Text"
               :bottom="-10"
               :icon-height="120"
+              @click="(event) => handleBoxClick(icon, event)"
             />
           </template>
         </div>

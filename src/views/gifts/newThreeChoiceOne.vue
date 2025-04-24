@@ -2,13 +2,14 @@
 import type { OrderPopupInfo, ProductInfo, ThreeChoiceOneGiftItemInfo } from '@/types'
 
 import { getProductListApi } from '@/api'
+import { useEmitBoxClick } from '@/hooks'
 import { useAnimatableRefs } from '@/hooks/useButtonRefs'
+
 import { useBuyOrder } from '@/hooks/useBuyOrder'
 
 import { formatPrice, getPGImg } from '@/utils'
 
 import { findImagePath } from '@/utils/imageUtils'
-
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 
 // function getImageUrl(name: string) {
@@ -42,7 +43,7 @@ import { computed, onMounted, reactive, ref, watch } from 'vue'
 //   imgMap.bg2Img,
 //   imgMap.bg3Img,
 // ]
-const emits = defineEmits(['openPopup'])
+const emits = defineEmits(['openPopup', 'boxClick'])
 
 // 接口保留但因暂未使用而注释
 interface _Gift {
@@ -240,7 +241,7 @@ async function getProductList() {
   // 当数据加载完成后，输出bgImgList的值，用于调试
   console.log('数据加载完成后的bgImgList:', bgImgList.value)
 }
-
+const { handleBoxClick } = useEmitBoxClick(emits)
 // 调用获取数据的函数
 getProductList()
 </script>
@@ -309,6 +310,7 @@ getProductList()
                 class="h-90"
                 :src="getPGImg(prop.Icon)"
                 alt=""
+                @click="(event) => handleBoxClick(prop, event)"
               >
               <div class="text-31 text-stroke-2 text-stroke-[#464646] paint-order -mt-15">
                 {{ prop.Text }}

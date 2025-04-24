@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import { useLoginStore } from '@/store/modules/loginStore'
 import { useScoreElementStore } from '@/store/modules/scoreElement'
 import { computed, ref } from 'vue'
-import GradientStrokeText from './GradientStrokeText.vue'
 
 function getImageUrl(name: string) {
   return new URL(`../assets/images/WelfareHeader/${name}`, import.meta.url).href
@@ -43,6 +43,17 @@ const vipLevelList = ref([
 ])
 
 const currentVipLevel = computed(() => vipLevelList.value[vipLevel.value])
+const loginStore = useLoginStore()
+
+const loginInfo = computed(() => loginStore.loginInfo)
+setTimeout(() => {
+  loginStore.setLoginInfo({
+    username: 'test',
+    viplevel: 5,
+    vipscore: 100,
+    viptargetscore: 100,
+  })
+}, 3000)
 </script>
 
 <template>
@@ -88,7 +99,7 @@ const currentVipLevel = computed(() => vipLevelList.value[vipLevel.value])
           class="z-10 w-78"
         >
         <div class="rounded-[24px] bg-[#200b49] bg-opacity-35 bg-cover bg-no-repeat px-25 py-2 pl-35 text-30 text-white text-stroke-1 text-stroke-[#181818] paint-order -ml-25">
-          21/100
+          {{ loginInfo.vipscore }}/{{ loginInfo.viptargetscore }}
         </div>
       </div>
     </div>

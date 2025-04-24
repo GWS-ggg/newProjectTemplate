@@ -38,6 +38,12 @@ const isFirstClick = ref(true)
 // 用于跟踪是否是页面刷新后的首次加载
 const isFirstTimeLoad = ref(true)
 
+// 存储滚动事件的防抖定时器ID
+let scrollDebounceTimer: ReturnType<typeof setTimeout> | null = null
+
+// 存储所有的timeout IDs，以便能在组件卸载时清除
+const positionTimeouts: ReturnType<typeof setTimeout>[] = []
+
 // 计算当前设备的rem基准值
 function getRootFontSize(): number {
   const screenWidth = window.innerWidth
@@ -80,6 +86,13 @@ const typeTwoOtherItem = computed(() => {
   return props.boxData?.Props.filter(item => !item.MaxRollCount)
 })
 
+const typeFourProgressItem = computed(() => {
+  if (props.boxData?.BoxInfo.BoxType !== 4) {
+    return null
+  }
+  return props.boxData?.Props.find(item => item.BoxMiniCount)
+})
+
 // 计算网格布局样式
 const gridStyle = computed(() => {
   if (!props.boxData || !props.boxData.Props)
@@ -116,11 +129,8 @@ const gridStyle = computed(() => {
 })
 const bubbleElement = ref<HTMLElement | null>(null)
 
-// 存储所有的timeout IDs，以便能在组件卸载时清除
-const positionTimeouts: ReturnType<typeof setTimeout>[] = []
-
 // 更新弹框位置
-function updatePosition() {
+function updatePosition(isScroll?: boolean) {
   if (!props.modelValue || !props.target) {
     // 如果没有目标元素或气泡不显示，将箭头设置在默认位置
     arrowPositionLeft.value = '50%'
@@ -166,14 +176,21 @@ function updatePosition() {
     const leftPosition = targetCenterX - (bubbleWidth / 2)
 
     // 确保不会超出屏幕边界
-    const actualLeftPosition = Math.max(10, Math.min(leftPosition, window.innerWidth - bubbleWidth - 10))
+    const actualLeftPosition = Math.max(10, Math.min(leftPosition, window.innerWidth - bubbleWidth - 35))
 
-    // 设置最终位置
-    position.value = {
-      top: pxToRem(Math.max(10, topPosition)), // 确保不会显示在页面顶部以外
-      left: pxToRem(actualLeftPosition), // 确保不会超出左右边界
+    if (isScroll) {
+      position.value.top = pxToRem(Math.max(10, topPosition)) // 确保不会显示在页面顶部以外
     }
-
+    else {
+      position.value = {
+        top: pxToRem(Math.max(10, topPosition)), // 确保不会显示在页面顶部以外
+        left: pxToRem(actualLeftPosition), // 确保不会超出左右边界
+      }
+    }
+    // 不重复计算箭头位置
+    if (isScroll) {
+      return
+    }
     // 计算箭头位置：箭头应该位于目标元素的中心点上方
     try {
       // 箭头位置 = 目标元素中心点 - 气泡左侧位置
@@ -194,6 +211,17 @@ function updatePosition() {
       arrowPositionLeft.value = '50%'
     }
   })
+}
+
+// 防抖处理滚动事件
+function handleScroll() {
+  if (scrollDebounceTimer) {
+    clearTimeout(scrollDebounceTimer)
+  }
+  scrollDebounceTimer = setTimeout(() => {
+    updatePosition(true)
+    scrollDebounceTimer = null // 清除定时器ID
+  }, 100) // 100ms 防抖延迟
 }
 
 // 处理文档点击事件
@@ -230,7 +258,8 @@ function handleDocumentClick() {
 // 监听目标元素位置变化
 onMounted(() => {
   window.addEventListener('resize', updatePosition)
-  window.addEventListener('scroll', updatePosition)
+  // 使用防抖处理滚动
+  window.addEventListener('scroll', handleScroll)
   // 添加点击事件监听
   document.addEventListener('click', handleDocumentClick)
 
@@ -238,18 +267,26 @@ onMounted(() => {
   window.addEventListener('load', () => {
     // 重置首次加载标志
     isFirstTimeLoad.value = true
+    // 页面加载完成后也更新一次位置
+    if (props.modelValue) {
+      updatePosition()
+    }
   })
 })
 
 // 在组件销毁时移除事件监听和清除所有timeout
 onUnmounted(() => {
   window.removeEventListener('resize', updatePosition)
-  window.removeEventListener('scroll', updatePosition)
+  window.removeEventListener('scroll', handleScroll)
   // 移除点击事件监听
   document.removeEventListener('click', handleDocumentClick)
 
   // 清除所有pending的timeout
   positionTimeouts.forEach(id => clearTimeout(id))
+  // 清除防抖定时器
+  if (scrollDebounceTimer) {
+    clearTimeout(scrollDebounceTimer)
+  }
 })
 
 // 监听显示状态变化，在显示状态改变时准确更新位置
@@ -257,26 +294,27 @@ watch(() => props.modelValue, (newVal: boolean) => {
   if (newVal) {
     // 弹框显示时设置一次位置，确保CSS过渡生效
     if (props.target) {
-      // 初始定位
-      updatePosition()
-
-      // 使用两次延时更新，确保位置准确
-      // 第一次延时是为了等待DOM完全渲染
-      const timeoutId1 = setTimeout(() => {
+      // 初始定位，使用 nextTick 确保元素已渲染
+      nextTick(() => {
         updatePosition()
-
-        // 第二次延时确保内容加载后再次校正位置
-        const timeoutId2 = setTimeout(() => {
+        // 可以保留一次短延迟的更新，应对内容可能造成的尺寸变化
+        const timeoutId = setTimeout(() => {
           updatePosition()
-        }, 50)
-
-        positionTimeouts.push(timeoutId2)
-      }, 10)
-
-      positionTimeouts.push(timeoutId1)
+        }, 50) // 稍微减少延迟
+        positionTimeouts.push(timeoutId)
+      })
     }
     // 弹框显示时重置点击标志，以支持点击事件处理逻辑
     isFirstClick.value = true
+  }
+  else {
+    // 可选：隐藏时清除可能还在等待执行的定位timeout
+    positionTimeouts.forEach(id => clearTimeout(id))
+    positionTimeouts.length = 0 // 清空数组
+    if (scrollDebounceTimer) {
+      clearTimeout(scrollDebounceTimer)
+      scrollDebounceTimer = null
+    }
   }
 })
 
@@ -284,22 +322,22 @@ function formatCount(count: number) {
   if (count < 1000) {
     return count
   }
-  else if (count < 10000) {
-    return `${(count / 1000)}K`
-  }
   else if (count < 1000000) {
-    return `${(count / 10000)}W`
+    return `${(count / 1000).toFixed(1).replace(/\.0$/, '')}K`
+  }
+  else if (count < 1000000000) {
+    return `${(count / 1000000).toFixed(1).replace(/\.0$/, '')}M`
+  }
+  else if (count < 1000000000000) {
+    return `${(count / 1000000000).toFixed(1).replace(/\.0$/, '')}B`
   }
   else {
-    return `${(count / 1000000)}M`
+    return `${(count / 1000000000000).toFixed(1).replace(/\.0$/, '')}T`
   }
 }
 
 // TODO
 const fontFamily = ref('font-en')
-const progress = ref(50)
-const total = ref(100)
-
 const arrowAfterStyle = computed(() => {
   return {
     '--arrow-left-position': arrowPositionLeft.value || '50%',
@@ -452,25 +490,31 @@ const arrowAfterStyle = computed(() => {
             Cards
           </div>
         </div>
-        <div class="absolute bottom-3 left-0 h-53 w-full flex items-center justify-evenly rounded-b-13 bg-[#000] opacity-20" />
-        <div class="absolute bottom-3 left-0 h-53 w-full f-c">
+        <div
+          v-if="typeFourProgressItem"
+          class="absolute bottom-3 left-0 h-53 w-full flex items-center justify-evenly rounded-b-13 bg-[#000] opacity-20"
+        />
+        <div
+          v-if="typeFourProgressItem"
+          class="absolute bottom-3 left-0 h-53 w-full f-c"
+        >
           <!-- 进度条容器 -->
           <div class="progress-mask relative h-23 w-306 f-c overflow-hidden rounded-full">
             <!-- 进度条填充部分 -->
             <div
               class="progress-bar absolute left-0 top-0 h-full f-c rounded-l-full"
-              :style="{ width: `${progress / total * 100}%` }"
+              :style="{ width: `${(typeFourProgressItem.BoxCurOpenCount as number / (typeFourProgressItem.BoxMiniCount as number)) * 100}%` }"
             />
 
             <div class="z-10 text-22 text-[#d8ffff] font-medium drop-shadow-md">
-              {{ progress }}/{{ total }}
+              {{ typeFourProgressItem.BoxCurOpenCount }}/{{ typeFourProgressItem.BoxMiniCount }}
             </div>
 
             <!-- 光泽效果 -->
             <!-- <div class="absolute left-0 top-0 h-1/2 w-full rounded-t-full bg-white bg-opacity-15" /> -->
           </div>
           <img
-            :src="getPGImg(prop?.Icon)"
+            :src="getPGImg(typeFourProgressItem?.Icon)"
             alt=""
             class="absolute left-85 top-0 z-30 h-53"
           >
