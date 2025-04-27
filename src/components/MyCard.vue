@@ -1,4 +1,4 @@
-<script lang="ts" setup>
+<!-- <script lang="ts" setup>
 import type { GoodsInfo, Level, MyCardType, MyCardTypeList, OrderReq, StoreUserInfo } from '@/types/index'
 import { myCardOrderApi, myCardTypeApi } from '@/api'
 import { MYCARD_PAY_TYPE } from '@/enum/const'
@@ -215,4 +215,4 @@ defineExpose({
       background-image: url("/img/selected-flag.png");
       background-size: 100%;
     }
-</style>
+</style> -->

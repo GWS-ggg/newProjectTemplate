@@ -15,8 +15,13 @@ const bgImg = ref(getImageUrl('img_背景_下.png'))
 
 const { getLoginInfo, setUid } = useLoginStore()
 const { getShopListInfo } = useGiftStore()
+
+// - 测试环境
+//   - 142830
+// - 开发环境
+//   - 102191
 onMounted(() => {
-  const uid = '102191'
+  const uid = '142830'
   setUid(uid)
   getLoginInfo()
   getShopListInfo(uid)

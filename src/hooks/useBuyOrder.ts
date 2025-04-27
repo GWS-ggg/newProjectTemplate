@@ -1,11 +1,13 @@
 import type { BuyOrderInfoRequest } from '@/api/types'
 import { buyOrderApi } from '@/api/index'
+import { useLoginStore } from '@/store/modules/loginStore'
 
 export function useBuyOrder() {
+  const loginStore = useLoginStore()
   async function handleBuyOrder(key: number, tradeproductId: number, skuId?: string, exchangeId?: number) {
     const buyOrderInfo: BuyOrderInfoRequest = {
       appid: '616876868660610',
-      uid: '102191',
+      uid: loginStore.userUid,
       key,
       tradeproductid: tradeproductId,
     }

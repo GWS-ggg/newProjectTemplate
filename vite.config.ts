@@ -89,17 +89,17 @@ export default defineConfig(({ mode }) => {
         'Api': path.resolve(__dirname, 'src/api'),
       },
     },
-    // server: {
-    //   port: 5173, // 本地开发服务端口
-    //   proxy: {
-    //     '/api': {
-    //       target: 'https://mprogram-test.forevernine.com/', // 要代理的地址
-    //       changeOrigin: true,
-    //       followRedirects: true, // Cookie支持重定向
-    //       rewrite(path) { return path.replace(/^\/api/, '') },
-    //     },
-    //   },
-    // },
+    server: {
+      port: 5179, // 本地开发服务端口
+      // proxy: {
+      //   '/api': {
+      //     target: 'https://mprogram-test.forevernine.com/', // 要代理的地址
+      //     changeOrigin: true,
+      //     followRedirects: true, // Cookie支持重定向
+      //     rewrite(path) { return path.replace(/^\/api/, '') },
+      //   },
+      // },
+    },
     // server: {
     // // https: false,
     // // Listening on all local IPs

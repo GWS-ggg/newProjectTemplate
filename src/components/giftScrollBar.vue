@@ -172,11 +172,13 @@ const giftPackages = ref([
                   alt="标签"
                   class="w-50"
                 >
-                <div
-                  class="absolute top-6 z-10 w-full f-c text-16 color-[#f6f0e5] font-medium text-stroke-2 text-stroke-[#88140f] paint-order -left-6 -rotate-45"
-                  :class="{ 'text-stroke-[#147f05]!': pkg.Tag === 1 }"
-                >
-                  {{ pkg.Tag === 1 ? 'Sale' : 'Hot' }}
+                <div class="absolute top-6 z-10 w-full f-c text-16 color-[#f6f0e5] font-medium -left-4 -rotate-45">
+                  <TextStroke
+                    :stroke-color="pkg.Tag === 1 ? '#147f05' : '#88140f'"
+                    :stroke-width="2"
+                  >
+                    {{ pkg.Tag === 1 ? 'Sale' : 'Hot' }}
+                  </TextStroke>
                 </div>
               </div>
             </div>

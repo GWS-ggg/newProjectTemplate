@@ -1,27 +1,28 @@
 <script setup lang="ts">
-import type { ItemInfo, OrderPopupInfo, ProductInfo } from '@/types'
+import type { ItemInfo, OrderPopupInfo, ProductInfo, Prop } from '@/types'
 import { buyOrderApi, getProductListApi } from '@/api/index'
 
 import GreenButton from '@/components/GreenButton.vue'
 
+import { useEmitBoxClick } from '@/hooks'
 import { useBuyOrder } from '@/hooks/useBuyOrder'
+import { useGiftStore } from '@/store/modules/giftStore'
 import { useLoginStore } from '@/store/modules/loginStore'
 import { formatPrice, getPGImg } from '@/utils'
 import { findImagePath } from '@/utils/imageUtils'
 import { computed, ref } from 'vue'
 
-const emits = defineEmits(['openPopup'])
+const emits = defineEmits(['openPopup', 'boxClick'])
+const { handleBoxClick } = useEmitBoxClick(emits)
 function getImageUrl(name: string) {
   return new URL(`../../assets/images/gifts/stepGift/${name}`, import.meta.url).href
 }
 const productInfo = ref<ProductInfo>()
 const itemInfoList = ref<ItemInfo[]>([])
+const { getProductListRequest } = useGiftStore()
+
 async function getProductList() {
-  const res = await getProductListApi({
-    appid: '616876868660610',
-    uid: '102191',
-    producttype: 1,
-  })
+  const res = await getProductListRequest(1)
   productInfo.value = res.ProductInfo
   itemInfoList.value = res.ItemInfo as ItemInfo[]
 
@@ -116,7 +117,6 @@ function triggerSuccessAnimation() {
 defineExpose({
   triggerSuccessAnimation,
 })
-
 const scoreTarget = ref<HTMLElement | null>(null)
 
 const vipScore = computed(() => {
@@ -362,7 +362,7 @@ console.log(`当前浏览器${isPaintOrderSupportedTest() ? '支持' : '不支�
           >
             <div
               class="z-10 text-47 text-[#1c6904]"
-              style="text-shadow: 0px 2px 0px rgba(190, 251, 91, 0.75);"
+              style="text-shadow: 0px 0.02rem 0px rgba(190, 251, 91, 0.75);"
             >
               {{ formatPrice(productInfo?.Price || 0) }}
             </div>
@@ -439,9 +439,11 @@ console.log(`当前浏览器${isPaintOrderSupportedTest() ? '支持' : '不支�
                 :text="item.Props?.[0]?.Text"
                 stroke-color="#4d4d4d"
                 :stroke-width="3"
-                text-size="28"
+                :text-size="28"
                 :icon-height="58"
                 :bottom="-10"
+                :gift-type="item.Props?.[0]?.PropType"
+                @click="(event: any) => handleBoxClick(item.Props?.[0] as Prop, event)"
               />
             </div>
           </div>

@@ -4,10 +4,11 @@ import type { OrderPopupInfo, ProductInfo, ThreeChoiceOneGiftItemInfo } from '@/
 import { getProductListApi } from '@/api'
 import { useEmitBoxClick } from '@/hooks'
 import { useAnimatableRefs } from '@/hooks/useButtonRefs'
+import { useGiftStore } from '@/store/modules/giftStore'
+
 import { formatPrice, getPGImg } from '@/utils'
 
 import { findImagePath } from '@/utils/imageUtils'
-
 import { computed, ref } from 'vue'
 
 const emits = defineEmits(['openPopup', 'boxClick'])
@@ -142,15 +143,12 @@ function triggerSuccessAnimation() {
 defineExpose({
   triggerSuccessAnimation,
 })
+const { getProductListRequest } = useGiftStore()
 
 const productInfo = ref<ProductInfo>()
 const itemInfoList = ref<ThreeChoiceOneGiftItemInfo[]>([])
 async function getProductList() {
-  const res = await getProductListApi({
-    appid: '616876868660610',
-    uid: '102191',
-    producttype: 10,
-  })
+  const res = await getProductListRequest(10)
   productInfo.value = res.ProductInfo
   itemInfoList.value = res.ItemInfo as ThreeChoiceOneGiftItemInfo[]
   let idNum = 0

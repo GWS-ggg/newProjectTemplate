@@ -2,7 +2,7 @@ import type { LoginInfo } from '@/api/types'
 import { loginApi } from '@/api'
 import { isPaintOrderSupported } from '@/utils/cssSupport'
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
 export const useLoginStore = defineStore('login', () => {
   const loginInfo = ref<LoginInfo>({
@@ -12,6 +12,7 @@ export const useLoginStore = defineStore('login', () => {
     viptargetscore: 0,
   })
   const userUid = ref<string>('')
+
   const noSupportsPaintOrder = ref(isPaintOrderSupported())
 
   function setUid(uid: string) {
@@ -29,6 +30,7 @@ export const useLoginStore = defineStore('login', () => {
   }
 
   return {
+
     userUid,
     loginInfo,
     getLoginInfo,

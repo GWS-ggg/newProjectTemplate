@@ -185,8 +185,13 @@ defineExpose({
                 :src="scoreIconImg"
                 class="h-73"
               >
-              <div class="absolute bottom-0 left-1/2 text-24 text-white text-stroke-black -mt-25 -translate-x-1/2">
-                {{ score }}
+              <div class="absolute bottom-0 left-1/2 text-24 text-white -mt-25 -translate-x-1/2">
+                <TextStroke
+                  stroke-color="#40403e"
+                  :stroke-width="3"
+                >
+                  {{ score }}
+                </TextStroke>
               </div>
             </div>
           </div>
@@ -217,8 +222,13 @@ defineExpose({
                 alt=""
                 class="h-73"
               >
-              <div class="absolute bottom-0 left-1/2 text-24 text-white text-stroke-black -mt-25 -translate-x-1/2">
-                {{ score }}
+              <div class="absolute bottom-0 left-1/2 text-24 text-white -mt-25 -translate-x-1/2">
+                <TextStroke
+                  stroke-color="#40403e"
+                  :stroke-width="3"
+                >
+                  {{ score }}
+                </TextStroke>
               </div>
             </div>
             <img
@@ -245,8 +255,13 @@ defineExpose({
                   </div>
                 </div>
               </div>
-              <div class="absolute bottom-0 left-1/2 text-24 text-white text-stroke-black -mt-25 -translate-x-1/2">
-                {{ scoreAdd }}
+              <div class="absolute bottom-0 left-1/2 text-24 text-white -mt-25 -translate-x-1/2">
+                <TextStroke
+                  stroke-color="#40403e"
+                  :stroke-width="3"
+                >
+                  {{ scoreAdd }}
+                </TextStroke>
               </div>
             </div>
           </div>

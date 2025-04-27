@@ -10,8 +10,9 @@ import { useEmitBoxClick } from '@/hooks'
 import { useAnimatableRefs } from '@/hooks/useButtonRefs'
 
 import { useBoxStore } from '@/store/modules/boxStore'
-import { animateWithClass, formatPrice, getPGImg } from '@/utils'
+import { useGiftStore } from '@/store/modules/giftStore'
 
+import { animateWithClass, formatPrice, getPGImg } from '@/utils'
 import { findImagePath } from '@/utils/imageUtils'
 import { computed, nextTick, ref, watchEffect } from 'vue'
 
@@ -70,17 +71,18 @@ const productInfo = ref<ProductInfo>()
 const itemInfoList = ref<onePlusTwoGiftItemInfo[]>([])
 const currentScore = ref(0)
 const targetScore = ref(0)
+const { getProductListRequest } = useGiftStore()
 
 async function getProductList() {
-  const res = await getProductListApi({
-    appid: '616876868660610',
-    uid: '102191',
-    producttype: 4,
-  })
+  const res = await getProductListRequest(4)
   productInfo.value = res.ProductInfo
   itemInfoList.value = res.ItemInfo as onePlusTwoGiftItemInfo[]
   currentScore.value = res.ProductInfo?.TaskScore ?? 0
   targetScore.value = res.ProductInfo?.TaskTargetScore ?? 0
+
+  // test
+  // itemInfoList.value[2].Props[3] = itemInfoList.value[0].Props[2]
+  // itemInfoList.value[2].Props[3].Text = '10min'
   let idNum = 0
   itemInfoList.value.forEach((item) => {
     item.id = idNum++
@@ -439,8 +441,13 @@ async function handleGiftAnimation(giftPackage: onePlusTwoGiftItemInfo) {
 
 <template>
   <div class="justify-cente flex flex-col items-center text-32">
-    <div class="mt-30 text-center text-29 text-stroke-3 text-stroke-[#19093e] paint-order">
-      {{ giftData.title }}
+    <div class="mt-30 text-center text-29 paint-order">
+      <TextStroke
+        stroke-color="#19093e"
+        :stroke-width="3"
+      >
+        BUY 1 PACK & GET 2 FREE !
+      </TextStroke>
     </div>
     <div class="relative mt-35 flex items-center justify-center">
       <div class="absolute z-10 aspect-square h-64 f-c bg-cover bg-center -left-40 -top-9">
@@ -495,6 +502,7 @@ async function handleGiftAnimation(giftPackage: onePlusTwoGiftItemInfo) {
           class="h-full"
           :src="getPGImg(productInfo?.Props?.[0]?.Icon)"
           alt=""
+          :class="productInfo?.Props?.[0].PropType === 11 ? 'scale-120' : ''"
           @click="(event) => handleBoxClick(productInfo?.Props?.[0] as Prop, event)"
         >
       </div>
@@ -530,12 +538,24 @@ async function handleGiftAnimation(giftPackage: onePlusTwoGiftItemInfo) {
                 />
               </div>
             </div>
-            <div class="h-600 w-full flex flex-col justify-evenly gap-20">
+            <div class="mt-20 h-560 w-full flex flex-col justify-evenly gap-20">
               <template
                 v-for="(goods, index) in getPorpsInfo(giftPackage.Props)"
                 :key="index"
               >
-                <div class="relative flex flex-col items-center">
+                <IconWithText
+                  :icon-url="getPGImg(goods.Icon)"
+                  :text="goods.Text"
+                  :text-size="36"
+                  :icon-height="100"
+                  :bottom="-10"
+                  stroke-color="#40403e"
+                  :stroke-width="3"
+                  :gift-type="goods.PropType"
+                  @click="(event) => handleBoxClick(goods, event)"
+                />
+
+                <!-- <div class="relative flex flex-col items-center">
                   <img
                     class="h-100"
                     :src="getPGImg(goods.Icon)"
@@ -548,7 +568,7 @@ async function handleGiftAnimation(giftPackage: onePlusTwoGiftItemInfo) {
                   >
                     {{ goods.Text }}
                   </span>
-                </div>
+                </div> -->
               </template>
             </div>
           </div>
@@ -563,7 +583,13 @@ async function handleGiftAnimation(giftPackage: onePlusTwoGiftItemInfo) {
               @click="handleButtonClick(giftPackage)"
             >
               <div class="relative z-10 h-full w-full f-c gap-5">
-                <span class="text-42 text-stroke-2 text-stroke-[#164b2e]">{{ getPrice(giftPackage) }}</span>
+                <TextStroke
+                  class="text-42"
+                  stroke-color="#164b2e"
+                  :stroke-width="3"
+                >
+                  {{ getPrice(giftPackage) }}
+                </TextStroke>
                 <img
                   v-if="giftPackage.sortId && giftPackage.sortId !== 1 && giftPackage.Price === 0 "
                   class="h-50"

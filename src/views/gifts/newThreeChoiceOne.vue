@@ -7,9 +7,11 @@ import { useAnimatableRefs } from '@/hooks/useButtonRefs'
 
 import { useBuyOrder } from '@/hooks/useBuyOrder'
 
-import { formatPrice, getPGImg } from '@/utils'
+import { useGiftStore } from '@/store/modules/giftStore'
 
+import { formatPrice, getPGImg } from '@/utils'
 import { findImagePath } from '@/utils/imageUtils'
+
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 
 // function getImageUrl(name: string) {
@@ -216,17 +218,22 @@ const bgImgList = computed(() => {
 
   return list
 })
+const { getProductListRequest } = useGiftStore()
 
 // 数据加载函数
 async function getProductList() {
-  const res = await getProductListApi({
-    appid: '616876868660610',
-    uid: '102191',
-    producttype: 5,
-  })
+  const res = await getProductListRequest(5)
   productInfo.value = res.ProductInfo
   console.log(productInfo.value?.Pic, 'productInfo.value?.Pic')
   itemInfoList.value = res.ItemInfo as ThreeChoiceOneGiftItemInfo[]
+
+  // test
+  // itemInfoList.value[0].Props[0].Text = '20000'
+  // itemInfoList.value[1].Props[0].Text = '20000'
+  // itemInfoList.value[0].Props[1] = itemInfoList.value[0].Props[0]
+  // itemInfoList.value[0].Props[2] = itemInfoList.value[0].Props[0]
+  // itemInfoList.value[0].Props[3] = itemInfoList.value[0].Props[0]
+
   let idNum = 0
   itemInfoList.value.forEach((item) => {
     item.id = idNum++
@@ -248,8 +255,13 @@ getProductList()
 
 <template>
   <div class="relative mb-30 f-c flex-col text-29">
-    <div class="mt-30 text-29 text-stroke-3 text-stroke-[#19093e] paint-order">
-      Only one purchase can be made !
+    <div class="mt-30 text-29">
+      <TextStroke
+        stroke-color="#19093e"
+        :stroke-width="3"
+      >
+        Only one purchase can be made !
+      </TextStroke>
     </div>
     <div class="min-h-789 w-700 flex items-end justify-center">
       <div
@@ -306,7 +318,19 @@ getProductList()
               :key="index"
               class="flex flex-col items-center justify-center"
             >
-              <img
+              <IconWithText
+                :icon-url="getPGImg(prop.Icon)"
+                :text="prop.Text"
+                :text-size="31"
+                :icon-height="90"
+                :bottom="-10"
+                stroke-color="#464646"
+                :stroke-width="2"
+                :gift-type="prop.PropType"
+                @click="(event: any) => handleBoxClick(prop, event)"
+              />
+
+              <!-- <img
                 class="h-90"
                 :src="getPGImg(prop.Icon)"
                 alt=""
@@ -314,7 +338,7 @@ getProductList()
               >
               <div class="text-31 text-stroke-2 text-stroke-[#464646] paint-order -mt-15">
                 {{ prop.Text }}
-              </div>
+              </div> -->
             </div>
           </div>
         </div>
@@ -332,8 +356,13 @@ getProductList()
               :mask-show="giftPackage.id !== activeGiftId"
               @click="handleClickBuySingle(giftPackage)"
             >
-              <div class="text-29 text-stroke-2 text-stroke-[#164b2e] paint-order">
-                {{ formatPrice(giftPackage.Price || 0) }}
+              <div class="text-29">
+                <TextStroke
+                  stroke-color="#164b2e"
+                  :stroke-width="2"
+                >
+                  {{ formatPrice(giftPackage.Price || 0) }}
+                </TextStroke>
               </div>
             </GreenButton>
           </div>
@@ -365,8 +394,13 @@ getProductList()
           :score="productInfo?.Props?.[0]?.VipScore"
           score-show
         >
-          <div class="text-33 text-stroke-2 text-stroke-[#164b2e] paint-order">
-            BUY ALL {{ formatPrice(itemInfoList[3]?.Price || 0) }}
+          <div class="text-33">
+            <TextStroke
+              stroke-color="#164b2e"
+              :stroke-width="3"
+            >
+              BUY ALL{{ formatPrice(itemInfoList[3]?.Price || 0) }}
+            </TextStroke>
           </div>
         </GreenButton>
       </div>

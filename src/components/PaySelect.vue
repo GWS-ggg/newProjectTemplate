@@ -102,8 +102,8 @@ async function handlePayOrder() {
 
   // 再调支付接口
   try {
-    // await checkout()
-    showPaymentSuccess()
+    await checkout()
+    // showPaymentSuccess()
   }
   catch (error) {
     console.log('handlePayOrder error', error)
@@ -237,6 +237,7 @@ async function startCheckStatus(res: PayOrderRes) {
     console.log('check', payId, currentPayId)
     if (payId !== currentPayId)
       return
+    debugger
     const checkRes = await checkOrderStatus(payId)
     if (checkRes.status === ORDER_STATUS_SUCCESS) {
       showPaymentSuccess()

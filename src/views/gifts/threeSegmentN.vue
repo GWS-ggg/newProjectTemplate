@@ -5,8 +5,9 @@ import GreenButton from '@/components/GreenButton.vue'
 import IconWithText from '@/components/IconWithText.vue'
 import { useEmitBoxClick } from '@/hooks'
 import { useAnimatableRefs } from '@/hooks/useButtonRefs'
-import { animateWithClass, formatPrice, getPGImg } from '@/utils'
+import { useGiftStore } from '@/store/modules/giftStore'
 
+import { animateWithClass, formatPrice, getPGImg } from '@/utils'
 import { findImagePath } from '@/utils/imageUtils'
 import { computed, nextTick, ref, watchEffect } from 'vue'
 
@@ -14,12 +15,10 @@ const emits = defineEmits(['openPopup', 'boxClick'])
 const { handleBoxClick } = useEmitBoxClick(emits)
 const itemInfoList = ref<ThreeSegmentNItemInfo[]>([])
 const productInfo = ref<ProductInfo>()
+const { getProductListRequest } = useGiftStore()
+
 async function getThreeSegmentNData() {
-  const res = await getProductListApi({
-    appid: '616876868660610',
-    uid: '102191',
-    producttype: 8,
-  })
+  const res = await getProductListRequest(8)
   productInfo.value = res.ProductInfo
   itemInfoList.value = res.ItemInfo as ThreeSegmentNItemInfo[]
   // itemInfoList.value = itemInfoList.value.slice(0, 5)

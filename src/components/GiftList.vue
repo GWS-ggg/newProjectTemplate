@@ -6,13 +6,14 @@ import { freeGiftAwardApi } from '@/api'
 import { useBuyOrder } from '@/hooks/useBuyOrder'
 import { useBoxStore } from '@/store/modules/boxStore'
 import { useGiftStore } from '@/store/modules/giftStore'
+import { useLoginStore } from '@/store/modules/loginStore'
 import { formatPrice } from '@/utils'
 import onePlusTwo from '@/views/gifts/1+2.vue'
 import battlePass from '@/views/gifts/battlePass.vue'
 import dailyLogin from '@/views/gifts/dailyLogin.vue'
 import newBattlePass from '@/views/gifts/newBattlePass.vue'
-import newThreeChoiceOne from '@/views/gifts/newThreeChoiceOne.vue'
 
+import newThreeChoiceOne from '@/views/gifts/newThreeChoiceOne.vue'
 import roulette from '@/views/gifts/roulette.vue'
 import sixSegment from '@/views/gifts/sixSegment.vue'
 import stepGift from '@/views/gifts/stepGift.vue'
@@ -184,13 +185,14 @@ const orderPopupInfo = ref<OrderPopupInfo>({
   skuId: '',
   exchangeId: 0,
 })
+const loginStore = useLoginStore()
 async function openPopup(orderInfo: OrderPopupInfo) {
   orderPopupInfo.value = orderInfo
   // 价格为0  走免费礼包发奖接口
   if (orderInfo.price === 0) {
     const freeGiftAwardRequestInfo: FreeGiftAwardRequest = {
       appid: '616876868660610',
-      uid: '102191',
+      uid: loginStore.userUid,
       packagekey: orderInfo.key,
       tradeproductid: orderInfo.tradeProductId,
     }

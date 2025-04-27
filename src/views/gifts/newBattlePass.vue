@@ -5,6 +5,7 @@ import { getProductListApi } from '@/api/index'
 import AnimatedIcon from '@/components/AnimatedIcon.vue'
 
 import { useBuyOrder } from '@/hooks/useBuyOrder'
+import { useGiftStore } from '@/store/modules/giftStore'
 import { useScoreElementStore } from '@/store/modules/scoreElement'
 import { formatPrice } from '@/utils'
 import { computed, ref } from 'vue'
@@ -140,15 +141,12 @@ function triggerSuccessAnimation() {
 defineExpose({
   triggerSuccessAnimation,
 })
+const { getProductListRequest } = useGiftStore()
 
 // 获取商品数据
 async function getProductList() {
   try {
-    const res = await getProductListApi({
-      appid: '616876868660610',
-      uid: '102191',
-      producttype: 2,
-    })
+    const res = await getProductListRequest(2)
     itemInfoList.value = res.ItemInfo as BattlePassItemInfo[]
     itemInfoList.value.forEach((item) => {
       if (item.BuyTimes === undefined)
@@ -167,8 +165,13 @@ getProductList()
 
 <template>
   <div class="relative mb-30 flex flex-col items-center text-29 color-white leading-tight">
-    <div class="mt-30 text-29 color-[#fff] text-stroke-3 text-stroke-[#19093e] paint-order">
-      仅限此赛季
+    <div class="mt-30 text-29 color-[#fff]">
+      <TextStroke
+        stroke-color="#19093e"
+        :stroke-width="3"
+      >
+        仅限此赛季
+      </TextStroke>
     </div>
 
     <!-- 第一个通行证卡片 -->
@@ -206,9 +209,12 @@ getProductList()
 
             <!-- 礼物描述 -->
             <div class="f-c flex-col">
-              <div class="text-stroke-4 text-stroke-[#3e3d94] paint-order">
+              <TextStroke
+                stroke-color="#3e3d94"
+                :stroke-width="3"
+              >
                 {{ item.title }}
-              </div>
+              </TextStroke>
               <div
                 v-if="item.desc"
                 class="text-24 color-[#fbd506]"
@@ -258,8 +264,13 @@ getProductList()
                       alt="积分图标"
                       class="h-73"
                     >
-                    <div class="absolute bottom-0 left-1/2 text-24 text-white text-stroke-black -mt-25 -translate-x-1/2">
-                      {{ firstProduct.Props[0]?.VipScore || 0 }}
+                    <div class="absolute bottom-0 left-1/2 text-24 text-white -mt-25 -translate-x-1/2">
+                      <TextStroke
+                        stroke-color="#40403e"
+                        :stroke-width="3"
+                      >
+                        {{ firstProduct.Props[0]?.VipScore || 0 }}
+                      </TextStroke>
                     </div>
                   </div>
 
@@ -291,8 +302,13 @@ getProductList()
                         </div>
                       </div>
                     </div>
-                    <div class="absolute bottom-0 left-1/2 text-24 text-white text-stroke-black -mt-25 -translate-x-1/2">
-                      {{ firstProduct.AddProps[0]?.VipScore || 0 }}
+                    <div class="absolute bottom-0 left-1/2 text-24 text-white -mt-25 -translate-x-1/2">
+                      <TextStroke
+                        stroke-color="#40403e"
+                        :stroke-width="3"
+                      >
+                        {{ firstProduct.AddProps[0]?.VipScore || 0 }}
+                      </TextStroke>
                     </div>
                   </div>
                 </div>
@@ -338,9 +354,12 @@ getProductList()
 
             <!-- 礼物描述 -->
             <div class="f-c flex-col">
-              <div class="text-stroke-4 text-stroke-[#3e3d94] paint-order">
+              <TextStroke
+                stroke-color="#3e3d94"
+                :stroke-width="3"
+              >
                 {{ item.title }}
-              </div>
+              </TextStroke>
               <div
                 v-if="item.desc"
                 class="text-24 color-[#fbd506]"
@@ -390,8 +409,13 @@ getProductList()
                       alt="积分图标"
                       class="h-73"
                     >
-                    <div class="absolute bottom-0 left-1/2 text-24 text-white text-stroke-black -mt-25 -translate-x-1/2">
-                      {{ secondProduct.Props[0]?.VipScore || 0 }}
+                    <div class="absolute bottom-0 left-1/2 text-24 text-white -mt-25 -translate-x-1/2">
+                      <TextStroke
+                        stroke-color="#40403e"
+                        :stroke-width="3"
+                      >
+                        {{ secondProduct.Props[0]?.VipScore || 0 }}
+                      </TextStroke>
                     </div>
                   </div>
 
@@ -423,8 +447,13 @@ getProductList()
                         </div>
                       </div>
                     </div>
-                    <div class="absolute bottom-0 left-1/2 text-24 text-white text-stroke-black -mt-25 -translate-x-1/2">
-                      {{ secondProduct.AddProps[0]?.VipScore || 0 }}
+                    <div class="absolute bottom-0 left-1/2 text-24 text-white -mt-25 -translate-x-1/2">
+                      <TextStroke
+                        stroke-color="#40403e"
+                        :stroke-width="3"
+                      >
+                        {{ secondProduct.AddProps[0]?.VipScore || 0 }}
+                      </TextStroke>
                     </div>
                   </div>
                 </div>

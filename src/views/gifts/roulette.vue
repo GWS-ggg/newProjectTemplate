@@ -5,10 +5,12 @@ import { getProductListApi } from '@/api/index'
 import CountDown from '@/components/CountDown.vue'
 
 import GreenButton from '@/components/GreenButton.vue'
+import IconWithText from '@/components/IconWithText.vue'
+
+import { useEmitBoxClick } from '@/hooks'
+import { useGiftStore } from '@/store/modules/giftStore'
 import { formatPrice, getPGImg } from '@/utils'
-
 import { findImagePath } from '@/utils/imageUtils'
-
 import { computed, ref } from 'vue'
 
 const emits = defineEmits(['openPopup', 'boxClick'])
@@ -98,12 +100,10 @@ const currentGiftId = computed(() => {
   return currentGift.value?.id || 0
 })
 const productInfo = ref<ProductInfo>()
+const { getProductListRequest } = useGiftStore()
+
 async function getWheelGiftList() {
-  const res = await getProductListApi({
-    appid: '616876868660610',
-    uid: '102191',
-    producttype: 3,
-  })
+  const res = await getProductListRequest(3)
 
   vipScore.value = res.ProductInfo?.Props?.[0]?.VipScore as number
   productInfo.value = res.ProductInfo
@@ -151,9 +151,7 @@ function triggerSuccessAnimation() {
 defineExpose({
   triggerSuccessAnimation,
 })
-function handleBoxClick(prop: Prop, event: MouseEvent) {
-  emits('boxClick', prop, event)
-}
+const { handleBoxClick } = useEmitBoxClick(emits)
 </script>
 
 <template>
@@ -203,24 +201,19 @@ function handleBoxClick(prop: Prop, event: MouseEvent) {
 
             <div class="relative z-10 h-full w-full f-c">
               <div class="relative f-c">
-                <img
-                  :src="getPGImg(gift?.Props?.[0]?.Icon)"
-                  alt=""
-                  class="w-75"
-                  @click="handleBoxClick(gift?.Props?.[0] as Prop, $event)"
-                >
-                <div
-                  v-if="gift?.Props?.[0]?.Text"
-                  class="absolute text-30 text-white text-stroke-2 text-stroke-[#1d2f3e] -bottom-5"
-                >
-                  {{ gift?.Props?.[0]?.Text }}
-                </div>
+                <IconWithText
+                  :icon-url="getPGImg(gift?.Props?.[0]?.Icon)"
+                  :text="gift?.Props?.[0]?.Text"
+                  :text-size="30"
+                  :icon-height="75"
+                  :bottom="-5"
+                  stroke-color="#1d2f3e"
+                  :stroke-width="2"
+                  :gift-type="gift?.Props?.[0]?.PropType"
+                  @click="(event) => handleBoxClick(gift?.Props?.[0] as Prop, event)"
+                />
               </div>
-              <!-- <img
-                :src="imgMap.giftBgMaskImg"
-                alt=""
-                class="absolute left-1/2 top-1/2 z-20 h-120 w-120 opacity-70 -translate-x-1/2 -translate-y-1/2"
-              > -->
+
               <img
                 v-if="gift.BuyTimes"
                 :src="imgMap.okImg"

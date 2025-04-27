@@ -144,9 +144,14 @@ const fontFamily = ref('font-en')
       >
       <div
         v-if="score"
-        class="absolute bottom-0 left-1/2 text-24 text-white text-stroke-black -translate-x-1/2 -translate-y-15"
+        class="absolute bottom-0 left-1/2 text-24 text-white -translate-x-1/2 -translate-y-15"
       >
-        +{{ score }}
+        <TextStroke
+          stroke-color="#40403e"
+          :stroke-width="3"
+        >
+          +{{ score }}
+        </TextStroke>
       </div>
     </div>
   </div>

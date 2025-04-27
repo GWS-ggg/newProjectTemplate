@@ -6,6 +6,7 @@ import AnimatedIcon from '@/components/AnimatedIcon.vue'
 import GreenButton from '@/components/GreenButton.vue'
 import { useEmitBoxClick } from '@/hooks'
 import { useAnimatableRefs } from '@/hooks/useButtonRefs'
+import { useGiftStore } from '@/store/modules/giftStore'
 import { animateWithClass, formatPrice, getPGImg } from '@/utils'
 import { findImagePath } from '@/utils/imageUtils'
 import { computed, nextTick, ref, watchEffect } from 'vue'
@@ -19,12 +20,10 @@ const itemInfoList = ref<SixSegmentItemInfo[]>([])
 const productInfo = ref<ProductInfo>()
 const currentScore = ref(0)
 const targetScore = ref(0)
+const { getProductListRequest } = useGiftStore()
+
 async function getSixSegmentData() {
-  const res = await getProductListApi({
-    appid: '616876868660610',
-    uid: '102191',
-    producttype: 7,
-  })
+  const res = await getProductListRequest(7)
   productInfo.value = res.ProductInfo
   itemInfoList.value = res.ItemInfo as SixSegmentItemInfo[]
   // TODO
@@ -473,6 +472,7 @@ function getScoreInfo(props: Array<{
           class="h-full"
           :src="getPGImg(productInfo?.Props[0]?.Icon as string)"
           alt=""
+          :class="productInfo?.Props?.[0].PropType === 11 ? 'scale-120' : ''"
           @click="(event) => handleBoxClick(productInfo?.Props[0] as Prop, event)"
         >
       </div>
@@ -509,15 +509,17 @@ function getScoreInfo(props: Array<{
                 :key="goodIndex"
                 class="relative h-120 f-e flex-col"
               >
-                <img
-                  class="h-full"
-                  :src="getPGImg(good.Icon)"
-                  alt=""
-                  @click="(event) => handleBoxClick(good, event)"
-                >
-                <div class="absolute bottom-0 left-1/2 text-34 text-stroke-2 text-stroke-[#464646] paint-order -mb-10 -translate-x-1/2">
-                  {{ good.Text }}
-                </div>
+                <IconWithText
+                  :icon-url="getPGImg(good.Icon)"
+                  :text="good.Text"
+                  :text-size="36"
+                  :icon-height="120"
+                  :bottom="-5"
+                  stroke-color="#464646"
+                  :stroke-width="3"
+                  :gift-type="good.PropType"
+                  @click="(event: any) => handleBoxClick(good, event)"
+                />
               </div>
             </div>
             <div class="ml-24 mt-30 f-s">
@@ -547,9 +549,14 @@ function getScoreInfo(props: Array<{
                 >
                   <div
                     v-show="gift.Price === 0"
-                    class="relative z-20 text-30 text-stroke-3 text-stroke-[#164b2e] paint-order"
+                    class="relative z-20 text-30"
                   >
-                    FREE
+                    <TextStroke
+                      stroke-color="#164b2e"
+                      :stroke-width="3"
+                    >
+                      FREE
+                    </TextStroke>
                     <img
                       v-if="gift.sortId !== 1"
                       :src="imgMap.lockImg"
@@ -559,9 +566,14 @@ function getScoreInfo(props: Array<{
                   </div>
                   <div
                     v-show="gift.Price !== 0"
-                    class="relative z-20 text-30 text-stroke-3 text-stroke-[#164b2e] paint-order"
+                    class="t relative z-20 text-30"
                   >
-                    {{ formatPrice(gift.Price || 0) }}
+                    <TextStroke
+                      stroke-color="#164b2e"
+                      :stroke-width="3"
+                    >
+                      {{ formatPrice(gift.Price || 0) }}
+                    </TextStroke>
                   </div>
                 </GreenButton>
               </div>

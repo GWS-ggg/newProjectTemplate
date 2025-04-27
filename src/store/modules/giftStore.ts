@@ -1,13 +1,15 @@
 import type { ShopListItem } from '@/api/types'
-import { getShopListInfoApi } from '@/api'
+import { getProductListApi, getShopListInfoApi } from '@/api'
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
+import { useLoginStore } from './loginStore'
 
 export const useGiftStore = defineStore('gift', () => {
   // 当前选中的礼包ID
   const currentGiftId = ref<number>(0)
   const shopListInfo = ref<ShopListItem[]>([])
 
+  const loginStore = useLoginStore()
   // 提供一个计算属性来访问 shopListInfo
   const currentShopListInfo = computed(() => {
     return shopListInfo.value
@@ -44,6 +46,15 @@ export const useGiftStore = defineStore('gift', () => {
     currentGiftId.value = giftId
   }
 
+  async function getProductListRequest(productType: number) {
+    const res = await getProductListApi({
+      appid: '616876868660610',
+      uid: loginStore.userUid,
+      producttype: productType,
+    })
+    return res
+  }
+
   return {
     currentGiftId,
     shopListInfo,
@@ -51,5 +62,6 @@ export const useGiftStore = defineStore('gift', () => {
     currentGiftInfo,
     getShopListInfo,
     setCurrentGiftId,
+    getProductListRequest,
   }
 })

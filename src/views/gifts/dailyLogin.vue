@@ -5,21 +5,19 @@ import GreenButton from '@/components/GreenButton.vue'
 import IconWithText from '@/components/IconWithText.vue'
 import { useEmitBoxClick } from '@/hooks'
 import { useBuyOrder } from '@/hooks/useBuyOrder'
+import { useGiftStore } from '@/store/modules/giftStore'
 import { formatPrice, getPGImg } from '@/utils'
 import { findImagePath } from '@/utils/imageUtils'
 import { computed, inject, ref } from 'vue'
 
 const emits = defineEmits(['openPopup', 'boxClick'])
 const { handleBoxClick } = useEmitBoxClick(emits)
+const { getProductListRequest } = useGiftStore()
 
 const dailyLoginItemInfo = ref<DailyLoginItemInfo[]>([])
 const productInfo = ref<ProductInfo>()
 async function getDailyLoginData() {
-  const res = await getProductListApi({
-    appid: '616876868660610',
-    uid: '102191',
-    producttype: 6,
-  })
+  const res = await getProductListRequest(6)
   dailyLoginItemInfo.value = res.ItemInfo as DailyLoginItemInfo[]
   productInfo.value = res.ProductInfo as ProductInfo
 
@@ -46,6 +44,7 @@ const imgMap = {
   diceImg: getImageUrl('202_2.png'),
   textImg: getImageUrl('头部文字_英语.png'),
   discountImg: getImageUrl('img_礼包标签.png'),
+  maskImg: getImageUrl('img_每日登录标签叠加资源.png'),
 }
 
 interface Gift {
@@ -135,27 +134,41 @@ const bubblePosition = {
           alt=""
           class="absolute left-0 top-0 h-full w-full"
         >
-        <div class="ml-15 mt-10 flex flex-col rotate-[15deg] items-center justify-center text-43 text-white text-stroke-4 text-stroke-[#ad145b] paint-order">
+        <img
+          :src="imgMap.maskImg"
+          class="absolute left-0 top-0 h-full w-full"
+          alt=""
+        >
+        <div class="ml-15 mt-10 flex flex-col rotate-[15deg] items-center justify-center text-43 text-white">
           <div>
-            {{ dailyLoginItemInfo[0]?.Addition }}%
+            <TextStroke
+              stroke-color="#ad145b"
+              :stroke-width="4"
+            >
+              {{ dailyLoginItemInfo[0]?.Addition }}%
+            </TextStroke>
           </div>
           <div class="-mt-10">
-            OFF
+            <TextStroke
+              stroke-color="#ad145b"
+              :stroke-width="4"
+            >
+              OFF
+            </TextStroke>
           </div>
         </div>
       </div>
     </div>
-    <!-- <div class="absolute left-1/2 top-60 f-c -translate-x-1/2">
-      <img
-        :src="imgMap.textImg"
-        alt=""
+    <div class="absolute left-1/2 top-240 h-46 w-356 f-c rounded-20 bg-[#000000] bg-opacity-24 text-30 -translate-x-1/2">
+      <TextStroke
+        stroke-color="#0a273d"
+        :stroke-width="3"
       >
-    </div> -->
-    <div class="absolute left-1/2 top-240 h-46 w-356 f-c rounded-20 bg-[#000000] bg-opacity-24 text-30 text-stroke-3 text-stroke-[#0a273d] paint-order -translate-x-1/2">
-      Only one chance
+        Only one chance
+      </TextStroke>
     </div>
     <div class="absolute bottom-300 left-1/2 h-126 w-590 flex items-center justify-center -translate-x-1/2">
-      <div class="h-97 w-520 flex items-center justify-evenly gap-10">
+      <div class="h-97 w-520 flex items-center justify-center gap-40">
         <div
           v-for="(gift, index) in dailyLoginItemInfo[0]?.Props"
           :key="index"
@@ -168,31 +181,20 @@ const bubblePosition = {
             :icon-height="90"
             :bottom="-10"
             text-class="text-stroke-3 text-stroke-[#4d1202] paint-order"
+            :gift-type="gift.PropType"
             @click="(event) => handleBoxClick(gift, event)"
           />
-          <!-- <img
-            :src="getPGImg(gift.Icon)"
-            alt=""
-            class="h-full"
-          >
-          <div
-            v-if="gift.Text"
-            class="text-42 text-white text-stroke-3 text-stroke-[#4d1202] paint-order -mt-40"
-          >
-            {{ gift.Text }}
-          </div> -->
         </div>
       </div>
     </div>
     <div class="absolute bottom-200 left-1/2 h-126 w-590 f-c -translate-x-1/2">
-      <div class="relative h-97 flex items-center justify-center gap-15 text-48 color-[#fff0de] text-stroke-3 text-stroke-[#4d1202] paint-order">
-        {{ formatPrice(dailyLoginItemInfo[0]?.Price || 0) }}
-        <!-- <div class="absolute bottom-1/2 translate-y-1/2 text-30 text-white color-[#fbcaa7] text-stroke-3 text-stroke-[#4d1202] paint-order -right-120">
-          <span class="relative">
-            $15.00
-            <span class="absolute left-0 top-1/2 h-3 w-full rotate-[-5deg] bg-[#f30404] -translate-y-1/2" />
-          </span>
-        </div> -->
+      <div class="relative h-97 flex items-center justify-center gap-15 text-48 color-[#fff0de]">
+        <TextStroke
+          stroke-color="#4d1202"
+          :stroke-width="3"
+        >
+          {{ formatPrice(dailyLoginItemInfo[0]?.Price || 0) }}
+        </TextStroke>
       </div>
     </div>
     <div class="absolute bottom-135 left-1/2 h-96 w-317 f-c -translate-x-1/2">

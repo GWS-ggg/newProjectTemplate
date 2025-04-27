@@ -1,6 +1,7 @@
 import type { GiftResponseData } from '@/types'
 import { getProductListApi } from '@/api'
 import { useGiftStore } from '@/store/modules/giftStore'
+import { useLoginStore } from '@/store/modules/loginStore'
 import { reactive, ref } from 'vue'
 
 /**
@@ -10,7 +11,7 @@ import { reactive, ref } from 'vue'
 export function useDataPreload() {
   const isLoading = ref(false)
   const giftStore = useGiftStore()
-
+  const loginStore = useLoginStore()
   // 缓存已加载的数据
   const cachedData = reactive<Record<number, GiftResponseData>>({})
 
@@ -40,7 +41,7 @@ export function useDataPreload() {
       console.log(`开始预加载数据 productType: ${productType}`)
       const res = await getProductListApi({
         appid: '616876868660610',
-        uid: '102191',
+        uid: loginStore.userUid,
         producttype: productType,
       })
 

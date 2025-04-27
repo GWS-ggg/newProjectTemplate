@@ -89,43 +89,43 @@ export default defineConfig(function (_a) {
                 'Api': path.resolve(__dirname, 'src/api'),
             },
         },
+        server: {
+            port: 5179, // 本地开发服务端口
+            // proxy: {
+            //   '/api': {
+            //     target: 'https://mprogram-test.forevernine.com/', // 要代理的地址
+            //     changeOrigin: true,
+            //     followRedirects: true, // Cookie支持重定向
+            //     rewrite(path) { return path.replace(/^\/api/, '') },
+            //   },
+            // },
+        },
         // server: {
-        //   port: 5173, // 本地开发服务端口
+        // // https: false,
+        // // Listening on all local IPs
+        //   host: true,
+        //   port: 5179,
         //   proxy: {
-        //     '/api': {
-        //       target: 'https://mprogram-test.forevernine.com/', // 要代理的地址
+        //     '/localpay': {
+        //       target: 'http://192.168.15.144:8010',
         //       changeOrigin: true,
-        //       followRedirects: true, // Cookie支持重定向
-        //       rewrite(path) { return path.replace(/^\/api/, '') },
+        //       secure: false,
+        //       ws: true,
+        //       followRedirects: true,
+        //       configure: (proxy, options) => {
+        //         proxy.on('error', (err, req, res) => {
+        //           console.log('proxy error', err)
+        //         })
+        //         proxy.on('proxyReq', (proxyReq, req, res) => {
+        //           console.log('Sending Request to the Target:', req.method, req.url)
+        //         })
+        //         proxy.on('proxyRes', (proxyRes, req, res) => {
+        //           console.log('Received Response from the Target:', proxyRes.statusCode, req.url)
+        //         })
+        //       },
         //     },
         //   },
         // },
-        server: {
-            // https: false,
-            // Listening on all local IPs
-            host: true,
-            port: 5179,
-            proxy: {
-                '/localpay': {
-                    target: 'http://192.168.15.144:8010',
-                    changeOrigin: true,
-                    secure: false,
-                    ws: true,
-                    followRedirects: true,
-                    configure: function (proxy, options) {
-                        proxy.on('error', function (err, req, res) {
-                            console.log('proxy error', err);
-                        });
-                        proxy.on('proxyReq', function (proxyReq, req, res) {
-                            console.log('Sending Request to the Target:', req.method, req.url);
-                        });
-                        proxy.on('proxyRes', function (proxyRes, req, res) {
-                            console.log('Received Response from the Target:', proxyRes.statusCode, req.url);
-                        });
-                    },
-                },
-            },
-        },
         build: {
             target: 'ESNext',
             minify: 'esbuild', // 使用 esbuild 进行代码压缩

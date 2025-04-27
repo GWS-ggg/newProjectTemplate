@@ -4,6 +4,7 @@ import { getProductListApi } from '@/api'
 import GreenButton from '@/components/GreenButton.vue'
 import { useAnimatableRefs } from '@/hooks/useButtonRefs'
 import { useBuyOrder } from '@/hooks/useBuyOrder'
+import { useGiftStore } from '@/store/modules/giftStore'
 import { animateWithClass, formatPrice, getPGImg } from '@/utils'
 import { findImagePath } from '@/utils/imageUtils'
 import { computed, nextTick, ref } from 'vue'
@@ -12,12 +13,10 @@ const emits = defineEmits(['boxClick', 'openPopup'])
 const itemInfoList = ref<ThreeSegmentItemInfo[]>([])
 const productInfo = ref<ProductInfo>()
 const bgImgList = ref<string[]>([])
+const { getProductListRequest } = useGiftStore()
+
 async function getThreeSegmentData() {
-  const res = await getProductListApi({
-    appid: '616876868660610',
-    uid: '102191',
-    producttype: 9,
-  })
+  const res = await getProductListRequest(9)
   productInfo.value = res.ProductInfo
   itemInfoList.value = res.ItemInfo as ThreeSegmentItemInfo[]
   itemInfoList.value[0].BuyTimes = 0

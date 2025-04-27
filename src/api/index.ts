@@ -92,7 +92,7 @@ export function payOrderApi(data: PayOrderReq): Promise<PayOrderRes> {
 export function payOrderStasuApi(data: OrderStatusReq): Promise<OrderStatusRes> {
   return request({
     url: '/wxpay/site/qr_status',
-    method: 'get',
+    method: 'post',
     data,
     apiType: 'pay',
   })

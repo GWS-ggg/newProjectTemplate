@@ -4,7 +4,7 @@ defineProps({
   // 文本内容
   text: {
     type: String,
-    required: true,
+    required: false,
   },
   // 描边颜色
   strokeColor: {

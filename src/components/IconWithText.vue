@@ -13,6 +13,7 @@ interface Props {
   textColor?: string
   strokeColor?: string
   strokeWidth?: number
+  giftType?: number
 }
 
 withDefaults(defineProps<Props>(), {
@@ -20,7 +21,7 @@ withDefaults(defineProps<Props>(), {
   text: '',
   iconHeight: 90,
   textClass: '',
-  containerClass: 'relative h-full flex flex-col items-center justify-center',
+  containerClass: 'relative  flex flex-col items-center justify-center',
   useGetPGImg: false,
   bottom: 0,
   textSize: 45,
@@ -35,6 +36,7 @@ withDefaults(defineProps<Props>(), {
     <img
       :src="useGetPGImg ? getPGImg(iconUrl) : iconUrl"
       alt=""
+      :class="giftType === 11 ? 'scale-120' : ''"
       :style="{
         height: `${iconHeight / 100}rem`,
       }"
