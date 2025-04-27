@@ -70,7 +70,7 @@ function handleCancel() {
 <template>
   <div
     v-if="pop.visible"
-    class="message-box-wrapper fixed left-0 top-0 z-9999 h-[100vh] w-[100vw] flex items-center justify-center bg-black/20"
+    class="message-box-wrapper fixed left-0 top-0 z-2000 h-[100vh] w-[100vw] flex items-center justify-center bg-black/20"
   >
     <div class="relative z-100 h-[626px] w-[626px] rounded-[20px] bg-white p-50">
       <!-- <div

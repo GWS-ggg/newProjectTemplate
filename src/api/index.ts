@@ -1,9 +1,9 @@
 import type { GiftResponseData, OrderStatusReq, OrderStatusRes, PayOrderReq, PayOrderRes } from '@/types'
-import type { BoxData, BuyOrderInfoRequest, LoginInfo, ShopListInfo } from './types'
+import type { BoxData, BuyOrderInfoRequest, FreeGiftAwardRequest, LoginInfo, ShopListInfo } from './types'
 import request from '@/utils/request'
 
 // 获取指定礼包数据
-export function getProductListApi(params: {
+export function getProductListApi(data: {
   appid: string
   uid: string
   producttype: number
@@ -13,12 +13,12 @@ export function getProductListApi(params: {
   return request({
     url: '/localpay/official/productlist',
     method: 'post',
-    params,
+    data,
   })
 }
 
 // 登录
-export function loginApi(params: {
+export function loginApi(data: {
   uid: string
 }): Promise<
     LoginInfo
@@ -26,22 +26,34 @@ export function loginApi(params: {
   return request({
     url: '/localpay/official/login',
     method: 'post',
-    params,
+    data,
   })
 }
 // 下单
-export function buyOrderApi(params: BuyOrderInfoRequest): Promise<
-  any
+export function buyOrderApi(data: BuyOrderInfoRequest): Promise<
+  {
+    param: string
+  }
 > {
   return request({
     url: '/localpay/official/order',
     method: 'post',
-    params,
+    data,
   })
 }
 
+// 免费礼包发奖
+export function freeGiftAwardApi(data: FreeGiftAwardRequest): Promise<
+  any
+> {
+  return request({
+    url: '/localpay/official/exchange',
+    method: 'post',
+    data,
+  })
+}
 // 获取礼包列表
-export function getShopListInfoApi(params: {
+export function getShopListInfoApi(data: {
   uid: string
 }): Promise<
     ShopListInfo
@@ -49,11 +61,11 @@ export function getShopListInfoApi(params: {
   return request({
     url: '/localpay/official/shoplist',
     method: 'post',
-    params,
+    data,
   })
 }
 // 获取宝箱数据
-export function getBoxDataApi(params: {
+export function getBoxDataApi(data: {
   uid: string
   boxid: number
 }): Promise<
@@ -62,23 +74,40 @@ export function getBoxDataApi(params: {
   return request({
     url: '/localpay/official/boxpreview',
     method: 'post',
-    params,
+    data,
   })
 }
+
 // 支付
-export function payOrderApi(params: PayOrderReq): Promise<PayOrderRes> {
+export function payOrderApi(data: PayOrderReq): Promise<PayOrderRes> {
   return request({
     url: '/wxpay/pay/order',
     method: 'post',
-    params,
+    data,
+    apiType: 'pay',
   })
 }
 
 // 轮询 查询订单状态接口
-export function payOrderStasuApi(params: OrderStatusReq): Promise<OrderStatusRes> {
+export function payOrderStasuApi(data: OrderStatusReq): Promise<OrderStatusRes> {
   return request({
     url: '/wxpay/site/qr_status',
     method: 'get',
-    params,
+    data,
+    apiType: 'pay',
+  })
+}
+
+// paypal回调通知服务器
+export function paypalSettleApi(data: {
+  orderid: string
+  fntype14: string
+  status: 0 | 1 | 3
+}): Promise<void> {
+  return request({
+    url: '/wxpay/paypal/settle',
+    method: 'post',
+    data,
+    apiType: 'pay',
   })
 }

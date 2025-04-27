@@ -20,6 +20,9 @@ async function getThreeSegmentData() {
   })
   productInfo.value = res.ProductInfo
   itemInfoList.value = res.ItemInfo as ThreeSegmentItemInfo[]
+  itemInfoList.value[0].BuyTimes = 0
+  itemInfoList.value[0].Props[0].PropType = 11
+  itemInfoList.value[0].Props[0].PropID = 2030434
   bgImgList.value = [
     getPGImg(productInfo.value?.Pic[0] as string),
     getPGImg(productInfo.value?.Pic[1] as string),
@@ -199,8 +202,8 @@ defineExpose({
       </div>
 
       <div v-show="item.BuyTimes === 0">
-        <div class="absolute left-0 top-35 h-120 w-full">
-          <div class="h-full flex items-center justify-center gap-30">
+        <div class="absolute left-1/2 top-35 h-120 w-[90%] -translate-x-1/2">
+          <div class="h-full w-full flex items-center justify-evenly gap-30">
             <template
               v-for="(icon, index) in item.Props"
               :key="index"

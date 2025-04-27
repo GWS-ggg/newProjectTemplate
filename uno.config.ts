@@ -58,7 +58,7 @@ export default defineConfig({
     ['animate-click-pulse', { animation: 'click-pulse 0.6s ease' }],
     ['animate-click-pulse-soft', { animation: 'click-pulse-soft 0.5s ease' }],
     ['animate-click-pulse-strong', { animation: 'click-pulse-strong 0.6s ease' }],
-    ['paint-order-stroke-fill', { 'paint-order': 'stroke fill' }],
+    ['paint-order-stroke-fill', { 'paint-order': 'stroke fill', '-webkit-paint-order': 'stroke fill', '-moz-paint-order': 'stroke fill' }],
   ],
   transformers: [transformerDirectives()],
 })

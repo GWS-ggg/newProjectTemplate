@@ -11,18 +11,22 @@ interface Props {
   bottom?: number
   textSize?: number
   textColor?: string
+  strokeColor?: string
+  strokeWidth?: number
 }
 
 withDefaults(defineProps<Props>(), {
   iconUrl: '',
   text: '',
   iconHeight: 90,
-  textClass: ' text-stroke-3 text-stroke-[#464646] paint-order',
+  textClass: '',
   containerClass: 'relative h-full flex flex-col items-center justify-center',
   useGetPGImg: false,
   bottom: 0,
   textSize: 45,
   textColor: '#fff',
+  strokeColor: '#464646',
+  strokeWidth: 3,
 })
 </script>
 
@@ -45,7 +49,12 @@ withDefaults(defineProps<Props>(), {
         color: textColor,
       }"
     >
-      {{ text }}
+      <TextStroke
+        :stroke-color="strokeColor"
+        :stroke-width="strokeWidth"
+      >
+        {{ text }}
+      </TextStroke>
     </div>
   </div>
 </template>

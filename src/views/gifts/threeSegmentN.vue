@@ -22,7 +22,7 @@ async function getThreeSegmentNData() {
   })
   productInfo.value = res.ProductInfo
   itemInfoList.value = res.ItemInfo as ThreeSegmentNItemInfo[]
-  itemInfoList.value = itemInfoList.value.slice(0, 5)
+  // itemInfoList.value = itemInfoList.value.slice(0, 5)
   // 处理item数据 添加id BuyTimes Price
   let idNum = 0
   itemInfoList.value.forEach((item) => {
@@ -347,6 +347,7 @@ async function handleAnimation(currentGift: ThreeSegmentNItemInfo) {
               :text="icon.Text"
               :bottom="-10"
               :icon-height="120"
+              :text-size="40"
               @click="(event) => handleBoxClick(icon, event)"
             />
           </template>
@@ -382,11 +383,11 @@ async function handleAnimation(currentGift: ThreeSegmentNItemInfo) {
           >
         </div>
       </div>
-      <div class="absolute bottom-35 left-50 f-c flex-col">
-        <div class="text-20 text-[#fff] text-stroke-1 text-stroke-[#5d2f0a]">
+      <div class="absolute bottom-60 left-50 f-c flex-col">
+        <div class="text-20 text-[#fff] text-stroke-2 text-stroke-[#5d2f0a] paint-order">
           1/1
         </div>
-        <div class="text-18 text-[#fddfb0] text-stroke-1 text-stroke-[#5d2f0a]">
+        <div class="text-18 text-[#fddfb0] text-stroke-2 text-stroke-[#5d2f0a] paint-order">
           Available
         </div>
       </div>

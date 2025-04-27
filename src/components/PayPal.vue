@@ -1,22 +1,22 @@
 <script lang="ts" setup>
-import type { GoodsInfo, Level, OrderReq, StoreUserInfo } from '@/types/index'
-import { myCardOrderApi } from '@/api'
-import { PAYPAL_PAY_TYPE } from '@/enum/const'
+import type { OrderPopupInfo } from '@/types'
+import type { PayOrderReq } from '@/types/index'
+import { payOrderApi } from '@/api'
+import { PAYPAL_PAY_TYPE, PG_APP_ID } from '@/enum'
 import { ref, watch } from 'vue'
+import Dialog from './Dialog.vue'
 
 interface Props {
-  appid: string
-  payPalClientId: string
-  selectedProduct: GoodsInfo | null
-  currentLevel: Level
-  userInfo?: StoreUserInfo
-  productCount: number
+  userUid: string
+  param: string
+  orderPopupInfo: OrderPopupInfo
+  selectedPayChannelId: number
 }
 const props = withDefaults(defineProps<Props>(), {
-  selectedProduct: null,
-  productCount: 1,
+  selectedPayChannelId: PAYPAL_PAY_TYPE,
 })
 const emits = defineEmits(['created', 'statusChange', 'close'])
+
 const visible = ref<boolean>(false)
 watch(visible, async (val) => {
   if (!val) {
@@ -40,38 +40,38 @@ const curOrder = ref<{
   fntype14: string
 }>()
 async function createPaypalOrder() {
-  if (!props.selectedProduct || !props.userInfo) {
+  if (!props.userUid || props.selectedPayChannelId !== PAYPAL_PAY_TYPE) {
     return
   }
-  const orderParams: OrderReq = {
-    appid: props.appid,
+  const orderParams: PayOrderReq = {
+    appid: PG_APP_ID,
     version: ' 1.0',
-    fn_uid: props.userInfo.fnUid,
+    fn_uid: props.userUid,
     fn_deviceid: '',
     token: '',
     os: 'pc',
     game_platform: 'h5',
     ts: new Date().getTime() / 1000,
-    price: props.selectedProduct.usd.toString(),
-    priceUsd: props.selectedProduct.usd,
-    params: '',
+    price: props.orderPopupInfo.price.toString(),
+    priceUsd: props.orderPopupInfo.price,
+    params: props.param,
     desc: '',
-    pid: props.selectedProduct[props.currentLevel].pid,
-    title: props.selectedProduct[props.currentLevel].desc,
-    game_appid: props.appid,
-    game_openid: props.userInfo.fnUid,
+    pid: '1',
+    title: 'PG',
+    game_appid: PG_APP_ID,
+    game_openid: props.userUid,
     pay_type: PAYPAL_PAY_TYPE,
     content_type: '',
-    zoneid: props.userInfo.serverId ? Number(props.userInfo.serverId) : 0,
-    roleid: props.userInfo.roleId,
-    zone_id: props.userInfo.serverId ? Number(props.userInfo.serverId) : 0,
-    role_id: props.userInfo.roleId,
+    zoneid: 0,
+    roleid: props.userUid,
+    zone_id: 0,
+    role_id: props.userUid,
     is_gs: 0,
     channel: 'site',
     // 商品数量
-    num: props.productCount,
+    num: 1,
   }
-  const res = await myCardOrderApi(orderParams)
+  const res = await payOrderApi(orderParams)
   const { fntype14 } = res
   curOrder.value = {
     orderId: res.orderid,
@@ -83,8 +83,10 @@ async function createPaypalOrder() {
 const STATUS_SUCCESS = 1
 const STATUS_ERROR = 0
 const STATUS_CANCEL = 3
+// TODO
 function renderBtn() {
-  loadScript(`https://www.paypal.com/sdk/js?client-id=${props.payPalClientId}`, () => {
+  const testPayPalId = 'AdkfZ6foWFV142QCZQmNkO8QwcfSORMhnPw2IQ0aNpGEdm07J5Oh3NCTr2OipdtbRO4eNRfKd5m8wnY_'
+  loadScript(`https://www.paypal.com/sdk/js?client-id=${testPayPalId}`, () => {
     // 定义按钮样式
     const buttonStyle = {
       layout: 'vertical', // 按钮布局：vertical, horizontal
@@ -144,14 +146,14 @@ defineExpose({
 </script>
 
 <template>
-  <m-dialog v-model="visible">
+  <Dialog v-model="visible">
     <div class="h-626 w-626 f-c">
       <div
         id="paypal-button-container"
         class="w-480"
       />
     </div>
-  </m-dialog>
+  </Dialog>
   <!-- <Dialog
     v-model:visible="visible"
     title="Paypal"
@@ -165,7 +167,7 @@ defineExpose({
   </Dialog> -->
 </template>
 
-<style lang="less" scoped>
+<style lang="scss" scoped>
 .paypal-container {
   display: flex;
   justify-content: center;

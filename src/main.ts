@@ -1,3 +1,4 @@
+import VConsole from 'vconsole'
 import { createApp } from 'vue'
 import App from './App.vue'
 import { initRootFontSize } from './plugins/rootFontSize'
@@ -10,6 +11,8 @@ import '@/assets/reset.css'
 
 initRootFontSize()
 const app = createApp(App)
+
+const _vConsole = new VConsole()
 app.use(store)
 app.use(router)
 

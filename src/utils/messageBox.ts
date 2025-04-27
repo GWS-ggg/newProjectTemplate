@@ -107,6 +107,19 @@ function createMessageBox(options: Partial<Pop> = {}) {
 
 // 创建MessageBox对象
 export const MessageBox = {
+
+  // 正在支付
+  paymentLoading: (content: string, btnText: string = '取消', callback?: () => void) => {
+    return createMessageBox({
+      type: 'success',
+      content,
+      primaryBtn: {
+        text: btnText,
+        onClick: callback || (() => {}),
+      },
+    })
+  },
+
   // 支付成功
   paymentSuccess: (content: string, btnText: string = '确定', callback?: () => void) => {
     return createMessageBox({

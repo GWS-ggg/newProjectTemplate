@@ -31,3 +31,11 @@ export interface BuyOrderInfoRequest {
   tradeproductid: number
   exchangeid?: number
 }
+
+export interface FreeGiftAwardRequest {
+  appid: string
+  uid: string
+  packagekey: number
+  tradeproductid: number
+  exchangeid?: number
+}

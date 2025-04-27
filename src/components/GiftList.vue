@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import type { BoxData } from '@/api/types'
+import type { BoxData, FreeGiftAwardRequest } from '@/api/types'
 import type { OrderPopupInfo, Prop } from '@/types'
 import type { AsyncComponentLoader, Component } from 'vue'
+import { freeGiftAwardApi } from '@/api'
 import { useBuyOrder } from '@/hooks/useBuyOrder'
 import { useBoxStore } from '@/store/modules/boxStore'
 import { useGiftStore } from '@/store/modules/giftStore'
@@ -11,8 +12,8 @@ import battlePass from '@/views/gifts/battlePass.vue'
 import dailyLogin from '@/views/gifts/dailyLogin.vue'
 import newBattlePass from '@/views/gifts/newBattlePass.vue'
 import newThreeChoiceOne from '@/views/gifts/newThreeChoiceOne.vue'
-import roulette from '@/views/gifts/roulette.vue'
 
+import roulette from '@/views/gifts/roulette.vue'
 import sixSegment from '@/views/gifts/sixSegment.vue'
 import stepGift from '@/views/gifts/stepGift.vue'
 import threeChoiceOne from '@/views/gifts/threeChoiceOne.vue'
@@ -183,10 +184,21 @@ const orderPopupInfo = ref<OrderPopupInfo>({
   skuId: '',
   exchangeId: 0,
 })
-function openPopup(orderInfo: OrderPopupInfo) {
+async function openPopup(orderInfo: OrderPopupInfo) {
   orderPopupInfo.value = orderInfo
-  // 价格为0  直接下单？
+  // 价格为0  走免费礼包发奖接口
   if (orderInfo.price === 0) {
+    const freeGiftAwardRequestInfo: FreeGiftAwardRequest = {
+      appid: '616876868660610',
+      uid: '102191',
+      packagekey: orderInfo.key,
+      tradeproductid: orderInfo.tradeProductId,
+    }
+    if (orderInfo.exchangeId) {
+      freeGiftAwardRequestInfo.exchangeid = orderInfo.exchangeId
+    }
+
+    await freeGiftAwardApi(freeGiftAwardRequestInfo)
     setTimeout(() => {
       if (giftComponentRef.value && typeof giftComponentRef.value.triggerSuccessAnimation === 'function') {
         console.log('onPaymentSuccess')
@@ -195,6 +207,8 @@ function openPopup(orderInfo: OrderPopupInfo) {
     }, 50)
     return
   }
+
+  // 不为0 走下单接口
   popupOpen.value = true
 }
 function closePopup() {

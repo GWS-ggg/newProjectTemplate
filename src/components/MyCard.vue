@@ -204,7 +204,7 @@ defineExpose({
   </m-dialog>
 </template>
 
-<style lang="less" scoped>
+<style lang="scss" scoped>
 .afterImage::after {
       content: "";
       position: absolute;

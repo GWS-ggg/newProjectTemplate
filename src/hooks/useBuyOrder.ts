@@ -20,12 +20,7 @@ export function useBuyOrder() {
 
     const res = await buyOrderApi(buyOrderInfo)
     console.log('res', res)
-    if (res.ret === 0) {
-      return true
-    }
-    else {
-      return false
-    }
+    return res
   }
   return {
     handleBuyOrder,

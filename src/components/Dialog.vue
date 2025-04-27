@@ -1,267 +1,185 @@
-<script lang="ts" setup>
-import { getPGImg } from '@/utils'
-import { computed, ref, watch } from 'vue'
+<script setup>
+// import Button from '../Button/index.vue'
 
-interface Props {
-  modelValue: boolean
-  closeable?: boolean
-  status?: 'success' | 'fail' | 'loading' | 'orderFail'
-  title?: string
-  content?: string
-  primaryButtonText?: string
-  showButtons?: boolean
-}
+// 定义过渡时间
+import { watch } from 'vue'
 
-const props = withDefaults(defineProps<Props>(), {
-  modelValue: false,
-  closeable: true,
-  status: 'success',
-  title: '',
-  content: '',
-  primaryButtonText: '确定',
-  showButtons: true,
+const props = defineProps({
+  modelValue: {
+    // 控制开关
+    type: Boolean,
+    required: true,
+  },
+  title: {
+    // 标题
+    type: String,
+  },
+  cancelText: {
+    // 删除按钮文字
+    type: String,
+    default: '取消',
+  },
+  okText: {
+    // 确认按钮文字
+    type: String,
+    default: '确认',
+  },
+  onCancel: {
+    // 取消按钮事件
+    type: Function,
+  },
+  onOk: {
+    // 确认按钮事件
+    type: Function,
+  },
+  close: {
+    // 关闭按钮事件
+    type: Function,
+  },
+  customeClass: {
+    type: String,
+  },
+  fadeVisible: {
+    type: Boolean,
+    default: true,
+  },
 })
+const emits = defineEmits(['update:modelValue', 'onFadeClose'])
+// const DURATION = '0.5s' // 关闭事件
+function onClose() {
+  emits('update:modelValue', false)
+}
+// const loading = ref(false)
+// // 取消事件
+// function onCancel() {
+//   props.onCancel?.()
+//   onClose()
+// }
 
-const emit = defineEmits(['update:modelValue', 'primaryAction'])
+// // 取消确认
+// function onOk() {
+//   if (!props.onOk) {
+//     onClose()
+//     return false
+//   }
+//   const result = props.onOk()
+//   // 判断 result 是不是promise对象？ 如果是则`promise`的状态变为`成功状态时`才会关闭`Dialog`，如果不是则直接关闭
+//   if (result && result.then && typeof result.then === 'function') {
+//     loading.value = true
+//     result
+//       .then(() => {
+//         onClose()
+//       })
+//       .finally(() => {
+//         loading.value = false
+//       })
+//   }
+//   else {
+//     onClose()
+//   }
+// }
 
-// 动画状态
-const isShown = ref(false)
-
-// 监视modelValue变化，控制动画
-watch(() => props.modelValue, (newVal) => {
-  if (newVal) {
-    setTimeout(() => {
-      isShown.value = true
-    }, 50)
+// 遮罩层显示时 滚轮隐藏 固定页面
+function disableScroll() {
+  document.body.style.overflow = 'hidden'
+  document.body.style.width = '100%'
+}
+function enableScroll() {
+  document.body.style.overflow = ''
+  document.body.style.width = ''
+}
+watch(() => props.modelValue, (newValue) => {
+  if (newValue) {
+    disableScroll()
   }
   else {
-    isShown.value = false
+    enableScroll()
   }
 })
-
-function handleClose() {
-  emit('update:modelValue', false)
+function onClickfadeClose() {
+  emits('onFadeClose')
 }
-
-function handlePrimaryAction() {
-  emit('primaryAction')
-  if (props.closeable) {
-    handleClose()
-  }
-}
-
-// 根据状态确定显示的图标和颜色
-const statusConfig = computed(() => {
-  switch (props.status) {
-    case 'success':
-      return {
-        useImage: true,
-        icon: 'common/icon_ok.png',
-        color: 'text-[#22c55e]',
-        title: props.title || '支付成功',
-        bgColor: 'bg-[#f0fff4]',
-        borderColor: 'border-[#22c55e]',
-      }
-    case 'fail':
-      return {
-        useImage: false,
-        svgIcon: 'error',
-        color: 'text-[#ef4444]',
-        iconColor: '#ef4444',
-        title: props.title || '支付失败',
-        bgColor: 'bg-[#fff5f5]',
-        borderColor: 'border-[#ef4444]',
-      }
-    case 'loading':
-      return {
-        useImage: false,
-        svgIcon: 'loading',
-        color: 'text-[#3b82f6]',
-        iconColor: '#3b82f6',
-        title: props.title || '正在支付',
-        bgColor: 'bg-[#f0f9ff]',
-        borderColor: 'border-[#3b82f6]',
-      }
-    case 'orderFail':
-      return {
-        useImage: false,
-        svgIcon: 'warning',
-        color: 'text-[#f59e0b]',
-        iconColor: '#f59e0b',
-        title: props.title || '下单失败',
-        bgColor: 'bg-[#fffbeb]',
-        borderColor: 'border-[#f59e0b]',
-      }
-    default:
-      return {
-        useImage: true,
-        icon: 'common/icon_ok.png',
-        color: 'text-[#22c55e]',
-        title: props.title || '支付成功',
-        bgColor: 'bg-[#f0fff4]',
-        borderColor: 'border-[#22c55e]',
-      }
-  }
-})
 </script>
 
 <template>
-  <Teleport to="body">
-    <div
-      v-if="modelValue"
-      class="fixed left-0 top-0 z-9999 h-[100vh] w-[100vw] flex items-center justify-center bg-[rgba(0,0,0,0.5)]"
-    >
-      <div
-        class="dialog-container relative z-10000 max-h-[90vh] w-[626px] overflow-hidden rounded-[24px] border-solid bg-white p-0"
-        :class="[
-          isShown ? 'dialog-animation' : '',
-          statusConfig.bgColor,
-          `border-[3px] ${statusConfig.borderColor}`,
-        ]"
+  <teleport to="body">
+    <div>
+      <!-- 遮罩层 -->
+      <transition
+        v-if="fadeVisible"
+        name="fade"
       >
-        <!-- 关闭按钮 -->
         <div
-          v-if="closeable"
-          class="absolute right-[20px] top-[20px] h-[30px] w-[30px] cursor-pointer text-[28px] text-gray-500"
-          @click="handleClose"
+          v-if="modelValue"
+          class="element-with-scroll fixed left-0 top-0 z-3000 h-screen w-full bg-zinc-900/80"
+          @click="onClickfadeClose"
+        />
+      </transition>
+      <!-- 内容 -->
+      <transition name="up">
+        <div
+          v-if="modelValue"
+          class="fixed left-1/2 top-[50%] z-3000 min-w-[256px] translate-x-[-50%] translate-y-[-50%] rounded-20 bg-white p-1.5"
+          :class="customeClass"
         >
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <line
-              x1="18"
-              y1="6"
-              x2="6"
-              y2="18"
-            />
-            <line
-              x1="6"
-              y1="6"
-              x2="18"
-              y2="18"
-            />
-          </svg>
-        </div>
-
-        <!-- 状态图标 -->
-        <div class="mt-[60px] w-full flex justify-center">
-          <div class="h-[120px] w-[120px]">
-            <template v-if="statusConfig.useImage">
-              <img
-                :src="getPGImg(statusConfig.icon)"
-                alt=""
-                class="h-full w-full"
-              >
-            </template>
-            <template v-else>
-              <!-- 失败图标 -->
-              <svg
-                v-if="statusConfig.svgIcon === 'error'"
-                viewBox="0 0 24 24"
-                class="h-full w-full"
-                :fill="statusConfig.iconColor"
-              >
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
-              </svg>
-
-              <!-- 加载图标 -->
-              <svg
-                v-if="statusConfig.svgIcon === 'loading'"
-                viewBox="0 0 24 24"
-                class="h-full w-full animate-spin"
-                :fill="statusConfig.iconColor"
-              >
-                <path d="M12 4V2C6.48 2 2 6.48 2 12H4C4 7.58 7.58 4 12 4Z" />
-                <path
-                  opacity="0.3"
-                  d="M12 4V2C17.52 2 22 6.48 22 12H20C20 7.58 16.42 4 12 4Z"
-                />
-                <path
-                  opacity="0.5"
-                  d="M12 20V22C17.52 22 22 17.52 22 12H20C20 16.42 16.42 20 12 20Z"
-                />
-                <path
-                  opacity="0.8"
-                  d="M12 20V22C6.48 22 2 17.52 2 12H4C4 16.42 7.58 20 12 20Z"
-                />
-              </svg>
-
-              <!-- 警告图标 -->
-              <svg
-                v-if="statusConfig.svgIcon === 'warning'"
-                viewBox="0 0 24 24"
-                class="h-full w-full"
-                :fill="statusConfig.iconColor"
-              >
-                <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" />
-              </svg>
-            </template>
+          <!-- title标题 -->
+          <div class="mb-1 text-sm text-zinc-800 font-bold dark:text-zinc-200">
+            {{ title }}
           </div>
-        </div>
-
-        <!-- 标题和内容 -->
-        <div class="mt-[30px] px-[40px] text-center">
-          <h2
-            class="text-[32px] font-bold"
-            :class="statusConfig.color"
-          >
-            {{ statusConfig.title }}
-          </h2>
+          <!-- 关闭按钮内容 -->
           <div
-            v-if="content"
-            class="mt-[20px] text-[24px] text-gray-600"
+            class="absolute right-20 top-20 z-200 f-c cursor-pointer border-2 border-[#757575] rounded-full border-solid"
+            @click="onClose"
           >
-            {{ content }}
+            <div
+              class="i-material-symbols:close h-30 w-30"
+              style="color:red;"
+            />
           </div>
-          <!-- 默认插槽 -->
-          <slot />
+          <!-- content内容 -->
+          <div class="text-zinc-700 dark:text-zinc-300">
+            <slot />
+          </div>
         </div>
-
-        <!-- 按钮区域 -->
-        <div
-          v-if="showButtons"
-          class="mt-[50px] flex justify-center gap-[20px] px-[40px] pb-[40px]"
-        >
-          <button
-            class="h-[80px] max-w-[400px] w-full rounded-[40px] px-[30px] text-[28px] text-white"
-            :class="[props.status === 'fail' || props.status === 'orderFail' ? 'bg-[#f59e0b]' : 'bg-[#3b82f6]']"
-            @click="handlePrimaryAction"
-          >
-            {{ primaryButtonText }}
-          </button>
-        </div>
-      </div>
+      </transition>
     </div>
-  </Teleport>
+  </teleport>
 </template>
 
-<style>
-.dialog-container {
+<style  scoped>
+/* 遮罩层过渡 */
+/* .fade-enter-from,
+.fade-leave-to {
   opacity: 0;
-  transform: scale(0.9);
-  transition: opacity 0.3s ease, transform 0.3s ease;
 }
+.fade-enter-active,
+.fade-leave-active {
+  transition: all v-bind('DURATION') ease-in-out;
+} */
 
-.dialog-animation {
-  opacity: 1;
-  transform: scale(1);
+/* 弹框过渡 */
+/* .up-enter-from,
+.up-leave-to {
+  transform: translate3d(-50%, 100px, 0);
+  opacity: 0;
 }
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
+.up-enter-active,
+.up-leave-active {
+  transition: all v-bind('DURATION') ease-in-out;
+} */
+  /* 隐藏滚动条 */
+  .element-with-scroll {
+    overflow: auto;
+    /* 或者 overflow-y: auto; 或者 overflow-x: auto; */
+    scrollbar-width: 0;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE 和 Edge */
   }
-  to {
-    transform: rotate(360deg);
-  }
-}
 
-.animate-spin {
-  animation: spin 1.5s linear infinite;
-}
+  /* 隐藏滚动条 */
+  .element-with-scroll::-webkit-scrollbar {
+    display: none;
+    /* Chrome, Safari 和 Opera */
+  }
 </style>

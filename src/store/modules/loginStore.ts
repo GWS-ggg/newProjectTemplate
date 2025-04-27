@@ -1,5 +1,6 @@
 import type { LoginInfo } from '@/api/types'
 import { loginApi } from '@/api'
+import { isPaintOrderSupported } from '@/utils/cssSupport'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
@@ -10,10 +11,16 @@ export const useLoginStore = defineStore('login', () => {
     vipscore: 0,
     viptargetscore: 0,
   })
+  const userUid = ref<string>('')
+  const noSupportsPaintOrder = ref(isPaintOrderSupported())
 
-  async function getLoginInfo(uid: string) {
+  function setUid(uid: string) {
+    userUid.value = uid
+  }
+  async function getLoginInfo() {
+    console.log('getLoginInfo', userUid.value, typeof userUid.value)
     const res = await loginApi({
-      uid,
+      uid: userUid.value,
     })
     loginInfo.value = res
   }
@@ -22,8 +29,11 @@ export const useLoginStore = defineStore('login', () => {
   }
 
   return {
+    userUid,
     loginInfo,
     getLoginInfo,
     setLoginInfo,
+    setUid,
+    noSupportsPaintOrder,
   }
 })

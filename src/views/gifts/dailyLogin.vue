@@ -22,6 +22,7 @@ async function getDailyLoginData() {
   })
   dailyLoginItemInfo.value = res.ItemInfo as DailyLoginItemInfo[]
   productInfo.value = res.ProductInfo as ProductInfo
+
   if (dailyLoginItemInfo.value[0]?.BuyTimes === undefined) {
     dailyLoginItemInfo.value[0].BuyTimes = 0
   }
@@ -29,7 +30,7 @@ async function getDailyLoginData() {
   console.log(res, 'res')
 }
 getDailyLoginData()
-const _bgImg = computed(() => {
+const bgImg = computed(() => {
   return findImagePath('Package_bg.png', productInfo.value?.Pic)
 })
 
@@ -108,14 +109,16 @@ const bubblePosition = {
 </script>
 
 <template>
-  <div class="relative mb-70 min-h-800 w-full f-c flex-col">
+  <div class="relative mb-70 min-h-800 w-full f-c flex-col -mt-100">
+    <!-- https://piggygo-static-jy.forevernine.com/cdn/officialpay/discount/10/Package_bg.png -->
+
     <img
-      :src="imgMap.bgImg"
+      :src="bgImg"
       alt=""
-      class="w-590"
+      class="h-1140"
     >
 
-    <div class="absolute left-1/2 f-c rounded-20 text-24 -bottom-40 -translate-x-1/2">
+    <div class="absolute bottom-50 left-1/2 f-c rounded-20 text-24 -translate-x-1/2">
       <CountDown
         :end-time="productInfo?.ExpireTime"
         text-class="px-20 py-10 text-26 text-white text-stroke-3 paint-order text-stroke-[#581616]"
@@ -125,7 +128,7 @@ const bubblePosition = {
         </template>
       </CountDown>
     </div>
-    <div class="absolute right-70 top-1/2 h-138 w-137 translate-y-45">
+    <div class="absolute right-70 top-1/2 h-138 w-137 translate-y-10">
       <div class="relative h-full w-full f-c flex-col">
         <img
           :src="imgMap.discountImg"
@@ -151,8 +154,8 @@ const bubblePosition = {
     <div class="absolute left-1/2 top-240 h-46 w-356 f-c rounded-20 bg-[#000000] bg-opacity-24 text-30 text-stroke-3 text-stroke-[#0a273d] paint-order -translate-x-1/2">
       Only one chance
     </div>
-    <div class="absolute bottom-200 left-1/2 h-126 w-590 f-c -translate-x-1/2">
-      <div class="h-97 flex items-center justify-evenly gap-20">
+    <div class="absolute bottom-300 left-1/2 h-126 w-590 flex items-center justify-center -translate-x-1/2">
+      <div class="h-97 w-520 flex items-center justify-evenly gap-10">
         <div
           v-for="(gift, index) in dailyLoginItemInfo[0]?.Props"
           :key="index"
@@ -181,7 +184,7 @@ const bubblePosition = {
         </div>
       </div>
     </div>
-    <div class="absolute bottom-100 left-1/2 h-126 w-590 f-c -translate-x-1/2">
+    <div class="absolute bottom-200 left-1/2 h-126 w-590 f-c -translate-x-1/2">
       <div class="relative h-97 flex items-center justify-center gap-15 text-48 color-[#fff0de] text-stroke-3 text-stroke-[#4d1202] paint-order">
         {{ formatPrice(dailyLoginItemInfo[0]?.Price || 0) }}
         <!-- <div class="absolute bottom-1/2 translate-y-1/2 text-30 text-white color-[#fbcaa7] text-stroke-3 text-stroke-[#4d1202] paint-order -right-120">
@@ -192,7 +195,7 @@ const bubblePosition = {
         </div> -->
       </div>
     </div>
-    <div class="absolute bottom-35 left-1/2 h-96 w-317 f-c -translate-x-1/2">
+    <div class="absolute bottom-135 left-1/2 h-96 w-317 f-c -translate-x-1/2">
       <div
         v-show="dailyLoginItemInfo[0]?.BuyTimes === 0"
         class="h-96 w-317"

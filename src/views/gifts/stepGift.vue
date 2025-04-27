@@ -5,6 +5,7 @@ import { buyOrderApi, getProductListApi } from '@/api/index'
 import GreenButton from '@/components/GreenButton.vue'
 
 import { useBuyOrder } from '@/hooks/useBuyOrder'
+import { useLoginStore } from '@/store/modules/loginStore'
 import { formatPrice, getPGImg } from '@/utils'
 import { findImagePath } from '@/utils/imageUtils'
 import { computed, ref } from 'vue'
@@ -144,6 +145,105 @@ const bubblePosition = {
   translateX: '50%',
   translateY: '0',
 }
+
+const isSupportPaintOrder = ref(false)
+// function isPaintOrderSupported() {
+//   // 创建一个SVG元素进行测试，因为paint-order主要用于SVG
+//   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+//   const text = document.createElementNS('http://www.w3.org/2000/svg', 'text')
+
+//   // 将文本元素添加到SVG中
+//   svg.appendChild(text)
+
+//   // 设置paint-order属性
+//   text.style.cssText = 'paint-order: stroke fill'
+
+//   // 获取计算后的样式
+//   document.body.appendChild(svg)
+//   const computedStyle = window.getComputedStyle(text)
+//   const paintOrderValue = computedStyle.getPropertyValue('paint-order').trim()
+//   document.body.removeChild(svg)
+
+//   // 检查计算样式是否包含我们设置的值
+//   // 有些浏览器可能返回"stroke fill"，有些可能返回"stroke"，但只要返回了非空值且包含"stroke"
+//   isSupportPaintOrder.value = paintOrderValue !== '' && paintOrderValue !== 'normal'
+//   return isSupportPaintOrder.value
+// }
+
+// console.log(`当前浏览器${isPaintOrderSupported() ? '支持' : '不支持'}paint-order: stroke fill 属性`)
+
+function isPaintOrderSupported() {
+  try {
+    // 检查是否支持SVG
+    if (typeof SVGElement === 'undefined')
+      return false
+
+    // 创建SVG元素
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+    svg.setAttribute('width', '0')
+    svg.setAttribute('height', '0')
+    svg.style.position = 'absolute'
+    svg.style.visibility = 'hidden'
+
+    // 创建文本元素
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text')
+    text.textContent = '测试'
+
+    // 应用paint-order样式
+    text.setAttribute('style', 'paint-order: stroke fill')
+
+    // 添加到DOM
+    svg.appendChild(text)
+    document.body.appendChild(svg)
+
+    // 检查计算样式
+    const computedStyle = window.getComputedStyle(text)
+    const paintOrderValue = computedStyle.getPropertyValue('paint-order').trim()
+
+    // 清理DOM
+    document.body.removeChild(svg)
+
+    // 验证结果：如果浏览器支持该属性，应该返回非默认值
+    // 默认值通常是"normal"或空字符串
+    return paintOrderValue !== '' && paintOrderValue !== 'normal'
+  }
+  catch (e) {
+    console.error('检测paint-order支持时出错:', e)
+    return false
+  }
+}
+
+// 执行检测
+const supportsPaintOrder = isPaintOrderSupported()
+isSupportPaintOrder.value = supportsPaintOrder
+console.log(`当前浏览器${supportsPaintOrder ? '支持' : '不支持'}paint-order: stroke fill 属性`)
+const { noSupportsPaintOrder } = useLoginStore()
+console.log('noSupportsPaintOrder', noSupportsPaintOrder)
+
+function isPaintOrderSupportedTest() {
+  // 创建一个SVG元素进行测试，因为paint-order主要用于SVG
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+  const text = document.createElementNS('http://www.w3.org/2000/svg', 'text')
+
+  // 将文本元素添加到SVG中
+  svg.appendChild(text)
+
+  // 设置paint-order属性
+  text.style.cssText = 'paint-order: stroke fill'
+
+  // 获取计算后的样式
+  document.body.appendChild(svg)
+  const computedStyle = window.getComputedStyle(text)
+  const paintOrderValue = computedStyle.getPropertyValue('paint-order').trim()
+  document.body.removeChild(svg)
+
+  // 检查计算样式是否包含我们设置的值
+  // 有些浏览器可能返回"stroke fill"，有些可能返回"stroke"，但只要返回了非空值且包含"stroke"
+  return paintOrderValue !== '' && paintOrderValue !== 'normal'
+}
+
+// 使用示例
+console.log(`当前浏览器${isPaintOrderSupportedTest() ? '支持' : '不支持'}paint-order: stroke fill 属性`)
 </script>
 
 <template>
@@ -182,11 +282,21 @@ const bubblePosition = {
             </div>
           </div>
         </div>
-        <div class="f-c text-38 text-stroke-3 text-stroke-[#46344a] paint-order">
+        <div class="f-c text-38">
           <div class="relative">
-            <div>
+            <!-- <div class="relative">
+              <span class="absolute inset-0 text-stroke-3 text-stroke-[#46344a]"> Get up to <span class="color-[#fff44b]">30,000</span></span>
+              <span class="relative z-10"> Get up to <span class="color-[#fff44b]">30,000</span></span>
+            </div> -->
+            <TextStroke
+              stroke-color="#46344a"
+              :stroke-width="3"
+            >
+              Get up to<span class="color-[#fff44b]"> 30,000</span>
+            </TextStroke>
+            <!-- <div>
               Get up to <span class="color-[#fff44b]">30,000</span>
-            </div>
+            </div> -->
             <div class="absolute bottom-1/2 f-c translate-y-1/2 -right-100">
               <div
                 v-for="prop in iconProps"
@@ -198,9 +308,13 @@ const bubblePosition = {
                     :src="getPGImg(prop.Icon)"
                     class="h-45 w-45"
                   >
-                  <div class="absolute bottom-0 left-0 f-c text-20">
+                  <TextStroke
+                    stroke-color="#46344a"
+                    :stroke-width="3"
+                    class="absolute bottom-0 left-0 f-c text-20"
+                  >
                     {{ prop.Text }}
-                  </div>
+                  </TextStroke>
                 </div>
               </div>
             </div>
@@ -308,20 +422,27 @@ const bubblePosition = {
                       class="h-full w-auto"
                     >
                   </div>
-                  <div class="absolute left-1/2 top-1/2 w-271 f-c text-22 text-white text-stroke-3 text-stroke-[#426676] paint-order -translate-x-1/2 -translate-y-1/2">
-                    {{ item.TaskScore || 0 }} / {{ item.TaskTargetScore }}
+                  <div class="absolute left-1/2 top-1/2 w-271 f-c text-22 text-white -translate-x-1/2 -translate-y-1/2">
+                    <TextStroke
+                      stroke-color="#426676"
+                      :stroke-width="3"
+                    >
+                      {{ item.TaskScore || 0 }} / {{ item.TaskTargetScore }}
+                    </TextStroke>
                   </div>
                 </div>
               </div>
             </div>
             <div class="relative mr-37 f-c">
-              <img
-                :src="getPGImg(item.Props?.[0]?.Icon)"
-                class="w-58"
-              >
-              <div class="absolute bottom-0 left-1/2 f-c translate-y-1/2 text-28 text-stroke-3 text-stroke-[#4d4d4d] paint-order -translate-x-1/2">
-                {{ item.Props?.[0]?.Text }}
-              </div>
+              <IconWithText
+                :icon-url="getPGImg(item.Props?.[0]?.Icon)"
+                :text="item.Props?.[0]?.Text"
+                stroke-color="#4d4d4d"
+                :stroke-width="3"
+                text-size="28"
+                :icon-height="58"
+                :bottom="-10"
+              />
             </div>
           </div>
         </TransitionGroup>
@@ -509,4 +630,9 @@ const bubblePosition = {
     opacity: 0;
   }
 }
+// .testBg {
+//   background: #fff;
+//   -webkit-background-clip: text;
+//   // -webkit-text-fill-color: transparent;
+// }
 </style>

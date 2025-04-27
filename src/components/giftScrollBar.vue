@@ -123,11 +123,11 @@ const giftPackages = ref([
         class="gift-slide"
       >
         <div class="relative mb-20 flex items-center justify-center">
-          <div class="absolute left-0 z-20 z-30 w-full f-c -bottom-19">
+          <div class="absolute left-0 z-20 z-30 w-full f-c -bottom-15">
             <div class="relative h-30 w-106 f-c border-2 border-[#3e9ebc] rounded-full border-solid bg-[#daecef] text-center text-22 text-[#385673] font-medium">
               <CountDown
                 :end-time="pkg.Expire"
-                text-class="text-22 text-[#385673]"
+                text-class="text-22 text-[#385673] -mb-3"
               >
                 <template #default="{ hours, minutes, seconds }">
                   {{ hours }}:{{ minutes }}:{{ seconds }}
@@ -190,9 +190,17 @@ const giftPackages = ref([
               >
               <!-- 礼包图片 -->
               <img
+                v-if="pkg.ProductType !== 2"
                 :src="getPGImg(pkg.BannerPic)"
                 alt="Gift package"
-                class="absolute left-0 top-0 z-20 w-full object-cover object-top"
+                class="absolute left-1/2 top-0 z-20 w-full object-cover object-top -translate-x-1/2"
+                style="clip-path: inset(2px);"
+              >
+              <img
+                v-if="pkg.ProductType === 2"
+                :src="getPGImg(pkg.BannerPic)"
+                alt="Gift package"
+                class="absolute left-1/2 top-0 z-20 h-82 object-cover object-top -translate-x-1/2"
                 style="clip-path: inset(2px);"
               >
               <img

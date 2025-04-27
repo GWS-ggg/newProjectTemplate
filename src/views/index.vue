@@ -13,11 +13,13 @@ function getImageUrl(name: string) {
 const fontFamily = ref('font-en')
 const bgImg = ref(getImageUrl('img_背景_下.png'))
 
-const { getLoginInfo } = useLoginStore()
+const { getLoginInfo, setUid } = useLoginStore()
 const { getShopListInfo } = useGiftStore()
 onMounted(() => {
-  getLoginInfo('102191')
-  getShopListInfo('102191')
+  const uid = '102191'
+  setUid(uid)
+  getLoginInfo()
+  getShopListInfo(uid)
 })
 </script>
 

@@ -33,8 +33,6 @@ const emit = defineEmits(['update:modelValue', 'close'])
 const position = ref({ top: '0rem', left: '0rem' })
 // 为箭头位置设置一个安全的默认值，确保始终有值
 const arrowPositionLeft = ref('50%') // 默认箭头居中
-// 添加标志变量，用于跟踪是否是第一次点击
-const isFirstClick = ref(true)
 // 用于跟踪是否是页面刷新后的首次加载
 const isFirstTimeLoad = ref(true)
 
@@ -213,6 +211,11 @@ function updatePosition(isScroll?: boolean) {
   })
 }
 
+// 包装函数，用于 resize 事件监听器
+function handleResize() {
+  updatePosition() // 不传递参数
+}
+
 // 防抖处理滚动事件
 function handleScroll() {
   if (scrollDebounceTimer) {
@@ -226,42 +229,32 @@ function handleScroll() {
 
 // 处理文档点击事件
 function handleDocumentClick() {
-  if (!props.modelValue)
+  // 如果弹窗未显示或目标元素不存在，则不处理
+  if (!props.modelValue || !props.target) {
     return
+  }
+  emit('close')
 
-  // 获取点击的元素
-  // const clickedElement = event.target as HTMLElement
+  // // 获取点击的元素
+  // const clickedElement = event.target as Node
 
-  // 检查是否点击在弹窗内部
-  // const isClickInBubble = bubbleElement.value && bubbleElement.value.contains(clickedElement)
+  // // 检查点击是否发生在触发弹窗的目标元素内部
+  // const isClickInsideTarget = props.target.contains(clickedElement)
 
-  // 如果点击在弹窗内部，不关闭弹窗（允许用户交互弹窗内容）
-  // if (isClickInBubble) {
-  //   console.log('click inside bubble, not closing')
-  //   return
+  // // 如果点击的目标不是触发元素，则关闭弹窗
+  // if (!isClickInsideTarget) {
+  //   console.log('Clicked outside target, closing popup')
+  //   emit('close')
   // }
-
-  // 如果是第一次点击（刚刚打开弹窗的点击），不处理
-  if (isFirstClick.value) {
-    // 第一次点击，只设置标志，不关闭弹窗
-    isFirstClick.value = false
-    console.log('first click, not closing')
-  }
-  else {
-    // 第二次点击任何位置（包括当前宝箱），都关闭弹窗
-    console.log('second click, closing')
-    emit('close')
-    isFirstClick.value = true
-  }
 }
 
 // 监听目标元素位置变化
 onMounted(() => {
-  window.addEventListener('resize', updatePosition)
+  window.addEventListener('resize', handleResize) // 使用包装函数
   // 使用防抖处理滚动
   window.addEventListener('scroll', handleScroll)
-  // 添加点击事件监听
-  document.addEventListener('click', handleDocumentClick)
+  // 移除: 不再在 onMounted 中添加 click 监听器
+  // document.addEventListener('click', handleDocumentClick);
 
   // 监听window的load事件，确保所有资源加载完成后再计算位置
   window.addEventListener('load', () => {
@@ -276,9 +269,12 @@ onMounted(() => {
 
 // 在组件销毁时移除事件监听和清除所有timeout
 onUnmounted(() => {
-  window.removeEventListener('resize', updatePosition)
+  window.removeEventListener('resize', handleResize) // 使用包装函数
   window.removeEventListener('scroll', handleScroll)
-  // 移除点击事件监听
+  // 移除: 不再在 onUnmounted 中移除 click 监听器 (由 watch 处理)
+  // document.removeEventListener('click', handleDocumentClick);
+
+  // 确保移除可能存在的 click 监听器
   document.removeEventListener('click', handleDocumentClick)
 
   // 清除所有pending的timeout
@@ -289,9 +285,15 @@ onUnmounted(() => {
   }
 })
 
-// 监听显示状态变化，在显示状态改变时准确更新位置
+// 监听显示状态变化，在显示状态改变时准确更新位置和管理点击监听器
 watch(() => props.modelValue, (newVal: boolean) => {
   if (newVal) {
+    // 添加文档点击监听器
+    // 使用 setTimeout 确保监听器在当前事件循环之后添加，避免立即触发关闭
+    setTimeout(() => {
+      document.addEventListener('click', handleDocumentClick)
+    }, 0)
+
     // 弹框显示时设置一次位置，确保CSS过渡生效
     if (props.target) {
       // 初始定位，使用 nextTick 确保元素已渲染
@@ -304,10 +306,11 @@ watch(() => props.modelValue, (newVal: boolean) => {
         positionTimeouts.push(timeoutId)
       })
     }
-    // 弹框显示时重置点击标志，以支持点击事件处理逻辑
-    isFirstClick.value = true
   }
   else {
+    // 移除文档点击监听器
+    document.removeEventListener('click', handleDocumentClick)
+
     // 可选：隐藏时清除可能还在等待执行的定位timeout
     positionTimeouts.forEach(id => clearTimeout(id))
     positionTimeouts.length = 0 // 清空数组
