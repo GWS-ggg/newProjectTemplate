@@ -67,6 +67,27 @@ function handleClickGift(giftPackage: ThreeChoiceOneGiftItemInfo) {
   }
   activeGiftId.value = giftPackage.id
 }
+
+const purchasedStatus = computed(() => {
+  const purchasedItem = itemInfoList.value.find((item) => {
+    return item.BuyTimes === 1
+  })
+  if (purchasedItem) {
+    return true
+  }
+  return false
+})
+
+// function getPurchasedItemStatus() {
+//   const purchasedItem = itemInfoList.value.find((item) => {
+//     return item.BuyTimes === 1
+//   })
+//   if (purchasedItem) {
+//     return true
+//   }
+//   return false
+// }
+
 async function handleClickBuySingle(giftPackage: ThreeChoiceOneGiftItemInfo) {
   if (giftPackage.BuyTimes === 1) {
     return
@@ -80,6 +101,9 @@ async function handleClickBuySingle(giftPackage: ThreeChoiceOneGiftItemInfo) {
 }
 async function handleClickBuyAll(giftPackage: ThreeChoiceOneGiftItemInfo) {
   if (giftPackage.BuyTimes === 1) {
+    return
+  }
+  if (purchasedStatus.value) {
     return
   }
   currentItemInfo.value = giftPackage
@@ -255,6 +279,8 @@ async function getProductList() {
 const { handleBoxClick } = useEmitBoxClick(emits)
 // 调用获取数据的函数
 getProductList()
+
+//  获取购买状态
 </script>
 
 <template>
@@ -348,7 +374,7 @@ getProductList()
         </div>
         <div class="absolute bottom-30 left-0 z-30 w-full flex flex-col items-center justify-end">
           <div
-            v-show="giftPackage.BuyTimes === 0"
+            v-show="giftPackage.BuyTimes === 0 && itemInfoList[3]?.BuyTimes === 0"
             class="z-50 h-55 w-135"
           >
             <GreenButton
@@ -371,7 +397,7 @@ getProductList()
             </GreenButton>
           </div>
           <div
-            v-show="giftPackage.BuyTimes && giftPackage.BuyTimes > 0"
+            v-show="giftPackage.BuyTimes && giftPackage.BuyTimes > 0 || itemInfoList[3]?.BuyTimes && itemInfoList[3]?.BuyTimes > 0"
             class="fade-in f-c"
           >
             <img
@@ -397,13 +423,28 @@ getProductList()
           radius="0.32rem"
           :score="productInfo?.Props?.[0]?.VipScore"
           score-show
+          :purchased="purchasedStatus"
         >
-          <div class="text-33">
+          <div
+            v-show="!purchasedStatus"
+            class="text-33"
+          >
             <TextStroke
               stroke-color="#164b2e"
               :stroke-width="3"
             >
               BUY ALL {{ formatPrice(itemInfoList[3]?.Price || 0) }}
+            </TextStroke>
+          </div>
+          <div
+            v-show="purchasedStatus"
+            class="text-33"
+          >
+            <TextStroke
+              stroke-color="#434343"
+              :stroke-width="3"
+            >
+              PURCHASED
             </TextStroke>
           </div>
         </GreenButton>

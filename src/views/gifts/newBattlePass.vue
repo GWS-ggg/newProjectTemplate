@@ -239,7 +239,7 @@ getProductList()
               {{ formatPrice(firstProduct.Price) }}
             </div>
             <div
-              v-else
+              v-else-if="firstProduct.BuyTimes === 1"
               class="fade-in h-full f-c -mt-10"
             >
               <img
@@ -384,7 +384,7 @@ getProductList()
               {{ formatPrice(secondProduct.Price) }}
             </div>
             <div
-              v-else
+              v-else-if="secondProduct.BuyTimes === 1"
               class="fade-in h-full f-c -mt-10"
             >
               <img

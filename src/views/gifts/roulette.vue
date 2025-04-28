@@ -234,7 +234,7 @@ const { handleBoxClick } = useEmitBoxClick(emits)
       </div>
     </div>
     <div
-      v-if="currentGiftId <= 7"
+
       class="absolute bottom-200 left-1/2 z-10 h-96 w-317 cursor-pointer -translate-x-1/2 -translate-y-1/2"
       @click="handleButtonClick"
     >
@@ -243,8 +243,27 @@ const { handleBoxClick } = useEmitBoxClick(emits)
         :score="vipScore"
         score-show
       >
-        <div class="text-40 text-white text-stroke-2 text-stroke-[#164b2e]">
-          Dance {{ formatPrice(currentGift?.Price || 0) }}
+        <div
+          v-if="currentGiftId <= 7"
+          class="text-40 text-white"
+        >
+          <TextStroke
+            stroke-color="#164b2e"
+            :stroke-width="2"
+          >
+            Dance {{ formatPrice(currentGift?.Price || 0) }}
+          </TextStroke>
+        </div>
+        <div
+          v-else
+          class="text-40 text-white"
+        >
+          <TextStroke
+            stroke-color="#434343"
+            :stroke-width="2"
+          >
+            已购买
+          </TextStroke>
         </div>
       </GreenButton>
     </div>

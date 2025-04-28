@@ -166,7 +166,7 @@ defineExpose({
 
     <div
       class="relative h-full w-full flex cursor-pointer items-center justify-center"
-      :class="{ 'bg-coolGray': purchased, 'btn-bg': !purchased }"
+      :class="{ 'bg-purchased': purchased, 'btn-bg': !purchased }"
     >
       <slot />
       <div
@@ -324,11 +324,30 @@ defineExpose({
 .btn-bg::before {
   content: "";
   position: absolute;
-  top: v-bind('`-${borderWidth || "2px"}`');
-  left: v-bind('`-${borderWidth || "2px"}`');
-  right: v-bind('`-${borderWidth || "2px"}`');
-  bottom: v-bind('`-${borderWidth || "2px"}`');
+  top: v-bind('`-${borderWidth || "0.02rem"}`');
+  left: v-bind('`-${borderWidth || "0.02rem"}`');
+  right: v-bind('`-${borderWidth || "0.02rem"}`');
+  bottom: v-bind('`-${borderWidth || "0.02rem"}`');
   background: linear-gradient(0deg, #1d6301 0%, #5f9f26 100%);
+   border-radius: v-bind('`${radius}`'); /* 动态计算，比按钮圆角大 2px */
+  z-index: -1;
+}
+
+.bg-purchased {
+  background-image: linear-gradient(0deg, #666666 0%, #898989 100%);
+  background-blend-mode: normal, normal;
+  border-radius: v-bind('radius');
+  box-shadow: 0 4px 1px -1px rgba(0,0,0,.2) ,inset 0 -4px 2px -1px #2e2e2e;
+}
+
+.bg-purchased::before {
+  content: "";
+  position: absolute;
+  top: v-bind('`-${borderWidth || "0.02rem"}`');
+  left: v-bind('`-${borderWidth || "0.02rem"}`');
+  right: v-bind('`-${borderWidth || "0.02rem"}`');
+  bottom: v-bind('`-${borderWidth || "0.02rem"}`');
+  background: #2e2e2e;
    border-radius: v-bind('`${radius}`'); /* 动态计算，比按钮圆角大 2px */
   z-index: -1;
 }

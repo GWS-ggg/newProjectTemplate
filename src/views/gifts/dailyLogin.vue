@@ -208,7 +208,6 @@ const bubblePosition = {
     </div>
     <div class="absolute bottom-135 left-1/2 h-96 w-317 f-c -translate-x-1/2">
       <div
-        v-show="dailyLoginItemInfo[0]?.BuyTimes === 0"
         class="h-96 w-317"
         @click="handleBtnClick"
       >
@@ -220,10 +219,13 @@ const bubblePosition = {
           :single-bubble-position="bubblePosition"
           :purchased="dailyLoginItemInfo[0]?.BuyTimes === 1"
         >
-          <div class="relative text-50">
+          <div
+            v-if="dailyLoginItemInfo[0]?.BuyTimes === 0"
+            class="relative text-50"
+          >
             <!-- 底层：只有阴影的文字 -->
             <div
-              v-if="dailyLoginItemInfo[0]?.BuyTimes === 0"
+
               class="absolute inset-0"
               style="text-shadow: 0px 0.03rem 0px #bcfb6b; color: transparent;"
             >
@@ -233,16 +235,16 @@ const bubblePosition = {
             <div class="gradient-text-with-shadow relative">
               Buy now
             </div>
-            <div
-              v-if="dailyLoginItemInfo[0]?.BuyTimes === 1"
-              class="absolute inset-0"
-            >
-              已购买
-            </div>
+          </div>
+          <div
+            v-if="dailyLoginItemInfo[0]?.BuyTimes === 1"
+            class="text-50"
+          >
+            已购买
           </div>
         </GreenButton>
       </div>
-      <div
+      <!-- <div
         v-show="dailyLoginItemInfo[0]?.BuyTimes && dailyLoginItemInfo[0]?.BuyTimes > 0"
         class="fade-in f-c"
       >
@@ -251,7 +253,7 @@ const bubblePosition = {
           src="@/assets/images/common/icon_ok.png"
           alt=""
         >
-      </div>
+      </div> -->
     </div>
   </div>
 </template>
