@@ -120,10 +120,15 @@ const bubblePosition = {
     <div class="absolute bottom-50 left-1/2 f-c rounded-20 text-24 -translate-x-1/2">
       <CountDown
         :end-time="productInfo?.ExpireTime"
-        text-class="px-20 py-10 text-26 text-white text-stroke-3 paint-order text-stroke-[#581616]"
+        text-class="px-20 py-10 text-26 text-white "
       >
         <template #default="{ hours, minutes, seconds }">
-          Ends in {{ hours }}:{{ minutes }}:{{ seconds }}
+          <TextStroke
+            stroke-color="#581616"
+            :stroke-width="3"
+          >
+            END IN {{ hours }}:{{ minutes }}:{{ seconds }}
+          </TextStroke>
         </template>
       </CountDown>
     </div>

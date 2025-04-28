@@ -5,6 +5,9 @@ import GiftScrollBar from '@/components/GiftScrollBar.vue'
 import WelfareHeader from '@/components/WelfareHeader.vue'
 import { useGiftStore } from '@/store/modules/giftStore'
 import { useLoginStore } from '@/store/modules/loginStore'
+
+import { usePayStore } from '@/store/modules/payStore'
+
 import { onMounted, ref } from 'vue'
 
 function getImageUrl(name: string) {
@@ -15,15 +18,16 @@ const bgImg = ref(getImageUrl('img_背景_下.png'))
 
 const { getLoginInfo, setUid } = useLoginStore()
 const { getShopListInfo } = useGiftStore()
-
-// - 测试环境
+const { getPayType } = usePayStore()
+onMounted(() => {
+  // - 测试环境
 //   - 142830
 // - 开发环境
 //   - 102191
-onMounted(() => {
-  const uid = '142830'
+  const uid = '102191'
   setUid(uid)
   getLoginInfo()
+  getPayType()
   getShopListInfo(uid)
 })
 </script>

@@ -430,10 +430,15 @@ function getScoreInfo(props: Array<{
     <div class="mt-30">
       <CountDown
         :end-time="productInfo?.ExpireTime"
-        text-class="px-20 text-29 text-stroke-3 text-stroke-[#19093e] paint-order"
+        text-class="px-20 text-29"
       >
         <template #default="{ hours, minutes, seconds }">
-          END IN  {{ hours }}:{{ minutes }}:{{ seconds }}
+          <TextStroke
+            stroke-color="#581616"
+            :stroke-width="3"
+          >
+            END IN  {{ hours }}:{{ minutes }}:{{ seconds }}
+          </TextStroke>
         </template>
       </CountDown>
     </div>

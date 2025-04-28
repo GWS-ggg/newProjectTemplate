@@ -12,7 +12,6 @@ import { computed, nextTick, ref } from 'vue'
 const emits = defineEmits(['boxClick', 'openPopup'])
 const itemInfoList = ref<ThreeSegmentItemInfo[]>([])
 const productInfo = ref<ProductInfo>()
-const bgImgList = ref<string[]>([])
 const { getProductListRequest } = useGiftStore()
 
 async function getThreeSegmentData() {
@@ -21,13 +20,7 @@ async function getThreeSegmentData() {
   itemInfoList.value = res.ItemInfo as ThreeSegmentItemInfo[]
   itemInfoList.value[0].BuyTimes = 0
   itemInfoList.value[0].Props[0].PropType = 11
-  itemInfoList.value[0].Props[0].PropID = 2030434
-  bgImgList.value = [
-    getPGImg(productInfo.value?.Pic[0] as string),
-    getPGImg(productInfo.value?.Pic[1] as string),
-    getPGImg(productInfo.value?.Pic[2] as string),
-  ]
-  console.log('bgImgList', bgImgList.value)
+  itemInfoList.value[0].Props[0].PropID = 2030428
   // 处理item数据 添加id BuyTimes Price
   let idNum = 0
   itemInfoList.value.forEach((item) => {
@@ -173,18 +166,29 @@ defineExpose({
 
 <template>
   <div class="mb-30 flex flex-col items-center justify-center text-29">
-    <div class="mt-30 text-[#fff] text-stroke-1 text-stroke-[#19093e]">
+    <div class="mt-30 text-[#fff]">
       <CountDown
         :end-time="productInfo?.ExpireTime"
-        text-class="px-20 text-29 text-stroke-3 text-stroke-[#19093e] paint-order"
+        text-class="px-20 text-29"
       >
         <template #default="{ hours, minutes, seconds }">
-          END IN  {{ hours }}:{{ minutes }}:{{ seconds }}
+          <TextStroke
+            stroke-color="#581616"
+            :stroke-width="3"
+          >
+            END IN  {{ hours }}:{{ minutes }}:{{ seconds }}
+          </TextStroke>
         </template>
       </CountDown>
     </div>
-    <div class="mt-24 text-24 text-[#fef29f] text-stroke-3 text-stroke-[#682c2e] paint-order">
-      Take each deal take each deal !"
+    <div class="mt-24 text-24">
+      <TextStroke
+        stroke-color="#682c2e"
+        :stroke-width="3"
+        text-color="#fef29f"
+      >
+        Take each deal take each deal !
+      </TextStroke>
     </div>
     <div
       v-for="item in itemInfoList"
@@ -202,7 +206,7 @@ defineExpose({
 
       <div v-show="item.BuyTimes === 0">
         <div class="absolute left-1/2 top-35 h-120 w-[90%] -translate-x-1/2">
-          <div class="h-full w-full flex items-center justify-evenly gap-30">
+          <div class="h-full w-full flex items-center justify-center gap-40">
             <template
               v-for="(icon, index) in item.Props"
               :key="index"
@@ -212,6 +216,8 @@ defineExpose({
                 :text="icon.Text"
                 :icon-height="120"
                 :bottom="-10"
+                :text-size="40"
+                :gift-type="icon.PropType"
                 @click="handleBoxClick(icon, $event)"
               />
             </template>
@@ -227,8 +233,14 @@ defineExpose({
             :score="productInfo?.Props[0].VipScore"
             score-show
           >
-            <div class="relative text-40 text-[#fff] text-stroke-3 text-stroke-[#164b2e] paint-order">
-              {{ item.Price ? formatPrice(item.Price) : 'FREE' }}
+            <div class="relative text-40 text-[#fff]">
+              <TextStroke
+                stroke-color="#164b2e"
+                :stroke-width="3"
+                text-color="#fff"
+              >
+                {{ item.Price ? formatPrice(item.Price) : 'FREE' }}
+              </TextStroke>
               <img
                 v-if="item.Price === 0 && currentGiftId !== item.id"
                 :src="imgMap.lockImg"
@@ -238,12 +250,24 @@ defineExpose({
             </div>
           </GreenButton>
         </div>
-        <div class="absolute bottom-35 left-50 f-c flex-col">
-          <div class="text-20 text-[#fff] text-stroke-1 text-stroke-[#5d2f0a]">
-            1/1
+        <div class="absolute bottom-60 left-50 f-c flex-col">
+          <div class="text-20 text-[#fff]">
+            <TextStroke
+              stroke-color="#5d2f0a"
+              :stroke-width="1"
+              text-color="#fff"
+            >
+              1/1
+            </TextStroke>
           </div>
-          <div class="text-18 text-[#fddfb0] text-stroke-1 text-stroke-[#5d2f0a]">
-            Available
+          <div class="text-18 text-[#fddfb0]">
+            <TextStroke
+              stroke-color="#5d2f0a"
+              :stroke-width="1"
+              text-color="#fddfb0"
+            >
+              Available
+            </TextStroke>
           </div>
         </div>
       </div>

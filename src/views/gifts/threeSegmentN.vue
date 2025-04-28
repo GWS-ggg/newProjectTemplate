@@ -307,18 +307,29 @@ async function handleAnimation(currentGift: ThreeSegmentNItemInfo) {
 
 <template>
   <div class="mb-30 flex flex-col items-center justify-center text-29">
-    <div class="mt-30 text-[#fff] text-stroke-1 text-stroke-[#19093e]">
+    <div class="mt-30 text-[#fff]">
       <CountDown
         :end-time="productInfo?.ExpireTime"
-        text-class="px-20  text-29 text-stroke-3 text-stroke-[#19093e] paint-order"
+        text-class="px-20 text-29"
       >
         <template #default="{ hours, minutes, seconds }">
-          END IN  {{ hours }}:{{ minutes }}:{{ seconds }}
+          <TextStroke
+            stroke-color="#581616"
+            :stroke-width="3"
+          >
+            END IN  {{ hours }}:{{ minutes }}:{{ seconds }}
+          </TextStroke>
         </template>
       </CountDown>
     </div>
-    <div class="mt-24 text-24 text-[#fef29f] text-stroke-3 text-stroke-[#682c2e] paint-order">
-      Take each deal take each deal !"
+    <div class="mt-24 text-24">
+      <TextStroke
+        stroke-color="#682c2e"
+        :stroke-width="3"
+        text-color="#fef29f"
+      >
+        Take each deal take each deal !
+      </TextStroke>
     </div>
     <div
       v-for="item in displayGiftList"
@@ -336,7 +347,7 @@ async function handleAnimation(currentGift: ThreeSegmentNItemInfo) {
       </div>
 
       <div class="absolute left-0 top-30 h-120 w-full">
-        <div class="h-full flex items-center justify-center gap-30">
+        <div class="h-full flex items-center justify-center gap-40">
           <template
             v-for="(icon, index) in item.Props"
             :key="index"
@@ -347,6 +358,7 @@ async function handleAnimation(currentGift: ThreeSegmentNItemInfo) {
               :bottom="-10"
               :icon-height="120"
               :text-size="40"
+              :gift-type="icon.PropType"
               @click="(event) => handleBoxClick(icon, event)"
             />
           </template>
@@ -361,8 +373,14 @@ async function handleAnimation(currentGift: ThreeSegmentNItemInfo) {
           score-show
           @click="handlePurchaseButton(item)"
         >
-          <div class="relative text-40 text-[#fff] text-stroke-3 text-stroke-[#164b2e] paint-order">
-            {{ item?.Price ? formatPrice(item?.Price) : 'FREE' }}
+          <div class="relative text-40 text-[#fff]">
+            <TextStroke
+              stroke-color="#164b2e"
+              :stroke-width="3"
+              text-color="#fff"
+            >
+              {{ item?.Price ? formatPrice(item?.Price) : 'FREE' }}
+            </TextStroke>
             <img
               v-if="item.Price === 0 && item.sortId !== 1"
               :src="imgMap.lockImg"
@@ -383,11 +401,23 @@ async function handleAnimation(currentGift: ThreeSegmentNItemInfo) {
         </div>
       </div>
       <div class="absolute bottom-60 left-50 f-c flex-col">
-        <div class="text-20 text-[#fff] text-stroke-2 text-stroke-[#5d2f0a] paint-order">
-          1/1
+        <div class="text-20 text-[#fff]">
+          <TextStroke
+            stroke-color="#5d2f0a"
+            :stroke-width="2"
+            text-color="#fff"
+          >
+            1/1
+          </TextStroke>
         </div>
-        <div class="text-18 text-[#fddfb0] text-stroke-2 text-stroke-[#5d2f0a] paint-order">
-          Available
+        <div class="text-18 text-[#fddfb0]">
+          <TextStroke
+            stroke-color="#5d2f0a"
+            :stroke-width="2"
+            text-color="#fddfb0"
+          >
+            Available
+          </TextStroke>
         </div>
       </div>
     </div>

@@ -249,15 +249,17 @@ const { handleBoxClick } = useEmitBoxClick(emits)
       v-if="currentGiftId <= 7"
       class="absolute bottom-90 left-1/2 z-10 h-96 -translate-x-1/2 -translate-y-1/2"
     >
-      <!-- <div class="text-26 text-[#d9cdb9] text-stroke-1 text-stroke-[#164b2e]">
-        End in 20:00:00
-      </div> -->
       <CountDown
         :end-time="productInfo?.ExpireTime"
-        class="text-26 text-[#d9cdb9] text-stroke-1 text-stroke-[#164b2e]"
+        class="text-26"
       >
         <template #default="{ hours, minutes, seconds }">
-          End in {{ hours }}:{{ minutes }}:{{ seconds }}
+          <TextStroke
+            stroke-color="#581616"
+            :stroke-width="3"
+          >
+            END IN {{ hours }}:{{ minutes }}:{{ seconds }}
+          </TextStroke>
         </template>
       </CountDown>
     </div>

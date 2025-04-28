@@ -280,3 +280,17 @@ export interface Pop {
     onClick: () => void
   }
 }
+
+export interface PayTypeRes {
+  appid: string
+  payChannels: PayType[]
+  payPalClientId: string
+}
+
+export interface PayType {
+  payType: number
+  name: string
+  extra: number
+  level: number
+  icon: string
+}

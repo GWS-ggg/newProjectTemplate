@@ -130,7 +130,8 @@ function getScoreInfo(props: Array<{
   return props.find(prop => prop.PropID === 270001)
 }
 
-const giftData = ref<GiftOnePlusTwo>({
+const plusImg = getImageUrl('img_+.png')
+const _giftData = ref<GiftOnePlusTwo>({
   title: 'BUY 1 PACK & GET 2 FREE !',
   currentScore: 100,
   totalScore: 200,
@@ -617,9 +618,9 @@ async function handleGiftAnimation(giftPackage: onePlusTwoGiftItemInfo) {
       >
         <img
           v-if="giftPackage.Price === 0 && index !== 0"
-          class="absolute top-1/2 z-50 h-96 w-96 transition-opacity duration-500 -translate-x-1/2 -translate-y-100"
+          class="absolute top-1/2 z-41 h-96 w-96 transition-opacity duration-500 -translate-x-1/2 -translate-y-100"
           :class="{ 'opacity-0': !showPlus, 'left-215': index === 1, 'left-435': index === 2 }"
-          :src="giftData.plusImg"
+          :src="plusImg"
           alt=""
         >
       </template>

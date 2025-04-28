@@ -1,4 +1,4 @@
-import type { GiftResponseData, OrderStatusReq, OrderStatusRes, PayOrderReq, PayOrderRes } from '@/types'
+import type { GiftResponseData, OrderStatusReq, OrderStatusRes, PayOrderReq, PayOrderRes, PayTypeRes } from '@/types'
 import type { BoxData, BuyOrderInfoRequest, FreeGiftAwardRequest, LoginInfo, ShopListInfo } from './types'
 import request from '@/utils/request'
 
@@ -106,6 +106,18 @@ export function paypalSettleApi(data: {
 }): Promise<void> {
   return request({
     url: '/wxpay/paypal/settle',
+    method: 'post',
+    data,
+    apiType: 'pay',
+  })
+}
+// 获取支付方式
+export function getPayTypeApi(data: {
+  path: string
+  fnUid: string
+}): Promise<PayTypeRes> {
+  return request({
+    url: '/pay/store/pg/info',
     method: 'post',
     data,
     apiType: 'pay',

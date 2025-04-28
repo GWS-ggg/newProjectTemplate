@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import type { OrderPopupInfo, PayOrderReq, PayOrderRes } from '@/types'
+import type { OrderPopupInfo, PayOrderReq, PayOrderRes, PayType } from '@/types'
 
 import { payOrderApi, payOrderStasuApi, paypalSettleApi } from '@/api'
 
 import { MYCARD_PAY_TYPE, PAYPAL_PAY_TYPE, PG_APP_ID } from '@/enum'
 import { useBuyOrder } from '@/hooks/useBuyOrder'
-import { formatPrice, getDeviceType } from '@/utils'
+import { usePayStore } from '@/store/modules/payStore'
 
+import { formatPrice, getDeviceType } from '@/utils'
 import { MessageBox } from '@/utils/messageBox'
 import { computed, ref } from 'vue'
 import { useLoginStore } from '../store/modules/loginStore'
@@ -16,67 +17,62 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits(['paymentSuccess', 'close'])
-const payChannels = ref<PayChannel[]>([
-  {
-    payType: 23002,
-    name: 'Alipay',
-    extra: 10,
-    level: 1,
-    icon: 'https://mprogram-static.forevernine.com/ovsite/icon2/alipay.png',
-  },
-  {
-    payType: 23001,
-    name: 'WeChatPay',
-    extra: 10,
-    level: 1,
-    icon: 'https://mprogram-static.forevernine.com/ovsite/icon2/weixin.png',
-  },
-  {
-    payType: 23003,
-    name: 'ApplePay',
-    extra: 10,
-    level: 1,
-    icon: 'https://mprogram-static.forevernine.com/ovsite/icon2/apple.png',
-  },
-  {
-    payType: 23004,
-    name: 'GooglePay',
-    extra: 10,
-    level: 1,
-    icon: 'https://mprogram-static.forevernine.com/ovsite/icon2/geogle.png',
-  },
-  {
-    payType: 230010,
-    name: 'Cards',
-    extra: 10,
-    level: 1,
-    icon: 'https://mprogram-static.forevernine.com/cdn/img/cards.jpeg',
-  },
-  {
-    payType: 23,
-    name: 'Payermax',
-    extra: 10,
-    level: 1,
-    icon: 'https://mprogram-static.forevernine.com/ovsite/icon2/payermax.png',
-  },
-  {
-    payType: 20,
-    name: 'PayPal',
-    extra: 10,
-    level: 1,
-    icon: 'https://mprogram-static.forevernine.com/ovsite/icon2/paypal.png',
-  },
-])
-interface PayChannel {
-  payType: number
-  name: string
-  extra: number
-  level: number
-  icon: string
-}
+// const payChannels = ref<PayChannel[]>([
+//   {
+//     payType: 23002,
+//     name: 'Alipay',
+//     extra: 10,
+//     level: 1,
+//     icon: 'https://mprogram-static.forevernine.com/ovsite/icon2/alipay.png',
+//   },
+//   {
+//     payType: 23001,
+//     name: 'WeChatPay',
+//     extra: 10,
+//     level: 1,
+//     icon: 'https://mprogram-static.forevernine.com/ovsite/icon2/weixin.png',
+//   },
+//   {
+//     payType: 23003,
+//     name: 'ApplePay',
+//     extra: 10,
+//     level: 1,
+//     icon: 'https://mprogram-static.forevernine.com/ovsite/icon2/apple.png',
+//   },
+//   {
+//     payType: 23004,
+//     name: 'GooglePay',
+//     extra: 10,
+//     level: 1,
+//     icon: 'https://mprogram-static.forevernine.com/ovsite/icon2/geogle.png',
+//   },
+//   {
+//     payType: 230010,
+//     name: 'Cards',
+//     extra: 10,
+//     level: 1,
+//     icon: 'https://mprogram-static.forevernine.com/cdn/img/cards.jpeg',
+//   },
+//   {
+//     payType: 23,
+//     name: 'Payermax',
+//     extra: 10,
+//     level: 1,
+//     icon: 'https://mprogram-static.forevernine.com/ovsite/icon2/payermax.png',
+//   },
+//   {
+//     payType: 20,
+//     name: 'PayPal',
+//     extra: 10,
+//     level: 1,
+//     icon: 'https://mprogram-static.forevernine.com/ovsite/icon2/paypal.png',
+//   },
+// ])
+const payStore = usePayStore()
+const payChannels = computed(() => payStore.payTypeList)
 
 // TODO 缓存
-const selectedPayChannel = ref<PayChannel | null>(payChannels.value[0])
+const selectedPayChannel = ref<PayType | null>(payChannels.value[0])
 const { handleBuyOrder } = useBuyOrder()
 const loginStore = useLoginStore()
 const userUid = computed(() => loginStore.userUid)
@@ -102,8 +98,8 @@ async function handlePayOrder() {
 
   // 再调支付接口
   try {
-    await checkout()
-    // showPaymentSuccess()
+    // await checkout()
+    showPaymentSuccess()
   }
   catch (error) {
     console.log('handlePayOrder error', error)
@@ -237,7 +233,6 @@ async function startCheckStatus(res: PayOrderRes) {
     console.log('check', payId, currentPayId)
     if (payId !== currentPayId)
       return
-    debugger
     const checkRes = await checkOrderStatus(payId)
     if (checkRes.status === ORDER_STATUS_SUCCESS) {
       showPaymentSuccess()

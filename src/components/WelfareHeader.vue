@@ -65,11 +65,23 @@ setTimeout(() => {
             <div class="mt-40 f-c text-40 color-[#e77bff]">
               welfare
             </div>
-            <div class="text-61 text-[#fff309] text-shadow-[3px_3px_0_#5b1800]">
-              100%
+            <div class="text-61">
+              <TextStroke
+                stroke-color="#5b1800"
+                :stroke-width="3"
+                text-color="#fff309"
+              >
+                100%
+              </TextStroke>
             </div>
-            <div class="f-e text-30 text-[#acb3ff] text-stroke-2 text-stroke-[#271a58] paint-order">
-              more
+            <div class="f-e text-30">
+              <TextStroke
+                stroke-color="#271a58"
+                :stroke-width="2"
+                text-color="#acb3ff"
+              >
+                more
+              </TextStroke>
             </div>
           </div>
         </div>
@@ -98,8 +110,13 @@ setTimeout(() => {
           alt=""
           class="z-10 w-78"
         >
-        <div class="rounded-[24px] bg-[#200b49] bg-opacity-35 bg-cover bg-no-repeat px-25 py-2 pl-35 text-30 text-white text-stroke-1 text-stroke-[#181818] paint-order -ml-25">
-          {{ loginInfo.vipscore }}/{{ loginInfo.viptargetscore }}
+        <div class="rounded-[24px] bg-[#200b49] bg-opacity-35 bg-cover bg-no-repeat px-25 py-2 pl-35 text-30 text-white -ml-25">
+          <TextStroke
+            stroke-color="#181818"
+            :stroke-width="1"
+          >
+            {{ loginInfo.vipscore }}/{{ loginInfo.viptargetscore }}
+          </TextStroke>
         </div>
       </div>
     </div>

@@ -353,7 +353,7 @@ const arrowAfterStyle = computed(() => {
     <div
       v-show="modelValue"
       ref="bubbleElement"
-      class="popup-bubble bg-outer pointer-events-auto fixed z-99999 h-auto max-w-750 border-2 border-[#233f59] rounded-13 border-solid p-15 text-20 text-[#fff] text-stroke-2 text-stroke-[#464646] will-change-transform paint-order"
+      class="popup-bubble bg-outer pointer-events-auto fixed z-99999 h-auto max-w-750 border-2 border-[#233f59] rounded-13 border-solid p-15 text-20 text-[#fff] will-change-transform"
       :class="{ 'popup-animation': realShow }"
       :style="{ ...computedStyle, fontFamily, ...arrowAfterStyle, visibility: realShow ? 'visible' : 'hidden' }"
     >
@@ -377,10 +377,20 @@ const arrowAfterStyle = computed(() => {
               v-if="item.PreviewMinCount && item.PreviewMaxCount"
               class="whitespace-nowrap"
             >
-              {{ formatCount(item.PreviewMinCount) }} - {{ formatCount(item.PreviewMaxCount) }}
+              <TextStroke
+                stroke-color="#464646"
+                :stroke-width="2"
+              >
+                {{ formatCount(item.PreviewMinCount) }} - {{ formatCount(item.PreviewMaxCount) }}
+              </TextStroke>
             </div>
             <div v-else>
-              {{ item.Text }}
+              <TextStroke
+                stroke-color="#464646"
+                :stroke-width="2"
+              >
+                {{ item.Text }}
+              </TextStroke>
             </div>
           </div>
         </div>
@@ -400,12 +410,12 @@ const arrowAfterStyle = computed(() => {
               1 out of {{ typeTwoMaxRollCountItem?.MaxRollCount }} chests contains a
             </div>
 
-            <div class="dual-color-text relative text-40 text-stroke-2 text-stroke-[#8c4a03] paint-order">
+            <div class="dual-color-text relative text-40">
               <span
                 class="absolute inset-0 text-[#8c4a03]"
                 style="text-shadow: 0px 0.03rem 0px 0px #8c4a03"
               >JOKER CARD</span>
-              <span class="gold-gradient-text relative z-10">JOKER CARD</span>
+              <span class="gold-gradient-text relative z-10 text-stroke-2 text-stroke-[#8c4a03]">JOKER CARD</span>
             </div>
           </div>
         </div>
@@ -428,10 +438,20 @@ const arrowAfterStyle = computed(() => {
                 v-if="item.PreviewMinCount && item.PreviewMaxCount"
                 class="whitespace-nowrap"
               >
-                {{ formatCount(item.PreviewMinCount) }} - {{ formatCount(item.PreviewMaxCount) }}
+                <TextStroke
+                  stroke-color="#464646"
+                  :stroke-width="2"
+                >
+                  {{ formatCount(item.PreviewMinCount) }} - {{ formatCount(item.PreviewMaxCount) }}
+                </TextStroke>
               </div>
               <div v-else>
-                {{ item.Text }}
+                <TextStroke
+                  stroke-color="#464646"
+                  :stroke-width="2"
+                >
+                  {{ item.Text }}
+                </TextStroke>
               </div>
             </div>
           </div>
@@ -462,10 +482,20 @@ const arrowAfterStyle = computed(() => {
                 v-if="item.PreviewMinCount && item.PreviewMaxCount"
                 class="whitespace-nowrap"
               >
-                {{ formatCount(item.PreviewMinCount) }} - {{ formatCount(item.PreviewMaxCount) }}
+                <TextStroke
+                  stroke-color="#464646"
+                  :stroke-width="2"
+                >
+                  {{ formatCount(item.PreviewMinCount) }} - {{ formatCount(item.PreviewMaxCount) }}
+                </TextStroke>
               </div>
               <div v-else>
-                {{ item.Text }}
+                <TextStroke
+                  stroke-color="#464646"
+                  :stroke-width="2"
+                >
+                  {{ item.Text }}
+                </TextStroke>
               </div>
             </div>
           </div>
@@ -485,12 +515,22 @@ const arrowAfterStyle = computed(() => {
           alt=""
           class="absolute left-1/2 top-30 h-200 -translate-x-1/2"
         >
-        <div class="absolute left-1/2 top-230 f-c text-36 text-stroke-2 text-stroke-[#203e51] paint-order -translate-x-1/2">
+        <div class="absolute left-1/2 top-230 f-c text-36 -translate-x-1/2">
           <div class="color-[#ffed22]">
-            x{{ boxData?.Props[0].DeltaCount }}&nbsp;
+            <TextStroke
+              stroke-color="#203e51"
+              :stroke-width="2"
+            >
+              x{{ boxData?.Props[0].DeltaCount }}&nbsp;
+            </TextStroke>
           </div>
           <div>
-            Cards
+            <TextStroke
+              stroke-color="#203e51"
+              :stroke-width="2"
+            >
+              Cards
+            </TextStroke>
           </div>
         </div>
         <div

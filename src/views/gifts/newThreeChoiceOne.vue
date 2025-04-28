@@ -325,7 +325,7 @@ getProductList()
                 :icon-height="90"
                 :bottom="-10"
                 stroke-color="#464646"
-                :stroke-width="2"
+                :stroke-width="3"
                 :gift-type="prop.PropType"
                 @click="(event: any) => handleBoxClick(prop, event)"
               />
@@ -419,10 +419,15 @@ getProductList()
     <div class="mt-20 f-c">
       <CountDown
         :end-time="productInfo?.ExpireTime"
-        class="text-26 text-[#f1e49e]"
+        class="text-26"
       >
         <template #default="{ hours, minutes, seconds }">
-          End in {{ hours }}:{{ minutes }}:{{ seconds }}
+          <TextStroke
+            stroke-color="#581616"
+            :stroke-width="3"
+          >
+            END IN {{ hours }}:{{ minutes }}:{{ seconds }}
+          </TextStroke>
         </template>
       </CountDown>
     </div>

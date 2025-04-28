@@ -189,8 +189,13 @@ const bubblePosition = {
 
 <template>
   <div class="relative mb-30 f-c flex-col text-29">
-    <div class="mt-30 text-29 text-stroke-3 text-stroke-[#19093e] paint-order">
-      Only one purchase can be made !
+    <div class="mt-30 text-29">
+      <TextStroke
+        stroke-color="#19093e"
+        :stroke-width="3"
+      >
+        Only one purchase can be made !
+      </TextStroke>
     </div>
     <div class="min-h-789 w-700 flex items-end justify-center">
       <div
@@ -232,7 +237,19 @@ const bubblePosition = {
               :key="index"
               class="flex flex-col items-center justify-center"
             >
-              <img
+              <IconWithText
+                :icon-url="getPGImg(prop.Icon)"
+                :text="prop.Text"
+                :text-size="31"
+                :icon-height="90"
+                :bottom="-15"
+                stroke-color="#464646"
+                :stroke-width="3"
+                :gift-type="prop.PropType"
+                @click="(event: any) => handleBoxClick(prop, event)"
+              />
+
+              <!-- <img
                 class="h-90"
                 :src="getPGImg(prop.Icon)"
                 alt=""
@@ -240,7 +257,7 @@ const bubblePosition = {
               >
               <div class="text-31 text-stroke-2 text-stroke-[#464646] paint-order -mt-15">
                 {{ prop.Text }}
-              </div>
+              </div> -->
             </div>
           </div>
         </div>
@@ -258,8 +275,13 @@ const bubblePosition = {
               :single-bubble-position="bubblePosition"
               :mask-show="giftPackage.id !== activeGiftId"
             >
-              <div class="text-29 text-stroke-2 text-stroke-[#164b2e] paint-order">
-                {{ formatPrice(giftPackage.Price || 0) }}
+              <div class="text-29">
+                <TextStroke
+                  stroke-color="#164b2e"
+                  :stroke-width="2"
+                >
+                  {{ formatPrice(giftPackage.Price || 0) }}
+                </TextStroke>
               </div>
             </GreenButton>
           </div>
@@ -283,7 +305,7 @@ const bubblePosition = {
         class="text-26 text-[#f1e49e]"
       >
         <template #default="{ hours, minutes, seconds }">
-          End in {{ hours }}:{{ minutes }}:{{ seconds }}
+          END IN {{ hours }}:{{ minutes }}:{{ seconds }}
         </template>
       </CountDown>
     </div>
