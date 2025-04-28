@@ -1,35 +1,70 @@
 <script setup lang="ts">
 import BackBtn from '@/components/BackBtn.vue'
+import Dialog from '@/components/Dialog.vue'
 import GiftList from '@/components/GiftList.vue'
 import GiftScrollBar from '@/components/GiftScrollBar.vue'
 import WelfareHeader from '@/components/WelfareHeader.vue'
 import { useGiftStore } from '@/store/modules/giftStore'
 import { useLoginStore } from '@/store/modules/loginStore'
-
 import { usePayStore } from '@/store/modules/payStore'
-
+import { MessageBox } from '@/utils/messageBox'
+import { initToast, Toast } from '@/utils/toast'
 import { onMounted, ref } from 'vue'
 
 function getImageUrl(name: string) {
   return new URL(`../assets/images/gifts/${name}`, import.meta.url).href
 }
 const fontFamily = ref('font-en')
-const bgImg = ref(getImageUrl('img_背景_下.png'))
-
+const bgImg = ref(getImageUrl('img_背景_下.jpg'))
 const { getLoginInfo, setUid } = useLoginStore()
 const { getShopListInfo } = useGiftStore()
 const { getPayType } = usePayStore()
+
+const isVisibleLogin = ref(false)
+const gameLoginRef = ref()
+const giftListRef = ref()
+isVisibleLogin.value = true
+async function handleLogin(uid: string) {
+  Toast.loading()
+  try {
+    setUid(uid)
+    const res = await getLoginInfo()
+    gameLoginRef.value.saveUIDRecord({
+      uid,
+      userName: res.username,
+    })
+    await getShopListInfo(uid)
+    await giftListRef.value.handleLoginGetInfo()
+    isVisibleLogin.value = false
+    Toast.close()
+    getPayType()
+  }
+  catch (error) {
+    Toast.close()
+    console.log(error)
+    MessageBox.paymentFailed('登录失败', '确认', () => {
+      console.log('取消登录')
+    })
+  }
+}
+
 onMounted(() => {
-  // - 测试环境
-//   - 142830
-// - 开发环境
-//   - 102191
-  const uid = '102191'
-  setUid(uid)
-  getLoginInfo()
-  getPayType()
-  getShopListInfo(uid)
+  initToast()
+
+  // 使用端内携带的uid登录
 })
+
+// onMounted(() => {
+//   // - 测试环境
+// //   - 142830
+// // - 开发环境
+// //   - 102191
+//   const uid = '142830'
+//   setUid(uid)
+//   getLoginInfo()
+//   getPayType()
+//   getShopListInfo(uid)
+// })
 </script>
 
 <template>
@@ -55,10 +90,21 @@ onMounted(() => {
       class="relative min-h-[calc(100vh-420px)]"
       :style="{ backgroundImage: `url(${bgImg})` }"
     >
-      <GiftList />
+      <GiftList ref="giftListRef" />
     </div>
 
     <BackBtn />
+
+    <Dialog
+      v-model="isVisibleLogin"
+      :z-index="1800"
+      :close-button-show="false"
+    >
+      <GameLogin
+        ref="gameLoginRef"
+        @on-click-login="handleLogin"
+      />
+    </Dialog>
   </div>
 </template>
 

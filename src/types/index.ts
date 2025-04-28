@@ -294,3 +294,31 @@ export interface PayType {
   level: number
   icon: string
 }
+
+export interface MyCardTypeReq {
+  appid: string
+  currency: string
+  amount: number
+}
+
+export interface MyCardType {
+  PaymentType: string
+  PaymentTypeDesc: string
+  PaymentGroup: string
+  PaymentGroupDesc: string
+  ItemList: MycardItem[]
+}
+
+interface MycardItem {
+  ItemCode: string
+  ItemCodeDesc: string
+  TradePointType: string
+  Amount: string
+  Currency: string
+}
+export type MyCardTypeList = MyCardType[]
+
+export interface UIDRecord {
+  uid: string
+  userName: string
+}

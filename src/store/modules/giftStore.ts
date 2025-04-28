@@ -27,18 +27,18 @@ export const useGiftStore = defineStore('gift', () => {
 
     // 创建一个新数组，确保响应式触发
     const newTabInfo = [...res.TabInfo]
-    newTabInfo.push({
-      BannerPic: 'newChooseThree/2/gift_icon.png',
-      ProductType: 4,
-      Expire: 1747734900,
-      id: 7,
-    })
-    newTabInfo.push({
-      BannerPic: 'newChooseThree/2/gift_icon.png',
-      ProductType: 7,
-      Expire: 1747734900,
-      id: 8,
-    })
+    // newTabInfo.push({
+    //   BannerPic: 'newChooseThree/2/gift_icon.png',
+    //   ProductType: 4,
+    //   Expire: 1747734900,
+    //   id: 7,
+    // })
+    // newTabInfo.push({
+    //   BannerPic: 'newChooseThree/2/gift_icon.png',
+    //   ProductType: 7,
+    //   Expire: 1747734900,
+    //   id: 8,
+    // })
     let idNum = 0
     newTabInfo.forEach((item) => {
       item.id = idNum++
@@ -53,6 +53,9 @@ export const useGiftStore = defineStore('gift', () => {
   }
 
   async function getProductListRequest(productType: number) {
+    if (!loginStore.userUid) {
+      return
+    }
     const res = await getProductListApi({
       appid: '616876868660610',
       uid: loginStore.userUid,

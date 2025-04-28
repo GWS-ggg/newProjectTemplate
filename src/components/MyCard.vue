@@ -1,22 +1,18 @@
-<!-- <script lang="ts" setup>
-import type { GoodsInfo, Level, MyCardType, MyCardTypeList, OrderReq, StoreUserInfo } from '@/types/index'
-import { myCardOrderApi, myCardTypeApi } from '@/api'
-import { MYCARD_PAY_TYPE } from '@/enum/const'
-import { t } from '@/language/i18n'
-import { Toast } from '@/utils/toast'
+<script lang="ts" setup>
+import type { MyCardType, MyCardTypeList, OrderPopupInfo, PayOrderReq } from '@/types'
+import { myCardTypeApi, payOrderApi } from '@/api'
+import { MYCARD_PAY_TYPE, PG_APP_ID } from '@/enum'
+
 import { ref, watch } from 'vue'
 
 interface Props {
-  appid: string
-  payPalClientId: string
-  selectedProduct: GoodsInfo | null
-  currentLevel: Level
-  userInfo?: StoreUserInfo
-  productCount: number
+  userUid: string
+  param: string
+  orderPopupInfo: OrderPopupInfo
+  selectedPayChannelId: number
 }
 const props = withDefaults(defineProps<Props>(), {
-  selectedProduct: null,
-  productCount: 1,
+  selectedPayChannelId: MYCARD_PAY_TYPE,
 })
 const emits = defineEmits(['created', 'close'])
 const currency = ref<string>('TWD')
@@ -29,16 +25,16 @@ watch(visible, async (val) => {
 })
 async function changeCurrency(value: string) {
   currency.value = value
-  if (!props.selectedProduct)
+  if (!props.orderPopupInfo)
     return
   mycardTypeList.value = []
-  const { usd } = props.selectedProduct
-  await getTypeList(Number(usd))
+  const { price } = props.orderPopupInfo
+  await getTypeList(Number(price))
 }
 async function start() {
-  if (props.selectedProduct) { // 检查 selectedProduct 是否为 null
-    const { usd } = props.selectedProduct
-    await getTypeList(Number(usd))
+  if (props.orderPopupInfo) { // 检查 selectedProduct 是否为 null
+    const { price } = props.orderPopupInfo
+    await getTypeList(Number(price))
     visible.value = true
   }
   else {
@@ -53,16 +49,14 @@ function chageMethod(method: MyCardType) {
 
 const toastVisble = ref(false)
 async function getTypeList(amount: number) {
-  Toast.loading()
   toastVisble.value = true
   const res = await myCardTypeApi({
-    appid: props.appid,
+    appid: PG_APP_ID,
     currency: currency.value,
     amount,
   })
   mycardTypeList.value = res
   payMethod.value = res.length ? res[0] : undefined
-  Toast.close()
   toastVisble.value = false
 }
 async function order() {
@@ -73,47 +67,47 @@ async function order() {
   if (isSafari) {
     win = window.open() as Window
   }
-  if (!props.selectedProduct || !props.userInfo) {
+  if (!props.orderPopupInfo) {
     return
   }
   const typeItem = payMethod.value
   if (!typeItem) {
-    Toast.info('请选择支付方式')
+    // Toast.info('请选择支付方式')
     return
   }
   try {
-    const orderParams: OrderReq = {
-      appid: props.appid,
+    const orderParams: PayOrderReq = {
+      appid: PG_APP_ID,
       version: ' 1.0',
-      fn_uid: props.userInfo.fnUid,
+      fn_uid: props.userUid,
       fn_deviceid: '',
       token: '',
       os: 'pc',
       game_platform: 'h5',
       ts: new Date().getTime() / 1000,
       // price: props.selectedProduct.twd, todo
-      price: props.selectedProduct.usd.toString(),
-      priceUsd: props.selectedProduct.usd,
-      params: '',
+      price: props.orderPopupInfo.price.toString(),
+      priceUsd: props.orderPopupInfo.price,
+      params: props.param,
       desc: '',
-      pid: props.selectedProduct[props.currentLevel].pid,
-      title: props.selectedProduct[props.currentLevel].desc,
-      game_appid: props.appid,
-      game_openid: props.userInfo.fnUid,
+      pid: '1',
+      title: 'PG',
+      game_appid: PG_APP_ID,
+      game_openid: props.userUid,
       pay_type: MYCARD_PAY_TYPE,
       mycard_pay_type: typeItem.PaymentType,
       content_type: '',
-      zoneid: props.userInfo.serverId ? Number(props.userInfo.serverId) : 0,
-      roleid: props.userInfo.roleId,
-      zone_id: props.userInfo.serverId ? Number(props.userInfo.serverId) : 0,
-      role_id: props.userInfo.roleId,
+      zoneid: 0,
+      roleid: props.userUid,
+      zone_id: 0,
+      role_id: props.userUid,
       is_gs: 0,
       channel: 'site',
       // 商品数量 固定为1
-      num: props.productCount,
+      num: 1,
     }
-    Toast.loading()
-    const res = await myCardOrderApi(orderParams)
+    // Toast.loading()
+    const res = await payOrderApi(orderParams)
     const { fntype14 } = res
     if (fntype14) {
       const url = fntype14
@@ -126,7 +120,7 @@ async function order() {
         }
       }
     }
-    Toast.close()
+    // Toast.close()
     emits('created', res)
   }
   catch (error) {
@@ -145,7 +139,7 @@ defineExpose({
 </script>
 
 <template>
-  <m-dialog v-model="visible">
+  <Dialog v-model="visible">
     <div
       class="relative z-100 h-650 w-650 f-s flex-col"
       lg="h-700 w-750"
@@ -172,7 +166,7 @@ defineExpose({
           v-if="!mycardTypeList.length && !toastVisble"
           class="mt-80 w-full f-c color-[#222C37]"
         >
-          {{ t('no_available_payment_method') }}
+          暂无可用的支付方式
         </div>
         <div class="h-348 overflow-auto">
           <div
@@ -184,7 +178,7 @@ defineExpose({
           >
             <img
               class="mx-40 h-64 w-64 f-c rounded-16"
-              src="/img/mycard.png"
+              src="@/assets/images/common/mycard.png"
               alt=""
             >
             <div class="w-full f-s text-30 font-bold">
@@ -197,22 +191,22 @@ defineExpose({
           class="absolute bottom-45 h-100 w-640 f-c cursor-pointer rounded-16 bg-[#ED6504]"
           @click="order"
         >
-          {{ t('continue') }}
+          确认
         </div>
       </div>
     </div>
-  </m-dialog>
+  </Dialog>
 </template>
 
 <style lang="scss" scoped>
 .afterImage::after {
       content: "";
       position: absolute;
-      top: -1px;
-      left: -1px;
-      width: 48px;
-      height: 48px;
-      background-image: url("/img/selected-flag.png");
-      background-size: 100%;
-    }
-</style> -->
+  top: -1px;
+  left: -1px;
+  width: 48px;
+  height: 48px;
+  background-image: url("@/assets/images/common/selected-flag.png");
+  background-size: 100%;
+}
+</style>

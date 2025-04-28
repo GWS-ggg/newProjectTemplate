@@ -17,8 +17,11 @@ const itemInfoList = ref<ThreeSegmentNItemInfo[]>([])
 const productInfo = ref<ProductInfo>()
 const { getProductListRequest } = useGiftStore()
 
-async function getThreeSegmentNData() {
+async function getProductList() {
   const res = await getProductListRequest(8)
+  if (!res) {
+    return
+  }
   productInfo.value = res.ProductInfo
   itemInfoList.value = res.ItemInfo as ThreeSegmentNItemInfo[]
   // itemInfoList.value = itemInfoList.value.slice(0, 5)
@@ -35,7 +38,7 @@ async function getThreeSegmentNData() {
   })
   console.log('res', res)
 }
-getThreeSegmentNData()
+getProductList()
 const giftCellBg1Img = getImageUrl('gift_cell_bg_1.png')
 
 const giftCellBgList = ref<string[]>([])
@@ -258,6 +261,7 @@ async function triggerSuccessAnimation() {
 }
 defineExpose({
   triggerSuccessAnimation,
+  getProductList,
 })
 
 async function handleAnimation(currentGift: ThreeSegmentNItemInfo) {
@@ -322,7 +326,7 @@ async function handleAnimation(currentGift: ThreeSegmentNItemInfo) {
         </template>
       </CountDown>
     </div>
-    <div class="mt-24 text-24">
+    <div class="mt-24 w-600 f-c text-24">
       <TextStroke
         stroke-color="#682c2e"
         :stroke-width="3"

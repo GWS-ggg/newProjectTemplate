@@ -16,8 +16,11 @@ const { getProductListRequest } = useGiftStore()
 
 const dailyLoginItemInfo = ref<DailyLoginItemInfo[]>([])
 const productInfo = ref<ProductInfo>()
-async function getDailyLoginData() {
+async function getProductList() {
   const res = await getProductListRequest(6)
+  if (!res) {
+    return
+  }
   dailyLoginItemInfo.value = res.ItemInfo as DailyLoginItemInfo[]
   productInfo.value = res.ProductInfo as ProductInfo
 
@@ -27,7 +30,7 @@ async function getDailyLoginData() {
   // dailyLoginItemInfo.value[0].Props[2].Icon = 'box/30.png'
   console.log(res, 'res')
 }
-getDailyLoginData()
+getProductList()
 const bgImg = computed(() => {
   return findImagePath('Package_bg.png', productInfo.value?.Pic)
 })
@@ -97,6 +100,7 @@ function triggerSuccessAnimation() {
 }
 defineExpose({
   triggerSuccessAnimation,
+  getProductList,
 })
 
 const bubblePosition = {
@@ -214,19 +218,26 @@ const bubblePosition = {
           :score="productInfo?.Props[0].VipScore"
           score-show
           :single-bubble-position="bubblePosition"
+          :purchased="dailyLoginItemInfo[0]?.BuyTimes === 1"
         >
           <div class="relative text-50">
             <!-- 底层：只有阴影的文字 -->
             <div
+              v-if="dailyLoginItemInfo[0]?.BuyTimes === 0"
               class="absolute inset-0"
               style="text-shadow: 0px 0.03rem 0px #bcfb6b; color: transparent;"
             >
               Buy now
             </div>
-
             <!-- 顶层：只有渐变的文字 -->
             <div class="gradient-text-with-shadow relative">
               Buy now
+            </div>
+            <div
+              v-if="dailyLoginItemInfo[0]?.BuyTimes === 1"
+              class="absolute inset-0"
+            >
+              已购买
             </div>
           </div>
         </GreenButton>

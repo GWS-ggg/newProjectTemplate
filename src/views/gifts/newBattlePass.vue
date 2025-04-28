@@ -140,6 +140,7 @@ function triggerSuccessAnimation() {
 }
 defineExpose({
   triggerSuccessAnimation,
+  getProductList,
 })
 const { getProductListRequest } = useGiftStore()
 
@@ -147,6 +148,9 @@ const { getProductListRequest } = useGiftStore()
 async function getProductList() {
   try {
     const res = await getProductListRequest(2)
+    if (!res) {
+      return
+    }
     itemInfoList.value = res.ItemInfo as BattlePassItemInfo[]
     itemInfoList.value.forEach((item) => {
       if (item.BuyTimes === undefined)
@@ -165,7 +169,7 @@ getProductList()
 
 <template>
   <div class="relative mb-30 flex flex-col items-center text-29 color-white leading-tight">
-    <div class="mt-30 text-29 color-[#fff]">
+    <div class="mt-30 w-600 f-c text-29 color-[#fff]">
       <TextStroke
         stroke-color="#19093e"
         :stroke-width="3"

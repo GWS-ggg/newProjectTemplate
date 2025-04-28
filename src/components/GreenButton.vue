@@ -24,6 +24,11 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  // 是否已购买
+  purchased: {
+    type: Boolean,
+    default: false,
+  },
   // 蒙版
   maskShow: {
     type: Boolean,
@@ -159,7 +164,10 @@ defineExpose({
       :style="{ borderRadius: radius, width: `calc(100% + ${borderWidth} + ${borderWidth})`, height: `calc(100% + ${borderWidth} + ${borderWidth})` }"
     />
 
-    <div class="btn-bg relative h-full w-full flex cursor-pointer items-center justify-center">
+    <div
+      class="relative h-full w-full flex cursor-pointer items-center justify-center"
+      :class="{ 'bg-coolGray': purchased, 'btn-bg': !purchased }"
+    >
       <slot />
       <div
         v-if="!scoreAddShow && scoreShow"

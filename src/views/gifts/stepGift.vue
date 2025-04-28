@@ -23,6 +23,9 @@ const { getProductListRequest } = useGiftStore()
 
 async function getProductList() {
   const res = await getProductListRequest(1)
+  if (!res) {
+    return
+  }
   productInfo.value = res.ProductInfo
   itemInfoList.value = res.ItemInfo as ItemInfo[]
 
@@ -32,6 +35,7 @@ async function getProductList() {
   })
 }
 getProductList()
+
 const bgImg = computed(() => {
   return findImagePath('bg.png', productInfo.value?.Pic)
 })
@@ -55,6 +59,7 @@ const imgMap: Record<string, string> = {
   bombImg: getImageUrl('列表-炮收集.png'),
   stealImg: getImageUrl('列表-偷收集.png'),
   back: new URL('../../assets/images/gifts/icon_back.png', import.meta.url).href,
+  taskOkBgImg: getImageUrl('img_付费副阶梯_任务条_黄.png'),
 }
 
 const greenButtonRef = ref<InstanceType<typeof GreenButton> | null>(null)
@@ -116,6 +121,7 @@ function triggerSuccessAnimation() {
 }
 defineExpose({
   triggerSuccessAnimation,
+  getProductList,
 })
 const scoreTarget = ref<HTMLElement | null>(null)
 
@@ -244,6 +250,16 @@ function isPaintOrderSupportedTest() {
 
 // 使用示例
 console.log(`当前浏览器${isPaintOrderSupportedTest() ? '支持' : '不支持'}paint-order: stroke fill 属性`)
+
+function getTaskImg(item: ItemInfo) {
+  if (!item.TaskTargetScore) {
+    return imgMap.taskOkBgImg
+  }
+  if (item.TaskScore && item.TaskScore >= item.TaskTargetScore) {
+    return imgMap.taskOkBgImg
+  }
+  return imgMap.taskBarImg
+}
 </script>
 
 <template>
@@ -393,7 +409,7 @@ console.log(`当前浏览器${isPaintOrderSupportedTest() ? '支持' : '不支�
             v-for="item in itemInfoList"
             :key="item.id"
             class="goods-item relative mt-7 h-110 w-705 f-b bg-cover text-white"
-            :style="{ backgroundImage: `url(${imgMap.taskBarImg})` }"
+            :style="{ backgroundImage: `url(${getTaskImg(item)})` }"
           >
             <div class="ml-43 f-s">
               <img
@@ -456,7 +472,12 @@ console.log(`当前浏览器${isPaintOrderSupportedTest() ? '支持' : '不支�
         text-class="px-20 py-10 text-31 text-white"
       >
         <template #default="{ hours, minutes, seconds }">
-          Ends in {{ hours }}:{{ minutes }}:{{ seconds }}
+          <TextStroke
+            stroke-color="#581616"
+            :stroke-width="3"
+          >
+            END IN {{ hours }}:{{ minutes }}:{{ seconds }}
+          </TextStroke>
         </template>
       </CountDown>
     </div>

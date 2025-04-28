@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { BoxData, FreeGiftAwardRequest } from '@/api/types'
 import type { OrderPopupInfo, Prop } from '@/types'
+import type stepGift from '@/views/gifts/stepGift.vue'
 import type { AsyncComponentLoader, Component } from 'vue'
 import { freeGiftAwardApi } from '@/api'
 import { useBuyOrder } from '@/hooks/useBuyOrder'
@@ -11,12 +12,11 @@ import { formatPrice } from '@/utils'
 import onePlusTwo from '@/views/gifts/1+2.vue'
 import battlePass from '@/views/gifts/battlePass.vue'
 import dailyLogin from '@/views/gifts/dailyLogin.vue'
-import newBattlePass from '@/views/gifts/newBattlePass.vue'
 
+import newBattlePass from '@/views/gifts/newBattlePass.vue'
 import newThreeChoiceOne from '@/views/gifts/newThreeChoiceOne.vue'
 import roulette from '@/views/gifts/roulette.vue'
 import sixSegment from '@/views/gifts/sixSegment.vue'
-import stepGift from '@/views/gifts/stepGift.vue'
 import threeChoiceOne from '@/views/gifts/threeChoiceOne.vue'
 import threeSegment from '@/views/gifts/threeSegment.vue'
 import threeSegmentN from '@/views/gifts/threeSegmentN.vue'
@@ -25,6 +25,7 @@ import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue'
 // 定义一个接口，描述子组件应该具有的方法
 interface GiftComponent {
   triggerSuccessAnimation?: () => void
+  getProductList?: () => void
 }
 
 const giftStore = useGiftStore()
@@ -228,6 +229,15 @@ function onPaymentSuccess() {
     }
   }, 400)
 }
+
+function handleLoginGetInfo() {
+  if (giftComponentRef.value && typeof giftComponentRef.value.getProductList === 'function') {
+    giftComponentRef.value.getProductList()
+  }
+}
+defineExpose({
+  handleLoginGetInfo,
+})
 </script>
 
 <template>

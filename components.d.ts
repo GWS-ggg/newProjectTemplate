@@ -11,6 +11,7 @@ declare module 'vue' {
     BackBtn: typeof import('./src/components/BackBtn.vue')['default']
     CountDown: typeof import('./src/components/CountDown.vue')['default']
     Dialog: typeof import('./src/components/Dialog.vue')['default']
+    GameLogin: typeof import('./src/components/GameLogin.vue')['default']
     GiftList: typeof import('./src/components/GiftList.vue')['default']
     GiftScrollBar: typeof import('./src/components/GiftScrollBar.vue')['default']
     GreenButton: typeof import('./src/components/GreenButton.vue')['default']

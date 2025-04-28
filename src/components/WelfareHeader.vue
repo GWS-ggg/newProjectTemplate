@@ -46,14 +46,14 @@ const currentVipLevel = computed(() => vipLevelList.value[vipLevel.value])
 const loginStore = useLoginStore()
 
 const loginInfo = computed(() => loginStore.loginInfo)
-setTimeout(() => {
-  loginStore.setLoginInfo({
-    username: 'test',
-    viplevel: 5,
-    vipscore: 100,
-    viptargetscore: 100,
-  })
-}, 3000)
+// setTimeout(() => {
+//   loginStore.setLoginInfo({
+//     username: 'test',
+//     viplevel: 5,
+//     vipscore: 100,
+//     viptargetscore: 100,
+//   })
+// }, 3000)
 </script>
 
 <template>

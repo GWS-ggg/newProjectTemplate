@@ -43,6 +43,14 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+  closeButtonShow: {
+    type: Boolean,
+    default: true,
+  },
+  zIndex: {
+    type: Number,
+    default: 3000,
+  },
 })
 const emits = defineEmits(['update:modelValue', 'onFadeClose'])
 // const DURATION = '0.5s' // 关闭事件
@@ -111,7 +119,8 @@ function onClickfadeClose() {
       >
         <div
           v-if="modelValue"
-          class="element-with-scroll fixed left-0 top-0 z-3000 h-screen w-full bg-zinc-900/80"
+          class="element-with-scroll fixed left-0 top-0 h-screen w-full bg-zinc-900/80"
+          :style="{ zIndex: props.zIndex }"
           @click="onClickfadeClose"
         />
       </transition>
@@ -119,7 +128,8 @@ function onClickfadeClose() {
       <transition name="up">
         <div
           v-if="modelValue"
-          class="fixed left-1/2 top-[50%] z-3000 min-w-[256px] translate-x-[-50%] translate-y-[-50%] rounded-20 bg-white p-1.5"
+          class="fixed left-1/2 top-[50%] min-w-[256px] translate-x-[-50%] translate-y-[-50%] rounded-20 bg-white p-1.5"
+          :style="{ zIndex: props.zIndex }"
           :class="customeClass"
         >
           <!-- title标题 -->
@@ -128,12 +138,13 @@ function onClickfadeClose() {
           </div>
           <!-- 关闭按钮内容 -->
           <div
+            v-if="closeButtonShow"
             class="absolute right-20 top-20 z-200 f-c cursor-pointer border-2 border-[#757575] rounded-full border-solid"
             @click="onClose"
           >
             <div
               class="i-material-symbols:close h-30 w-30"
-              style="color:red;"
+              style="color:#757575;"
             />
           </div>
           <!-- content内容 -->

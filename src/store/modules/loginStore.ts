@@ -24,6 +24,7 @@ export const useLoginStore = defineStore('login', () => {
       uid: userUid.value,
     })
     loginInfo.value = res
+    return res
   }
   function setLoginInfo(info: LoginInfo) {
     loginInfo.value = info

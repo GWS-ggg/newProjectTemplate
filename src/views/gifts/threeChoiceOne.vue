@@ -142,6 +142,7 @@ function triggerSuccessAnimation() {
 }
 defineExpose({
   triggerSuccessAnimation,
+  getProductList,
 })
 const { getProductListRequest } = useGiftStore()
 
@@ -149,6 +150,9 @@ const productInfo = ref<ProductInfo>()
 const itemInfoList = ref<ThreeChoiceOneGiftItemInfo[]>([])
 async function getProductList() {
   const res = await getProductListRequest(10)
+  if (!res) {
+    return
+  }
   productInfo.value = res.ProductInfo
   itemInfoList.value = res.ItemInfo as ThreeChoiceOneGiftItemInfo[]
   let idNum = 0
@@ -189,7 +193,7 @@ const bubblePosition = {
 
 <template>
   <div class="relative mb-30 f-c flex-col text-29">
-    <div class="mt-30 text-29">
+    <div class="mt-30 w-600 f-c text-29">
       <TextStroke
         stroke-color="#19093e"
         :stroke-width="3"

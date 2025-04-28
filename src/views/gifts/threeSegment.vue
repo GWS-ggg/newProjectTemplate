@@ -14,13 +14,16 @@ const itemInfoList = ref<ThreeSegmentItemInfo[]>([])
 const productInfo = ref<ProductInfo>()
 const { getProductListRequest } = useGiftStore()
 
-async function getThreeSegmentData() {
+async function getProductList() {
   const res = await getProductListRequest(9)
+  if (!res) {
+    return
+  }
   productInfo.value = res.ProductInfo
   itemInfoList.value = res.ItemInfo as ThreeSegmentItemInfo[]
-  itemInfoList.value[0].BuyTimes = 0
-  itemInfoList.value[0].Props[0].PropType = 11
-  itemInfoList.value[0].Props[0].PropID = 2030428
+  // itemInfoList.value[0].BuyTimes = 0
+  // itemInfoList.value[0].Props[0].PropType = 11
+  // itemInfoList.value[0].Props[0].PropID = 2030428
   // 处理item数据 添加id BuyTimes Price
   let idNum = 0
   itemInfoList.value.forEach((item) => {
@@ -34,7 +37,7 @@ async function getThreeSegmentData() {
   })
   console.log('res', res)
 }
-getThreeSegmentData()
+getProductList()
 const giftCellBg1Img = computed(() => {
   return findImagePath('complete_bg_1.png', productInfo.value?.Pic)
 })
@@ -161,6 +164,7 @@ function handleBtnClick(item: ThreeSegmentItemInfo) {
 
 defineExpose({
   triggerSuccessAnimation,
+  getProductList,
 })
 </script>
 
@@ -181,7 +185,7 @@ defineExpose({
         </template>
       </CountDown>
     </div>
-    <div class="mt-24 text-24">
+    <div class="mt-24 w-600 f-c text-24">
       <TextStroke
         stroke-color="#682c2e"
         :stroke-width="3"

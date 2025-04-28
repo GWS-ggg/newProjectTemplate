@@ -102,9 +102,11 @@ const currentGiftId = computed(() => {
 const productInfo = ref<ProductInfo>()
 const { getProductListRequest } = useGiftStore()
 
-async function getWheelGiftList() {
+async function getProductList() {
   const res = await getProductListRequest(3)
-
+  if (!res) {
+    return
+  }
   vipScore.value = res.ProductInfo?.Props?.[0]?.VipScore as number
   productInfo.value = res.ProductInfo
   wheelGiftList.value = res.ItemInfo as WheelGiftItemInfo[]
@@ -121,7 +123,7 @@ async function getWheelGiftList() {
   console.log(res)
 }
 
-getWheelGiftList()
+getProductList()
 const bgImg = computed(() => {
   return findImagePath('bg.png', productInfo.value?.Pic)
 })
@@ -150,6 +152,7 @@ function triggerSuccessAnimation() {
 }
 defineExpose({
   triggerSuccessAnimation,
+  getProductList,
 })
 const { handleBoxClick } = useEmitBoxClick(emits)
 </script>

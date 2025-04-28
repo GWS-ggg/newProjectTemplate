@@ -36,6 +36,9 @@ importers:
       '@antfu/eslint-config':
         specifier: ^3.12.0
         version: 3.12.0(@typescript-eslint/utils@8.18.1(eslint@9.17.0(jiti@2.4.2))(typescript@5.6.3))(@unocss/eslint-plugin@0.65.2(eslint@9.17.0(jiti@2.4.2))(typescript@5.6.3))(@vue/compiler-sfc@3.5.13)(eslint@9.17.0(jiti@2.4.2))(typescript@5.6.3)
+      '@iconify/json':
+        specifier: ^2.2.332
+        version: 2.2.332
       '@tsconfig/node22':
         specifier: ^22.0.0
         version: 22.0.0
@@ -686,6 +689,9 @@ packages:
   '@humanwhocodes/retry@0.4.1':
     resolution: {integrity: sha512-c7hNEllBlenFTHBky65mhq8WD2kbN9Q6gk0bTk8lSBvc554jpXSkST1iePudpt7+A/AQvuHs9EMqjHDXMY1lrA==}
     engines: {node: '>=18.18'}
+
+  '@iconify/json@2.2.332':
+    resolution: {integrity: sha512-bIaEG2ecvYiq/lwBF0KIOCEW5zMyBx1WOmBubetZwvKNs+gXbV3ocLCjT3xWBFSD4v29BRpqdtoVOpUlIfDK+g==}
 
   '@iconify/types@2.0.0':
     resolution: {integrity: sha512-+wluvCrRhXrhyOmRDJ3q8mux9JkKy5SJ/v8ol2tu4FVjyYvtEzkc/3pK15ET6RKg4b4w4BmTk1+gsCUhf21Ykg==}
@@ -4638,6 +4644,11 @@ snapshots:
   '@humanwhocodes/retry@0.3.1': {}
 
   '@humanwhocodes/retry@0.4.1': {}
+
+  '@iconify/json@2.2.332':
+    dependencies:
+      '@iconify/types': 2.0.0
+      pathe: 1.1.2
 
   '@iconify/types@2.0.0': {}
 

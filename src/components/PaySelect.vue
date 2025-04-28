@@ -95,11 +95,18 @@ async function handlePayOrder() {
     showOrderFailed()
     return
   }
-
   // 再调支付接口
   try {
     // await checkout()
-    showPaymentSuccess()
+    // await new Promise((resolve) => {
+    //   setTimeout(() => {
+    //     resolve(true)
+    //   }, 1000)
+    // })
+    // throw new Error('test')
+
+    // showPaymentSuccess()
+    checkout()
   }
   catch (error) {
     console.log('handlePayOrder error', error)
@@ -109,7 +116,7 @@ async function handlePayOrder() {
 
 // 正在支付
 function showPaymentLoading() {
-  MessageBox.paymentLoading('正在支付', '取消', () => {
+  MessageBox.paymentLoading('请在新打开的页面完成支付', '取消', () => {
     console.log('取消支付')
   })
 }
@@ -126,7 +133,7 @@ function showPaymentSuccess() {
 // 支付失败
 function showPaymentFailed() {
   MessageBox.paymentFailed('支付失败', '确定', () => {
-    handleClose()
+    // handleClose()
     console.log('确定')
   })
 }
@@ -155,16 +162,16 @@ async function checkout() {
     return
   }
   // maycard支付
-  // if (selectedPayChannel.value?.payType === MYCARD_PAY_TYPE) {
-  //   mycardRef.value.start()
-  // }
-  // else if (selectedPayChannel.value?.payType === PAYPAL_PAY_TYPE) {
-  //   payPalRef.value.start()
-  // }
-  // else {
-  //   handlePayerMaxCheckout()
-  // }
-  handlePayerMaxCheckout()
+  if (selectedPayChannel.value?.payType === MYCARD_PAY_TYPE) {
+    mycardRef.value.start()
+  }
+  else if (selectedPayChannel.value?.payType === PAYPAL_PAY_TYPE) {
+    payPalRef.value.start()
+  }
+  else {
+    handlePayerMaxCheckout()
+  }
+  // handlePayerMaxCheckout()
 }
 
 let win: Window | null = null
@@ -416,6 +423,16 @@ async function createPayOrder() {
       @created="handleOrderCreated"
       @close="handleModalClose"
       @status-change="handlePaypalStatusChange"
+    />
+
+    <MyCard
+      ref="mycardRef"
+      :user-uid="userUid"
+      :param="orderParam"
+      :order-popup-info="orderPopupInfo"
+      :selected-pay-channel-id="selectedPayChannel?.payType"
+      @created="handleOrderCreated"
+      @close="handleModalClose"
     />
   </div>
 </template>

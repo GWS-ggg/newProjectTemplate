@@ -22,8 +22,11 @@ const currentScore = ref(0)
 const targetScore = ref(0)
 const { getProductListRequest } = useGiftStore()
 
-async function getSixSegmentData() {
+async function getProductList() {
   const res = await getProductListRequest(7)
+  if (!res) {
+    return
+  }
   productInfo.value = res.ProductInfo
   itemInfoList.value = res.ItemInfo as SixSegmentItemInfo[]
   // TODO
@@ -43,7 +46,7 @@ async function getSixSegmentData() {
   })
   console.log('res', res)
 }
-getSixSegmentData()
+getProductList()
 const collectBgImg = computed(() => {
   return findImagePath('collectBg.png', productInfo.value?.Pic)
 })
@@ -394,6 +397,7 @@ async function triggerSuccessAnimation() {
 }
 defineExpose({
   triggerSuccessAnimation,
+  getProductList,
 })
 
 function getAnimationDelay(sortId: number) {
@@ -541,7 +545,7 @@ function getScoreInfo(props: Array<{
               :class="{ 'f-b': gift.Price !== 0, 'f-c': gift.Price === 0 }"
             >
               <div
-                class="relative h-70 w-280"
+                class="relative h-70 w-280 -mt-5"
                 :class="{ 'w-[190px]! ml-20': gift.Price !== 0 }"
               >
                 <GreenButton

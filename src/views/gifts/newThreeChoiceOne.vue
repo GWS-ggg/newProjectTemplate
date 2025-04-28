@@ -112,6 +112,7 @@ function triggerSuccessAnimation() {
 }
 defineExpose({
   triggerSuccessAnimation,
+  getProductList,
 })
 
 const displayItemInfoList = computed(() => {
@@ -223,6 +224,9 @@ const { getProductListRequest } = useGiftStore()
 // 数据加载函数
 async function getProductList() {
   const res = await getProductListRequest(5)
+  if (!res) {
+    return
+  }
   productInfo.value = res.ProductInfo
   console.log(productInfo.value?.Pic, 'productInfo.value?.Pic')
   itemInfoList.value = res.ItemInfo as ThreeChoiceOneGiftItemInfo[]
@@ -255,7 +259,7 @@ getProductList()
 
 <template>
   <div class="relative mb-30 f-c flex-col text-29">
-    <div class="mt-30 text-29">
+    <div class="mt-30 w-600 f-c text-29">
       <TextStroke
         stroke-color="#19093e"
         :stroke-width="3"
@@ -399,7 +403,7 @@ getProductList()
               stroke-color="#164b2e"
               :stroke-width="3"
             >
-              BUY ALL{{ formatPrice(itemInfoList[3]?.Price || 0) }}
+              BUY ALL {{ formatPrice(itemInfoList[3]?.Price || 0) }}
             </TextStroke>
           </div>
         </GreenButton>

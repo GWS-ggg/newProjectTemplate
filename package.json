@@ -24,6 +24,7 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "^3.12.0",
+    "@iconify/json": "^2.2.332",
     "@tsconfig/node22": "^22.0.0",
     "@types/node": "^22.9.3",
     "@types/swiper": "^6.0.0",

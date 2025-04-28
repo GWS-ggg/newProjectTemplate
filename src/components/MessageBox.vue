@@ -86,7 +86,7 @@ function handleCancel() {
       <div class="mb-30 w-full flex justify-center">
         <img
           v-if="pop.type === 'success'"
-          src="@/assets/images/common/icon_ok.png"
+          src="@/assets/icons/success-icon.png"
           alt="成功"
           class="h-[207px] w-[207px]"
         >
@@ -98,7 +98,7 @@ function handleCancel() {
         >
         <img
           v-if="pop.type === 'failed'"
-          src="@/assets/icons/success-icon.png"
+          src="@/assets/icons/error-icon.png"
           alt="失败"
           class="h-[207px] w-[207px]"
         >
@@ -107,7 +107,7 @@ function handleCancel() {
         {{ getTitle(pop.type) }}
       </div> -->
       <div
-        class="whitespace-pre-wrap text-center text-[30px] text-[#222C37] font-normal leading-[34px] tracking-0"
+        class="mt-20 f-c whitespace-pre-wrap text-center text-[36px] text-[#222C37] font-normal leading-[34px] tracking-0"
         :class="{
           'text-left': pop.textAlign === 'left',
           'text-right': pop.textAlign === 'right',

@@ -75,6 +75,9 @@ const { getProductListRequest } = useGiftStore()
 
 async function getProductList() {
   const res = await getProductListRequest(4)
+  if (!res) {
+    return
+  }
   productInfo.value = res.ProductInfo
   itemInfoList.value = res.ItemInfo as onePlusTwoGiftItemInfo[]
   currentScore.value = res.ProductInfo?.TaskScore ?? 0
@@ -391,6 +394,7 @@ function triggerSuccessAnimation() {
 }
 defineExpose({
   triggerSuccessAnimation,
+  getProductList,
 })
 async function handleGiftAnimation(giftPackage: onePlusTwoGiftItemInfo) {
   const giftElement = document.querySelector(`#gift-${giftPackage.sortId}`)
@@ -442,7 +446,7 @@ async function handleGiftAnimation(giftPackage: onePlusTwoGiftItemInfo) {
 
 <template>
   <div class="justify-cente flex flex-col items-center text-32">
-    <div class="mt-30 text-center text-29 paint-order">
+    <div class="mt-30 w-600 text-center text-29 paint-order">
       <TextStroke
         stroke-color="#19093e"
         :stroke-width="3"
