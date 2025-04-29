@@ -11,7 +11,7 @@ const service = axios.create({
   // 海外正式 https://mprogram.forevernine.com/
   baseURL: '', // 将baseURL设置为空字符串
   withCredentials: false, // send cookies when cross-domain requests
-  timeout: 10000, // request timeout
+  timeout: 120000, // request timeout
   headers: {
     'Content-Type': 'application/json',
   },

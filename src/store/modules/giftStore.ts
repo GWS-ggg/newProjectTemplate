@@ -24,15 +24,18 @@ export const useGiftStore = defineStore('gift', () => {
     const res = await getShopListInfoApi({
       uid,
     })
+    if (res === null || !res.TabInfo || res.TabInfo.length === 0 || res === undefined) {
+      throw new Error('type_1')
+    }
 
     // 创建一个新数组，确保响应式触发
     const newTabInfo = [...res.TabInfo]
-    // newTabInfo.push({
-    //   BannerPic: 'newChooseThree/2/gift_icon.png',
-    //   ProductType: 4,
-    //   Expire: 1747734900,
-    //   id: 7,
-    // })
+    newTabInfo.push({
+      BannerPic: 'newChooseThree/2/gift_icon.png',
+      ProductType: 10,
+      Expire: 1747734900,
+      id: 7,
+    })
     // newTabInfo.push({
     //   BannerPic: 'newChooseThree/2/gift_icon.png',
     //   ProductType: 7,

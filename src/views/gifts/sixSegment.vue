@@ -69,28 +69,6 @@ watchEffect(() => {
   giftCellBgImgList.value = giftCellBgImgList.value.filter(item => item !== '')
 })
 
-interface Goods {
-  img: string
-  desc?: string
-}
-
-interface GiftPackage {
-  id: number
-  price: string
-  bgImg: string
-  goodsList: Goods[]
-  score?: number
-  isFree?: boolean
-  BuyTimes?: number // 添加购买状态标记
-  sortId?: number
-}
-interface GiftData {
-  title: string
-  currentScore: number
-  totalScore: number
-  giftList: GiftPackage[]
-}
-
 const okImg = new URL(`../../assets/images/common/icon_ok.png`, import.meta.url).href
 
 const imgMap = {
@@ -116,104 +94,6 @@ const imgMap = {
   btnBigImg: getImageUrl('btn_6阶N段式按钮_大.png'),
   glowImg: getImageUrl('img_光.png'),
 }
-const _giftData = ref<GiftData>({
-  title: 'END IN:60:00:00',
-  currentScore: 100,
-  totalScore: 200,
-  giftList: [
-    {
-      id: 1,
-      price: '$88.88',
-      bgImg: imgMap.purpleBgImg,
-      score: 50,
-      BuyTimes: 1,
-      goodsList: [
-        {
-          img: imgMap.diceImg,
-          desc: '10',
-        },
-        {
-          img: imgMap.goldImg,
-          desc: '1.0w',
-        },
-      ],
-    },
-    {
-      id: 2,
-      price: 'FREE',
-      bgImg: imgMap.pinkBgImg,
-      score: 100,
-      BuyTimes: 0,
-      goodsList: [{
-        img: imgMap.castleImg,
-      }],
-      isFree: true,
-    },
-    {
-      id: 3,
-      price: '$188.88',
-      bgImg: imgMap.pinkBgImg,
-      score: 100,
-      BuyTimes: 0,
-      goodsList: [{
-        img: imgMap.spinImg,
-        desc: '10min',
-      }],
-      isFree: true,
-    },
-    {
-      id: 4,
-      price: '$99.99',
-      bgImg: imgMap.pinkBgImg,
-      score: 50,
-      BuyTimes: 0,
-      goodsList: [{
-        img: imgMap.box1Img,
-      }],
-    },
-    {
-      id: 5,
-      price: '$99.99',
-      bgImg: imgMap.pinkBgImg,
-      score: 50,
-      BuyTimes: 0,
-      goodsList: [{
-        img: imgMap.box3Img,
-      }],
-      isFree: true,
-    },
-    {
-      id: 6,
-      price: '$99.99',
-      bgImg: imgMap.pinkBgImg,
-      score: 50,
-      BuyTimes: 0,
-      goodsList: [{
-        img: imgMap.box1Img,
-      }],
-    },
-    {
-      id: 7,
-      price: '$99.99',
-      bgImg: imgMap.pinkBgImg,
-      score: 50,
-      BuyTimes: 0,
-      goodsList: [{
-        img: imgMap.box1Img,
-      }],
-    },
-    {
-      id: 8,
-      price: '$99.99',
-      bgImg: imgMap.pinkBgImg,
-      score: 50,
-      BuyTimes: 0,
-      goodsList: [{
-        img: imgMap.box1Img,
-      }],
-    },
-  ],
-})
 
 // TODO 对礼包进行重新排序 购买的不显示  待购买的6个  其余的隐藏
 // 只显示前六个礼包

@@ -1,0 +1,46 @@
+// 这是一个en示例 三文件的结构保持一致
+import type { LocaleMessages } from 'vue-i18n'
+
+const locale: LocaleMessages<any> = {
+  same_price: 'Same Price',
+  more_rewards: 'More Rewards',
+  bonus: 'bonus',
+  more: 'MORE',
+  claim: 'Claim',
+  free: 'FREE',
+  buy_all: 'BUY ALL',
+  buy_now: 'Buy now',
+  order_failed: 'Order failed',
+  please_complete_the_payment_on_the_opened_page: 'Please complete the payment on the opened page',
+  success: 'Success',
+  payment_failed: 'Payment failed',
+  payment_success: 'Payment success',
+  no_payment_method: 'No payment method',
+  sure: 'Sure',
+  cancel: 'Cancel',
+  loading: 'Loading...',
+  end: 'End',
+  get_up_to_3000: 'Get up to 3000',
+  buy_now_to_claim: 'Buy now to claim',
+  your_earned_rewards: 'your earned rewards',
+  achieve_the_bar_to_gain_the_rewards: 'Achieve the bar to gain the rewards!',
+  this_season_only: 'This season only',
+  super_pass: 'Super Pass',
+  unlock_all_rewards: 'Unlock All Rewards',
+  reach_lv_20_at_once: 'Reach LV.20 at once',
+  worth_4000_gems: 'Worth 4000 gems',
+  auto_open_card_chest: 'Auto Open Card Chest',
+  gold_name_gifts_for_team: 'Gold Name & Gifts for Team',
+  piggy_pass: 'Piggy Pass',
+  unlock_all_rewards_desc: 'Unlock All Rewards',
+  silver_name_gifts_for_team: 'Silver Name & Gifts for Team',
+  buy_1_pack_get_2_free: 'BUY 1 PACK & GET 2 FREE !',
+  only_one_purchase_can_be_made: 'Only one purchase can be made !',
+  only_one_chance_to_buy: 'Only one chance to buy!',
+  take_each_deal_take_each_deal: 'Take each deal take each deal !',
+  available: 'Available',
+
+  user_login: 'User login',
+}
+
+export default locale

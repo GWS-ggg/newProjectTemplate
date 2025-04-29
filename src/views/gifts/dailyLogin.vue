@@ -80,7 +80,7 @@ const _giftList = ref<Gift[]>([
 ])
 const greenButtonRef = ref<InstanceType<typeof GreenButton> | null>(null)
 function handleBtnClick() {
-  if (dailyLoginItemInfo.value[0]?.BuyTimes === 1) {
+  if (dailyLoginItemInfo.value[0]?.BuyTimes > 0) {
     return
   }
   const orderPopupInfo: OrderPopupInfo = {
@@ -112,7 +112,7 @@ const bubblePosition = {
 </script>
 
 <template>
-  <div class="relative mb-70 min-h-800 w-full f-c flex-col -mt-100">
+  <div class="relative mb-70 min-h-800 w-full f-c flex-col -mt-130">
     <!-- https://piggygo-static-jy.forevernine.com/cdn/officialpay/discount/10/Package_bg.png -->
 
     <img
@@ -186,7 +186,7 @@ const bubblePosition = {
           <IconWithText
             :icon-url="getPGImg(gift.Icon)"
             :text="gift.Text"
-            :text-size="42"
+            :text-size="36"
             :icon-height="90"
             :bottom="-10"
             text-class="text-stroke-3 text-stroke-[#4d1202] paint-order"
@@ -217,7 +217,7 @@ const bubblePosition = {
           :score="productInfo?.Props[0].VipScore"
           score-show
           :single-bubble-position="bubblePosition"
-          :purchased="dailyLoginItemInfo[0]?.BuyTimes === 1"
+          :purchased="dailyLoginItemInfo[0]?.BuyTimes > 0 "
         >
           <div
             v-if="dailyLoginItemInfo[0]?.BuyTimes === 0"
@@ -237,7 +237,7 @@ const bubblePosition = {
             </div>
           </div>
           <div
-            v-if="dailyLoginItemInfo[0]?.BuyTimes === 1"
+            v-if="dailyLoginItemInfo[0]?.BuyTimes > 0"
             class="text-50"
           >
             已购买

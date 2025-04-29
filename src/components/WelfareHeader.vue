@@ -2,50 +2,50 @@
 import { useLoginStore } from '@/store/modules/loginStore'
 import { useScoreElementStore } from '@/store/modules/scoreElement'
 import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 function getImageUrl(name: string) {
   return new URL(`../assets/images/WelfareHeader/${name}`, import.meta.url).href
 }
 const scoreElementStore = useScoreElementStore()
-const vipLevel = ref(5)
-
 const vipLevelList = ref([
   {
-    level: 0,
+    level: 1,
     name: 'VIP1',
     icon: getImageUrl('icon_会员卡1.png'),
   },
   {
-    level: 1,
+    level: 2,
     name: 'VIP2',
     icon: getImageUrl('icon_会员卡2.png'),
   },
   {
-    level: 2,
+    level: 3,
     name: 'VIP3',
     icon: getImageUrl('icon_会员卡3.png'),
   },
   {
-    level: 3,
+    level: 4,
     name: 'VIP4',
     icon: getImageUrl('icon_会员卡4.png'),
   },
   {
-    level: 4,
+    level: 5,
     name: 'VIP5',
     icon: getImageUrl('icon_会员卡5.png'),
   },
   {
-    level: 5,
+    level: 6,
     name: 'VIP6',
     icon: getImageUrl('icon_会员卡6.png'),
   },
 ])
-
-const currentVipLevel = computed(() => vipLevelList.value[vipLevel.value])
 const loginStore = useLoginStore()
-
 const loginInfo = computed(() => loginStore.loginInfo)
+
+const currentVipLevel = computed(() => vipLevelList.value[loginInfo.value.viplevel])
+
 // setTimeout(() => {
 //   loginStore.setLoginInfo({
 //     username: 'test',
@@ -63,7 +63,7 @@ const loginInfo = computed(() => loginStore.loginInfo)
         <div class="relative aspect-square w-full f-c">
           <div class="mb-40 flex flex-col">
             <div class="mt-40 f-c text-40 color-[#e77bff]">
-              welfare
+              bonus
             </div>
             <div class="text-61">
               <TextStroke

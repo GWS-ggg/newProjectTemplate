@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useLoginStore } from '@/store/modules/loginStore'
 import { defineEmits, defineExpose, defineProps, nextTick, onMounted, ref } from 'vue'
 
 const props = defineProps({
@@ -41,9 +42,13 @@ const endPos = ref({ x: 0, y: 0 })
 function getRootFontSize(): number {
   return Number.parseFloat(window.getComputedStyle(document.documentElement).fontSize)
 }
+const { getLoginInfo } = useLoginStore()
 
 // 触发动画方法
 function triggerAnimation() {
+  getLoginInfo()
+  // 触发动画的时候 重新登录拉取积分
+
   // 如果元素不存在，不执行动画
   if (!props.startElement || !props.targetElement)
     return

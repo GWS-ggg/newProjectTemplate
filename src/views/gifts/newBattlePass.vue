@@ -110,7 +110,7 @@ function triggerAnimation(mainRef: any, addRef: any) {
 const currentItem = ref<BattlePassItemInfo>()
 const currentId = ref(1)
 async function handleBtnClick(id: number, itemInfo: BattlePassItemInfo) {
-  if (itemInfo.BuyTimes === 1) {
+  if (itemInfo.BuyTimes > 0) {
     return
   }
   console.log('handleBtnClick', id)
@@ -239,7 +239,7 @@ getProductList()
               {{ formatPrice(firstProduct.Price) }}
             </div>
             <div
-              v-else-if="firstProduct.BuyTimes === 1"
+              v-else-if="firstProduct.BuyTimes > 0"
               class="fade-in h-full f-c -mt-10"
             >
               <img
@@ -384,7 +384,7 @@ getProductList()
               {{ formatPrice(secondProduct.Price) }}
             </div>
             <div
-              v-else-if="secondProduct.BuyTimes === 1"
+              v-else-if="secondProduct.BuyTimes > 0"
               class="fade-in h-full f-c -mt-10"
             >
               <img

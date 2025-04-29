@@ -152,105 +152,6 @@ const bubblePosition = {
   translateY: '0',
 }
 
-const isSupportPaintOrder = ref(false)
-// function isPaintOrderSupported() {
-//   // 创建一个SVG元素进行测试，因为paint-order主要用于SVG
-//   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
-//   const text = document.createElementNS('http://www.w3.org/2000/svg', 'text')
-
-//   // 将文本元素添加到SVG中
-//   svg.appendChild(text)
-
-//   // 设置paint-order属性
-//   text.style.cssText = 'paint-order: stroke fill'
-
-//   // 获取计算后的样式
-//   document.body.appendChild(svg)
-//   const computedStyle = window.getComputedStyle(text)
-//   const paintOrderValue = computedStyle.getPropertyValue('paint-order').trim()
-//   document.body.removeChild(svg)
-
-//   // 检查计算样式是否包含我们设置的值
-//   // 有些浏览器可能返回"stroke fill"，有些可能返回"stroke"，但只要返回了非空值且包含"stroke"
-//   isSupportPaintOrder.value = paintOrderValue !== '' && paintOrderValue !== 'normal'
-//   return isSupportPaintOrder.value
-// }
-
-// console.log(`当前浏览器${isPaintOrderSupported() ? '支持' : '不支持'}paint-order: stroke fill 属性`)
-
-function isPaintOrderSupported() {
-  try {
-    // 检查是否支持SVG
-    if (typeof SVGElement === 'undefined')
-      return false
-
-    // 创建SVG元素
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
-    svg.setAttribute('width', '0')
-    svg.setAttribute('height', '0')
-    svg.style.position = 'absolute'
-    svg.style.visibility = 'hidden'
-
-    // 创建文本元素
-    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text')
-    text.textContent = '测试'
-
-    // 应用paint-order样式
-    text.setAttribute('style', 'paint-order: stroke fill')
-
-    // 添加到DOM
-    svg.appendChild(text)
-    document.body.appendChild(svg)
-
-    // 检查计算样式
-    const computedStyle = window.getComputedStyle(text)
-    const paintOrderValue = computedStyle.getPropertyValue('paint-order').trim()
-
-    // 清理DOM
-    document.body.removeChild(svg)
-
-    // 验证结果：如果浏览器支持该属性，应该返回非默认值
-    // 默认值通常是"normal"或空字符串
-    return paintOrderValue !== '' && paintOrderValue !== 'normal'
-  }
-  catch (e) {
-    console.error('检测paint-order支持时出错:', e)
-    return false
-  }
-}
-
-// 执行检测
-const supportsPaintOrder = isPaintOrderSupported()
-isSupportPaintOrder.value = supportsPaintOrder
-console.log(`当前浏览器${supportsPaintOrder ? '支持' : '不支持'}paint-order: stroke fill 属性`)
-const { noSupportsPaintOrder } = useLoginStore()
-console.log('noSupportsPaintOrder', noSupportsPaintOrder)
-
-function isPaintOrderSupportedTest() {
-  // 创建一个SVG元素进行测试，因为paint-order主要用于SVG
-  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
-  const text = document.createElementNS('http://www.w3.org/2000/svg', 'text')
-
-  // 将文本元素添加到SVG中
-  svg.appendChild(text)
-
-  // 设置paint-order属性
-  text.style.cssText = 'paint-order: stroke fill'
-
-  // 获取计算后的样式
-  document.body.appendChild(svg)
-  const computedStyle = window.getComputedStyle(text)
-  const paintOrderValue = computedStyle.getPropertyValue('paint-order').trim()
-  document.body.removeChild(svg)
-
-  // 检查计算样式是否包含我们设置的值
-  // 有些浏览器可能返回"stroke fill"，有些可能返回"stroke"，但只要返回了非空值且包含"stroke"
-  return paintOrderValue !== '' && paintOrderValue !== 'normal'
-}
-
-// 使用示例
-console.log(`当前浏览器${isPaintOrderSupportedTest() ? '支持' : '不支持'}paint-order: stroke fill 属性`)
-
 function getTaskImg(item: ItemInfo) {
   if (!item.TaskTargetScore) {
     return imgMap.taskOkBgImg
@@ -313,7 +214,7 @@ function getTaskImg(item: ItemInfo) {
             <!-- <div>
               Get up to <span class="color-[#fff44b]">30,000</span>
             </div> -->
-            <div class="absolute bottom-1/2 f-c translate-y-1/2 -right-100">
+            <div class="absolute bottom-1/2 f-c translate-x-[100%] translate-y-1/2 -right-10">
               <div
                 v-for="prop in iconProps"
                 :key="prop.PropID"

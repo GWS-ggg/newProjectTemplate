@@ -139,6 +139,9 @@ function triggerSuccessAnimation() {
   }
   triggerAnimation(currentItemInfo.value.id)
   currentItemInfo.value.BuyTimes = 1
+  setTimeout(() => {
+    getProductList()
+  }, 1000)
 }
 defineExpose({
   triggerSuccessAnimation,
@@ -189,6 +192,9 @@ const bubblePosition = {
   translateX: '50%',
   translateY: '0',
 }
+const purchasedStatus = computed(() => {
+  return itemInfoList.value[0]?.BuyTimes > 0 || itemInfoList.value[1]?.BuyTimes > 0 || itemInfoList.value[2]?.BuyTimes > 0
+})
 </script>
 
 <template>
@@ -278,8 +284,12 @@ const bubblePosition = {
               score-show
               :single-bubble-position="bubblePosition"
               :mask-show="giftPackage.id !== activeGiftId"
+              :purchased="purchasedStatus"
             >
-              <div class="text-29">
+              <div
+                v-show="!purchasedStatus"
+                class="text-29"
+              >
                 <TextStroke
                   stroke-color="#164b2e"
                   :stroke-width="2"
@@ -287,10 +297,22 @@ const bubblePosition = {
                   {{ formatPrice(giftPackage.Price || 0) }}
                 </TextStroke>
               </div>
+
+              <div
+                v-show="purchasedStatus"
+                class="text-33"
+              >
+                <TextStroke
+                  stroke-color="#434343"
+                  :stroke-width="3"
+                >
+                  PURCHASED
+                </TextStroke>
+              </div>
             </GreenButton>
           </div>
           <div
-            v-show="giftPackage.BuyTimes === 1"
+            v-show="giftPackage.BuyTimes > 0"
             class="fade-in f-c"
           >
             <img
@@ -371,5 +393,25 @@ const bubblePosition = {
 .mask-lock-leave-to {
   opacity: 0;
   transform: translate(-50%, 0) scale(0.8);
+}
+
+.fade-in {
+  animation: fadeInUp 0.5s ease forwards;
+  animation-delay: 0s; /* 将被内联样式覆盖 */
+}
+
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  80% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 </style>

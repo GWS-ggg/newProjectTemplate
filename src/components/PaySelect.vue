@@ -159,7 +159,7 @@ const mycardRef = ref()
 const payPalRef = ref()
 async function checkout() {
   if (!orderParam.value) {
-    return
+    throw new Error('orderParam.value is empty')
   }
   // maycard支付
   if (selectedPayChannel.value?.payType === MYCARD_PAY_TYPE) {
@@ -171,7 +171,6 @@ async function checkout() {
   else {
     handlePayerMaxCheckout()
   }
-  // handlePayerMaxCheckout()
 }
 
 let win: Window | null = null
@@ -220,7 +219,6 @@ async function handlePayerMaxCheckout() {
 
 function handleOrderCreated(res: PayOrderRes) {
   console.log(res, 'handleOrderCreated')
-  showPaymentSuccess()
   startCheckStatus(res)
 }
 
@@ -325,9 +323,11 @@ function payermaxMsghandler(event: MessageEvent) {
             showPaymentSuccess()
             break
           case PAYERMAX_CANCEL_RET:
+            console.log('PAYERMAX_CANCEL_RET')
             showPaymentFailed()
             break
           case PAYERMAX_FAILED_RET:
+            console.log('PAYERMAX_FAILED_RET')
             currentPayId = ''
             showPaymentFailed()
             break

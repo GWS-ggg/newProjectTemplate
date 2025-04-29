@@ -12,7 +12,7 @@ import { useGiftStore } from '@/store/modules/giftStore'
 import { formatPrice, getPGImg } from '@/utils'
 import { findImagePath } from '@/utils/imageUtils'
 
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { computed, onMounted, reactive, ref, watch, watchEffect } from 'vue'
 
 // function getImageUrl(name: string) {
 //   return new URL(`../../assets/images/gifts/newThreeChoiceOne/${name}`, import.meta.url).href
@@ -70,12 +70,44 @@ function handleClickGift(giftPackage: ThreeChoiceOneGiftItemInfo) {
 
 const purchasedStatus = computed(() => {
   const purchasedItem = itemInfoList.value.find((item) => {
-    return item.BuyTimes === 1
+    return item.BuyTimes > 0
   })
-  if (purchasedItem) {
+  if (purchasedItem || itemInfoList.value[3]?.BuyTimes > 0) {
     return true
   }
   return false
+})
+
+interface PurchasedItemStatus {
+  id: number
+  status: boolean
+}
+// 单个礼包按钮显示状态
+// true 置灰 false 显示
+const purchasedItemStatusList = ref<PurchasedItemStatus[]>([])
+
+watchEffect(() => {
+  if (itemInfoList.value[0]?.BuyTimes > 0) {
+    purchasedItemStatusList.value = [
+      { id: 0, status: false },
+      { id: 1, status: true },
+      { id: 2, status: true },
+    ]
+  }
+  if (itemInfoList.value[1]?.BuyTimes > 0) {
+    purchasedItemStatusList.value = [
+      { id: 0, status: true },
+      { id: 1, status: false },
+      { id: 2, status: true },
+    ]
+  }
+  if (itemInfoList.value[2]?.BuyTimes > 0) {
+    purchasedItemStatusList.value = [
+      { id: 0, status: true },
+      { id: 1, status: true },
+      { id: 2, status: false },
+    ]
+  }
 })
 
 // function getPurchasedItemStatus() {
@@ -89,7 +121,7 @@ const purchasedStatus = computed(() => {
 // }
 
 async function handleClickBuySingle(giftPackage: ThreeChoiceOneGiftItemInfo) {
-  if (giftPackage.BuyTimes === 1) {
+  if (itemInfoList.value[0]?.BuyTimes === 1 || itemInfoList.value[1]?.BuyTimes === 1 || itemInfoList.value[2]?.BuyTimes === 1 || itemInfoList.value[3]?.BuyTimes === 1) {
     return
   }
   if (activeGiftId.value !== giftPackage.id) {
@@ -128,11 +160,10 @@ function triggerSuccessAnimation() {
   console.log(currentItemInfo.value, 'currentItemInfo.value')
   triggerAnimation(currentItemInfo.value.id)
   currentItemInfo.value.BuyTimes = 1
-  if (currentItemInfo.value.id === 3) {
-    itemInfoList.value.forEach((item) => {
-      item.BuyTimes = 1
-    })
-  }
+  // TODO 测试 购买成功后 动画结束后 1s后拉取新数据
+  setTimeout(() => {
+    getProductList()
+  }, 1000)
 }
 defineExpose({
   triggerSuccessAnimation,
@@ -254,7 +285,7 @@ async function getProductList() {
   productInfo.value = res.ProductInfo
   console.log(productInfo.value?.Pic, 'productInfo.value?.Pic')
   itemInfoList.value = res.ItemInfo as ThreeChoiceOneGiftItemInfo[]
-
+  // itemInfoList.value[3].BuyTimes = 1
   // test
   // itemInfoList.value[0].Props[0].Text = '20000'
   // itemInfoList.value[1].Props[0].Text = '20000'
@@ -384,6 +415,7 @@ getProductList()
               score-show
               :single-bubble-position="bubblePosition"
               :mask-show="giftPackage.id !== activeGiftId"
+              :purchased="purchasedItemStatusList[giftPackage.id]?.status"
               @click="handleClickBuySingle(giftPackage)"
             >
               <div class="text-29">
@@ -414,10 +446,7 @@ getProductList()
       class="z-10 mt-20 h-90 w-400"
       @click="handleClickBuyAll(itemInfoList[3])"
     >
-      <div
-        v-show="itemInfoList[3]?.BuyTimes === 0"
-        class="h-full w-full"
-      >
+      <div class="h-full w-full">
         <GreenButton
           :ref="(el: any) => setRef(el, 3)"
           radius="0.32rem"
@@ -449,7 +478,7 @@ getProductList()
           </div>
         </GreenButton>
       </div>
-      <div
+      <!-- <div
         v-show="itemInfoList[3]?.BuyTimes && itemInfoList[3]?.BuyTimes > 0"
         class="fade-in h-full f-c"
       >
@@ -458,7 +487,7 @@ getProductList()
           src="@/assets/images/common/icon_ok.png"
           alt=""
         >
-      </div>
+      </div> -->
     </div>
 
     <div class="mt-20 f-c">

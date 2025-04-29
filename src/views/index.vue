@@ -39,12 +39,20 @@ async function handleLogin(uid: string) {
     Toast.close()
     getPayType()
   }
-  catch (error) {
+  catch (error: any) {
+    // 登录超时提示
     Toast.close()
-    console.log(error)
-    MessageBox.paymentFailed('登录失败', '确认', () => {
-      console.log('取消登录')
-    })
+    console.log(error.message)
+    if (error.message === 'type_1') {
+      MessageBox.paymentFailed('获取礼包数据失败', '确认', () => {
+        console.log('取消登录')
+      })
+    }
+    else {
+      MessageBox.paymentFailed('登录失败', '确认', () => {
+        console.log('取消登录')
+      })
+    }
   }
 }
 

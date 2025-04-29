@@ -1,6 +1,7 @@
 import VConsole from 'vconsole'
 import { createApp } from 'vue'
 import App from './App.vue'
+import { setupI18n } from './language/i18n'
 import { initRootFontSize } from './plugins/rootFontSize'
 import router from './router'
 import store from './store'
@@ -15,5 +16,5 @@ const app = createApp(App)
 const _vConsole = new VConsole()
 app.use(store)
 app.use(router)
-
+setupI18n(app)
 app.mount('#app')

@@ -69,7 +69,7 @@ export interface BattlePassItemInfo {
   Price: number
   SkuID: string
   TradeProductID: number
-  BuyTimes?: number
+  BuyTimes: number
   ExchangeID?: number
   Props: Array<{
     VipScore: number
@@ -131,7 +131,7 @@ export interface ThreeChoiceOneGiftItemInfo {
   SkuID?: string
   Limit: number
   Price?: number
-  BuyTimes?: number
+  BuyTimes: number
   Props: Array<Prop>
 }
 
@@ -151,7 +151,7 @@ export interface DailyLoginItemInfo {
   TradeProductID: number
   ExchangeID?: number
   Limit: number
-  BuyTimes?: number
+  BuyTimes: number
   Props: Array<Prop>
   Addition: number
 }

@@ -220,7 +220,7 @@ defineExpose({
                 :text="icon.Text"
                 :icon-height="120"
                 :bottom="-10"
-                :text-size="40"
+                :text-size="36"
                 :gift-type="icon.PropType"
                 @click="handleBoxClick(icon, $event)"
               />

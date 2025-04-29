@@ -80,124 +80,6 @@ const imgMap = {
   okImg: getImageUrl('icon_勾.png'),
 }
 
-interface GiftIcon {
-  id: number
-  iconImg: string
-  desc?: string
-}
-
-interface Gift {
-  id: number
-  btnDesc: string
-  available: boolean
-  bgImg: string
-  bgOkImg: string
-  isFree: boolean
-  iconList: GiftIcon[]
-  score: number
-  isPurchased: boolean
-  BuyTimes: number
-  sortId?: number
-}
-const _giftList = ref<Gift[]>([
-  {
-    id: 1,
-    btnDesc: 'FREE',
-    available: true,
-    isFree: true,
-    isPurchased: false,
-    bgImg: imgMap.bg1Img,
-    bgOkImg: imgMap.bg1OkImg,
-    BuyTimes: 1,
-    iconList: [
-      { id: 1, iconImg: imgMap.diceImg, desc: '200' },
-      { id: 2, iconImg: imgMap.goldImg, desc: '30K' },
-      { id: 3, iconImg: imgMap.diamondImg, desc: '200' },
-    ],
-    score: 40,
-  },
-  {
-    id: 2,
-    btnDesc: '20.00',
-    available: true,
-    isFree: false,
-    isPurchased: false,
-    bgImg: imgMap.bg2Img,
-    bgOkImg: imgMap.bg2OkImg,
-    BuyTimes: 0,
-    iconList: [
-      { id: 1, iconImg: imgMap.box1Img, desc: '100' },
-      { id: 2, iconImg: imgMap.diamondImg, desc: '200' },
-      { id: 3, iconImg: imgMap.box2Img, desc: '100' },
-    ],
-    score: 20,
-  },
-  {
-    id: 3,
-    btnDesc: '60.00',
-    available: true,
-    isFree: false,
-    isPurchased: false,
-    bgImg: imgMap.bg3Img,
-    bgOkImg: imgMap.bg3OkImg,
-    BuyTimes: 0,
-    iconList: [
-      { id: 1, iconImg: imgMap.box1Img, desc: '200' },
-      { id: 2, iconImg: imgMap.diamondImg, desc: '300' },
-      { id: 3, iconImg: imgMap.box2Img, desc: '200' },
-    ],
-    score: 60,
-  },
-  {
-    id: 4,
-    btnDesc: 'FREE',
-    available: true,
-    isFree: true,
-    isPurchased: false,
-    bgImg: imgMap.bg1Img,
-    bgOkImg: imgMap.bg1OkImg,
-    BuyTimes: 0,
-    iconList: [
-      { id: 1, iconImg: imgMap.diceImg, desc: '200' },
-      { id: 2, iconImg: imgMap.goldImg, desc: '30K' },
-      { id: 3, iconImg: imgMap.diamondImg, desc: '200' },
-    ],
-    score: 40,
-  },
-  {
-    id: 5,
-    btnDesc: '20.00',
-    available: true,
-    isFree: false,
-    isPurchased: false,
-    bgImg: imgMap.bg2Img,
-    bgOkImg: imgMap.bg2OkImg,
-    BuyTimes: 0,
-    iconList: [
-      { id: 1, iconImg: imgMap.box1Img, desc: '100' },
-      { id: 2, iconImg: imgMap.diamondImg, desc: '200' },
-      { id: 3, iconImg: imgMap.box2Img, desc: '100' },
-    ],
-    score: 20,
-  },
-  {
-    id: 6,
-    btnDesc: '60.00',
-    available: true,
-    isFree: false,
-    isPurchased: false,
-    bgImg: imgMap.bg3Img,
-    bgOkImg: imgMap.bg3OkImg,
-    BuyTimes: 0,
-    iconList: [
-      { id: 1, iconImg: imgMap.box1Img, desc: '200' },
-      { id: 2, iconImg: imgMap.diamondImg, desc: '300' },
-      { id: 3, iconImg: imgMap.box2Img, desc: '200' },
-    ],
-    score: 60,
-  },
-])
-
 const displayGiftList = ref<ThreeSegmentNItemInfo[]>([])
 const noBuyGiftNum = computed(() => {
   return itemInfoList.value.filter(item => item.BuyTimes === 0).length
@@ -361,7 +243,7 @@ async function handleAnimation(currentGift: ThreeSegmentNItemInfo) {
               :text="icon.Text"
               :bottom="-10"
               :icon-height="120"
-              :text-size="40"
+              :text-size="36"
               :gift-type="icon.PropType"
               @click="(event) => handleBoxClick(icon, event)"
             />
