@@ -7,6 +7,7 @@ import { useBuyOrder } from '@/hooks/useBuyOrder'
 import { useGiftStore } from '@/store/modules/giftStore'
 import { animateWithClass, formatPrice, getPGImg } from '@/utils'
 import { findImagePath } from '@/utils/imageUtils'
+import { Toast } from '@/utils/toast'
 import { computed, nextTick, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -17,28 +18,38 @@ const productInfo = ref<ProductInfo>()
 const { getProductListRequest } = useGiftStore()
 
 async function getProductList() {
-  const res = await getProductListRequest(9)
-  if (!res) {
-    return
+  Toast.loading()
+  try {
+    const res = await getProductListRequest(9)
+    if (!res) {
+      return
+    }
+    productInfo.value = res.ProductInfo
+    itemInfoList.value = res.ItemInfo as ThreeSegmentItemInfo[]
+    // itemInfoList.value[0].BuyTimes = 0
+    // itemInfoList.value[1].BuyTimes = 0
+    // itemInfoList.value[0].Props[0].PropType = 11
+    // itemInfoList.value[0].Props[0].PropID = 2030428
+    // 处理item数据 添加id BuyTimes Price
+    let idNum = 0
+    itemInfoList.value.forEach((item) => {
+      item.id = idNum++
+      if (item.BuyTimes === undefined) {
+        item.BuyTimes = 0
+      }
+      if (item.Price === undefined) {
+        item.Price = 0
+      }
+    })
+    console.log('res', res)
+    Toast.close()
   }
-  productInfo.value = res.ProductInfo
-  itemInfoList.value = res.ItemInfo as ThreeSegmentItemInfo[]
-  // itemInfoList.value[0].BuyTimes = 0
-  // itemInfoList.value[1].BuyTimes = 0
-  // itemInfoList.value[0].Props[0].PropType = 11
-  // itemInfoList.value[0].Props[0].PropID = 2030428
-  // 处理item数据 添加id BuyTimes Price
-  let idNum = 0
-  itemInfoList.value.forEach((item) => {
-    item.id = idNum++
-    if (item.BuyTimes === undefined) {
-      item.BuyTimes = 0
-    }
-    if (item.Price === undefined) {
-      item.Price = 0
-    }
-  })
-  console.log('res', res)
+  catch (error) {
+    console.error(error)
+  }
+  finally {
+    Toast.close()
+  }
 }
 getProductList()
 const giftCellBg1Img = computed(() => {

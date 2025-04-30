@@ -10,6 +10,7 @@ import { useGiftStore } from '@/store/modules/giftStore'
 import { useLoginStore } from '@/store/modules/loginStore'
 import { formatPrice, getPGImg } from '@/utils'
 import { findImagePath } from '@/utils/imageUtils'
+import { Toast } from '@/utils/toast'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -24,19 +25,28 @@ function getImageUrl(name: string) {
 const productInfo = ref<ProductInfo>()
 const itemInfoList = ref<ItemInfo[]>([])
 const { getProductListRequest } = useGiftStore()
-
 async function getProductList() {
-  const res = await getProductListRequest(1)
-  if (!res) {
-    return
-  }
-  productInfo.value = res.ProductInfo
-  itemInfoList.value = res.ItemInfo as ItemInfo[]
+  Toast.loading()
+  try {
+    const res = await getProductListRequest(1)
+    if (!res) {
+      return
+    }
+    productInfo.value = res.ProductInfo
+    itemInfoList.value = res.ItemInfo as ItemInfo[]
 
-  let idNum = 0
-  itemInfoList.value.forEach((item) => {
-    item.id = idNum++
-  })
+    let idNum = 0
+    itemInfoList.value.forEach((item) => {
+      item.id = idNum++
+    })
+    Toast.close()
+  }
+  catch (error) {
+    console.error(error)
+  }
+  finally {
+    Toast.close()
+  }
 }
 getProductList()
 

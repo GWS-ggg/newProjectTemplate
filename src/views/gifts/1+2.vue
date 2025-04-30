@@ -1,19 +1,14 @@
 <script setup lang="ts">
 import type { onePlusTwoGiftItemInfo, OrderPopupInfo, ProductInfo, Prop } from '@/types'
-import { getProductListApi } from '@/api'
 import AnimatedIcon from '@/components/AnimatedIcon.vue'
 import GreenButton from '@/components/GreenButton.vue'
 import IconWithText from '@/components/IconWithText.vue'
-import PopupBubble from '@/components/PopupBubble.vue'
-
 import { useEmitBoxClick } from '@/hooks'
 import { useAnimatableRefs } from '@/hooks/useButtonRefs'
-
-import { useBoxStore } from '@/store/modules/boxStore'
 import { useGiftStore } from '@/store/modules/giftStore'
-
 import { animateWithClass, formatPrice, getPGImg } from '@/utils'
 import { findImagePath } from '@/utils/imageUtils'
+import { Toast } from '@/utils/toast'
 import { computed, nextTick, ref, watchEffect } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -25,24 +20,6 @@ function getImageUrl(name: string) {
 }
 const okImg = new URL(`../../assets/images/common/icon_ok.png`, import.meta.url).href
 
-const imgMap: Record<string, string> = {
-  score: getImageUrl('icon_积分.png'),
-  circle: getImageUrl('img_通用积分_bg.png'),
-  progress: getImageUrl('img_通用进度条.png'),
-  progressBg: getImageUrl('img_通用进度条_bg.png'),
-  strip_1: getImageUrl('img_条1_bg.png'),
-  strip_2: getImageUrl('img_条2_bg.png'),
-  plus: getImageUrl('img_+.png'),
-  goods_1: getImageUrl('钻石1.png'),
-  goods_2: getImageUrl('钻石1.png'),
-  tag: getImageUrl('img_标签.png'),
-  back: new URL('../../assets/images/gifts/icon_back.png', import.meta.url).href,
-  boxImg: getImageUrl('魔法宝箱.png'),
-  diceImg: getImageUrl('骰子.png'),
-  btn_bg: getImageUrl('btn_1+2礼包按钮.png'),
-  lock: getImageUrl('锁.png'),
-}
-
 const productInfo = ref<ProductInfo>()
 const itemInfoList = ref<onePlusTwoGiftItemInfo[]>([])
 const currentScore = ref(0)
@@ -50,28 +27,38 @@ const targetScore = ref(0)
 const { getProductListRequest } = useGiftStore()
 
 async function getProductList() {
-  const res = await getProductListRequest(4)
-  if (!res) {
-    return
-  }
-  productInfo.value = res.ProductInfo
-  itemInfoList.value = res.ItemInfo as onePlusTwoGiftItemInfo[]
-  currentScore.value = res.ProductInfo?.TaskScore ?? 0
-  targetScore.value = res.ProductInfo?.TaskTargetScore ?? 0
+  Toast.loading()
+  try {
+    const res = await getProductListRequest(4)
+    if (!res) {
+      return
+    }
+    productInfo.value = res.ProductInfo
+    itemInfoList.value = res.ItemInfo as onePlusTwoGiftItemInfo[]
+    currentScore.value = res.ProductInfo?.TaskScore ?? 0
+    targetScore.value = res.ProductInfo?.TaskTargetScore ?? 0
 
-  // test
-  // itemInfoList.value[2].Props[3] = itemInfoList.value[0].Props[2]
-  // itemInfoList.value[2].Props[3].Text = '10min'
-  let idNum = 0
-  itemInfoList.value.forEach((item) => {
-    item.id = idNum++
-    if (item.BuyTimes === undefined) {
-      item.BuyTimes = 0
-    }
-    if (item.Price === undefined) {
-      item.Price = 0
-    }
-  })
+    // test
+    // itemInfoList.value[2].Props[3] = itemInfoList.value[0].Props[2]
+    // itemInfoList.value[2].Props[3].Text = '10min'
+    let idNum = 0
+    itemInfoList.value.forEach((item) => {
+      item.id = idNum++
+      if (item.BuyTimes === undefined) {
+        item.BuyTimes = 0
+      }
+      if (item.Price === undefined) {
+        item.Price = 0
+      }
+    })
+    Toast.close()
+  }
+  catch (error) {
+    console.error(error)
+  }
+  finally {
+    Toast.close()
+  }
 }
 getProductList()
 
@@ -293,11 +280,6 @@ async function handleGiftAnimation(giftPackage: onePlusTwoGiftItemInfo) {
     <div class="relative mt-35 flex items-center justify-center">
       <div class="absolute z-10 aspect-square h-64 f-c bg-cover bg-center -left-40 -top-9">
         <div class="relative h-full">
-          <!-- <img
-            class="h-full"
-            :src="imgMap.circle"
-            alt=""
-          > -->
           <div class="h-64 w-64 border-8 border-[#ffc529] rounded-full border-solid bg-[#1b1142]" />
           <img
             ref="scoreTargetRef"
@@ -309,11 +291,6 @@ async function handleGiftAnimation(giftPackage: onePlusTwoGiftItemInfo) {
       </div>
 
       <div class="relative h-48 f-s bg-cover bg-center text-center text-24">
-        <!-- <img
-          class="h-full"
-          :src="imgMap.progressBg"
-          alt=""
-        > -->
         <div class="progress-mask relative h-48 w-450 f-c overflow-hidden border-6 border-[#ffc529] rounded-full border-solid">
           <!-- 进度条填充部分 -->
           <div
@@ -325,18 +302,6 @@ async function handleGiftAnimation(giftPackage: onePlusTwoGiftItemInfo) {
             {{ currentScore }}/{{ targetScore }}
           </div>
         </div>
-        <!-- <div
-          class="absolute left-0 top-0 h-full rounded-full"
-          :style="{
-            width: processBar,
-            backgroundImage: `url(${imgMap.progress})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'left center',
-          }"
-        />
-        <div class="absolute left-1/2 top-1/2 text-31 -translate-x-1/2 -translate-y-1/2">
-          {{ currentScore }} / {{ targetScore }}
-        </div> -->
       </div>
       <div class="absolute right-0 top-1/2 z-10 h-90 f-c translate-x-1/2 -translate-y-1/2">
         <img
@@ -434,7 +399,7 @@ async function handleGiftAnimation(giftPackage: onePlusTwoGiftItemInfo) {
                 <img
                   v-if="giftPackage.sortId && giftPackage.sortId !== 1 && giftPackage.Price === 0 "
                   class="h-50"
-                  :src="imgMap.lock"
+                  src="@/assets/images/common/lock.png"
                   alt=""
                 >
               </div>

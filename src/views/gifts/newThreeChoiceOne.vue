@@ -12,49 +12,13 @@ import { useGiftStore } from '@/store/modules/giftStore'
 import { formatPrice, getPGImg } from '@/utils'
 import { findImagePath } from '@/utils/imageUtils'
 
-import { computed, onMounted, reactive, ref, watch, watchEffect } from 'vue'
+import { Toast } from '@/utils/toast'
 
+import { computed, onMounted, reactive, ref, watch, watchEffect } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-// function getImageUrl(name: string) {
-//   return new URL(`../../assets/images/gifts/newThreeChoiceOne/${name}`, import.meta.url).href
-// }
-// const lockImg = getImageUrl('三选一礼包_0005_suo-拷贝-3.png')
-// const imgMap = {
-//   bg1Img: getImageUrl('1 copy 2.png'),
-//   bg2Img: getImageUrl('2 copy 2.png'),
-//   bg3Img: getImageUrl('3 copy 2.png'),
-//   gift1Icon1Img: getImageUrl('体力3.png'),
-//   gift1Icon2Img: getImageUrl('药水魔力瓶.png'),
-//   gift1Icon3Img: getImageUrl('钻石1.png'),
-//   gift2Icon1Img: getImageUrl('体力3.png'),
-//   gift2Icon2Img: getImageUrl('卡牌宝箱33.png'),
-//   gift2Icon3Img: getImageUrl('Bet-Blast-低级-礼包活动icon.png'),
-//   gift3Icon1Img: getImageUrl('体力3.png'),
-//   gift3Icon2Img: getImageUrl('魔法宝箱.png'),
-//   gift3Icon3Img: getImageUrl('天降buff-礼包活动icon.png'),
-//   gift3Icon4Img: getImageUrl('卡牌收益buff-礼包活动icon.png'),
-//   btnImg: getImageUrl('btn_三选一礼包按钮.png'),
-//   btnSmallImg: getImageUrl('按钮.png'),
-//   maskImg: getImageUrl('上锁半透明蒙版.png'),
-//   lockImg: getImageUrl('三选一礼包_0005_suo-拷贝-3.png'),
-//   mask1Img: getImageUrl('img_三选一1.png'),
-//   mask2Img: getImageUrl('img_三选一2.png'),
-//   mask3Img: getImageUrl('img_三选一3.png'),
-// }
-// const _imgList = [
-//   imgMap.bg1Img,
-//   imgMap.bg2Img,
-//   imgMap.bg3Img,
-// ]
 const emits = defineEmits(['openPopup', 'boxClick'])
 const { t } = useI18n()
-// 接口保留但因暂未使用而注释
-interface _Gift {
-  id: number
-  iconImg: string
-  title?: string
-}
 const productInfo = ref<ProductInfo>()
 const itemInfoList = ref<ThreeChoiceOneGiftItemInfo[]>([])
 
@@ -111,16 +75,6 @@ watchEffect(() => {
     ]
   }
 })
-
-// function getPurchasedItemStatus() {
-//   const purchasedItem = itemInfoList.value.find((item) => {
-//     return item.BuyTimes === 1
-//   })
-//   if (purchasedItem) {
-//     return true
-//   }
-//   return false
-// }
 
 async function handleClickBuySingle(giftPackage: ThreeChoiceOneGiftItemInfo) {
   if (itemInfoList.value[0]?.BuyTimes === 1 || itemInfoList.value[1]?.BuyTimes === 1 || itemInfoList.value[2]?.BuyTimes === 1 || itemInfoList.value[3]?.BuyTimes === 1) {
@@ -181,11 +135,6 @@ const bubblePosition = {
   translateX: '50%',
   translateY: '0',
 }
-// const _maskList = ref<string[]>([
-//   imgMap.mask1Img,
-//   imgMap.mask2Img,
-//   imgMap.mask3Img,
-// ])
 // 存储图片原始尺寸
 const imageSizes = reactive<Record<string, { width: number, height: number }>>({})
 
@@ -280,34 +229,44 @@ const { getProductListRequest } = useGiftStore()
 
 // 数据加载函数
 async function getProductList() {
-  const res = await getProductListRequest(5)
-  if (!res) {
-    return
+  Toast.loading()
+  try {
+    const res = await getProductListRequest(5)
+    if (!res) {
+      return
+    }
+    productInfo.value = res.ProductInfo
+    console.log(productInfo.value?.Pic, 'productInfo.value?.Pic')
+    itemInfoList.value = res.ItemInfo as ThreeChoiceOneGiftItemInfo[]
+    // itemInfoList.value[3].BuyTimes = 1
+    // test
+    // itemInfoList.value[0].Props[0].Text = '20000'
+    // itemInfoList.value[1].Props[0].Text = '20000'
+    // itemInfoList.value[0].Props[1] = itemInfoList.value[0].Props[0]
+    // itemInfoList.value[0].Props[2] = itemInfoList.value[0].Props[0]
+    // itemInfoList.value[0].Props[3] = itemInfoList.value[0].Props[0]
+
+    let idNum = 0
+    itemInfoList.value.forEach((item) => {
+      item.id = idNum++
+      if (item.BuyTimes === undefined) {
+        item.BuyTimes = 0
+      }
+      if (item.Price === undefined) {
+        item.Price = 0
+      }
+    })
+
+    // 当数据加载完成后，输出bgImgList的值，用于调试
+    console.log('数据加载完成后的bgImgList:', bgImgList.value)
+    Toast.close()
   }
-  productInfo.value = res.ProductInfo
-  console.log(productInfo.value?.Pic, 'productInfo.value?.Pic')
-  itemInfoList.value = res.ItemInfo as ThreeChoiceOneGiftItemInfo[]
-  // itemInfoList.value[3].BuyTimes = 1
-  // test
-  // itemInfoList.value[0].Props[0].Text = '20000'
-  // itemInfoList.value[1].Props[0].Text = '20000'
-  // itemInfoList.value[0].Props[1] = itemInfoList.value[0].Props[0]
-  // itemInfoList.value[0].Props[2] = itemInfoList.value[0].Props[0]
-  // itemInfoList.value[0].Props[3] = itemInfoList.value[0].Props[0]
-
-  let idNum = 0
-  itemInfoList.value.forEach((item) => {
-    item.id = idNum++
-    if (item.BuyTimes === undefined) {
-      item.BuyTimes = 0
-    }
-    if (item.Price === undefined) {
-      item.Price = 0
-    }
-  })
-
-  // 当数据加载完成后，输出bgImgList的值，用于调试
-  console.log('数据加载完成后的bgImgList:', bgImgList.value)
+  catch (error) {
+    console.error(error)
+  }
+  finally {
+    Toast.close()
+  }
 }
 const { handleBoxClick } = useEmitBoxClick(emits)
 // 调用获取数据的函数

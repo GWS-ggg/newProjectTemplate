@@ -9,6 +9,7 @@ import { useGiftStore } from '@/store/modules/giftStore'
 
 import { animateWithClass, formatPrice, getPGImg } from '@/utils'
 import { findImagePath } from '@/utils/imageUtils'
+import { Toast } from '@/utils/toast'
 import { computed, nextTick, ref, watchEffect } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -19,25 +20,35 @@ const productInfo = ref<ProductInfo>()
 const { getProductListRequest } = useGiftStore()
 const { t } = useI18n()
 async function getProductList() {
-  const res = await getProductListRequest(8)
-  if (!res) {
-    return
+  Toast.loading()
+  try {
+    const res = await getProductListRequest(8)
+    if (!res) {
+      return
+    }
+    productInfo.value = res.ProductInfo
+    itemInfoList.value = res.ItemInfo as ThreeSegmentNItemInfo[]
+    // itemInfoList.value = itemInfoList.value.slice(0, 5)
+    // 处理item数据 添加id BuyTimes Price
+    let idNum = 0
+    itemInfoList.value.forEach((item) => {
+      item.id = idNum++
+      if (item.BuyTimes === undefined) {
+        item.BuyTimes = 0
+      }
+      if (item.Price === undefined) {
+        item.Price = 0
+      }
+    })
+    console.log('res', res)
+    Toast.close()
   }
-  productInfo.value = res.ProductInfo
-  itemInfoList.value = res.ItemInfo as ThreeSegmentNItemInfo[]
-  // itemInfoList.value = itemInfoList.value.slice(0, 5)
-  // 处理item数据 添加id BuyTimes Price
-  let idNum = 0
-  itemInfoList.value.forEach((item) => {
-    item.id = idNum++
-    if (item.BuyTimes === undefined) {
-      item.BuyTimes = 0
-    }
-    if (item.Price === undefined) {
-      item.Price = 0
-    }
-  })
-  console.log('res', res)
+  catch (error) {
+    console.error(error)
+  }
+  finally {
+    Toast.close()
+  }
 }
 getProductList()
 const giftCellBg1Img = getImageUrl('gift_cell_bg_1.png')

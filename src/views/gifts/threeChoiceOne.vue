@@ -9,6 +9,7 @@ import { useGiftStore } from '@/store/modules/giftStore'
 import { formatPrice, getPGImg } from '@/utils'
 
 import { findImagePath } from '@/utils/imageUtils'
+import { Toast } from '@/utils/toast'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -57,26 +58,35 @@ defineExpose({
   getProductList,
 })
 const { getProductListRequest } = useGiftStore()
-
 const productInfo = ref<ProductInfo>()
 const itemInfoList = ref<ThreeChoiceOneGiftItemInfo[]>([])
 async function getProductList() {
-  const res = await getProductListRequest(10)
-  if (!res) {
-    return
+  Toast.loading()
+  try {
+    const res = await getProductListRequest(10)
+    if (!res) {
+      return
+    }
+    productInfo.value = res.ProductInfo
+    itemInfoList.value = res.ItemInfo as ThreeChoiceOneGiftItemInfo[]
+    let idNum = 0
+    itemInfoList.value.forEach((item) => {
+      item.id = idNum++
+      if (item.BuyTimes === undefined) {
+        item.BuyTimes = 0
+      }
+      if (item.Price === undefined) {
+        item.Price = 0
+      }
+    })
+    Toast.close()
   }
-  productInfo.value = res.ProductInfo
-  itemInfoList.value = res.ItemInfo as ThreeChoiceOneGiftItemInfo[]
-  let idNum = 0
-  itemInfoList.value.forEach((item) => {
-    item.id = idNum++
-    if (item.BuyTimes === undefined) {
-      item.BuyTimes = 0
-    }
-    if (item.Price === undefined) {
-      item.Price = 0
-    }
-  })
+  catch (error) {
+    console.error(error)
+  }
+  finally {
+    Toast.close()
+  }
 }
 const displayItemInfoList = computed(() => {
   return itemInfoList.value.slice(0, 3)

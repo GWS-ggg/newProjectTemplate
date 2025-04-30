@@ -20,7 +20,7 @@ style.innerHTML = `
   }
 
   .fn-loading-spinner {
-    border-radius: 8px;
+    border-radius: 0.08rem;
     background-color: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: center;
@@ -29,18 +29,18 @@ style.innerHTML = `
   }
 
   #fn-spinner {
-    border: 4px solid rgba(0, 0, 0, 0.1);
+    border: 0.04rem solid rgba(0, 0, 0, 0.1);
     border-left-color: #fff;
     border-radius: 50%;
-    margin: 30px;
-    width: 20px;
-    height: 20px;
+    margin: 0.3rem;
+    width: 0.4rem;
+    height: 0.4rem;
     animation: fn-spin 1s linear infinite;
   }
 
-  #fn-toast-text {
-    padding: 10px 16px;
-  }
+  // #fn-toast-text {
+  //   padding: 10px 16px;
+  // }
 
   @keyframes fn-spin {
     to {

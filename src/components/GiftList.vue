@@ -9,10 +9,11 @@ import { useBoxStore } from '@/store/modules/boxStore'
 import { useGiftStore } from '@/store/modules/giftStore'
 import { useLoginStore } from '@/store/modules/loginStore'
 import { formatPrice } from '@/utils'
+import { Toast } from '@/utils/toast'
 import onePlusTwo from '@/views/gifts/1+2.vue'
 import battlePass from '@/views/gifts/battlePass.vue'
-import dailyLogin from '@/views/gifts/dailyLogin.vue'
 
+import dailyLogin from '@/views/gifts/dailyLogin.vue'
 import newBattlePass from '@/views/gifts/newBattlePass.vue'
 import newThreeChoiceOne from '@/views/gifts/newThreeChoiceOne.vue'
 import roulette from '@/views/gifts/roulette.vue'
@@ -191,28 +192,39 @@ async function openPopup(orderInfo: OrderPopupInfo) {
   orderPopupInfo.value = orderInfo
   // 价格为0  走免费礼包发奖接口
   if (orderInfo.price === 0) {
-    const freeGiftAwardRequestInfo: FreeGiftAwardRequest = {
-      appid: '616876868660610',
-      uid: loginStore.userUid,
-      packagekey: orderInfo.key,
-      tradeproductid: orderInfo.tradeProductId,
-    }
-    if (orderInfo.exchangeId) {
-      freeGiftAwardRequestInfo.exchangeid = orderInfo.exchangeId
-    }
-
-    await freeGiftAwardApi(freeGiftAwardRequestInfo)
-    setTimeout(() => {
-      if (giftComponentRef.value && typeof giftComponentRef.value.triggerSuccessAnimation === 'function') {
-        console.log('onPaymentSuccess')
-        giftComponentRef.value.triggerSuccessAnimation()
+    try {
+      Toast.loading()
+      const freeGiftAwardRequestInfo: FreeGiftAwardRequest = {
+        appid: '616876868660610',
+        uid: loginStore.userUid,
+        packagekey: orderInfo.key,
+        tradeproductid: orderInfo.tradeProductId,
       }
-    }, 50)
-    return
-  }
+      if (orderInfo.exchangeId) {
+        freeGiftAwardRequestInfo.exchangeid = orderInfo.exchangeId
+      }
 
-  // 不为0 走下单接口
-  popupOpen.value = true
+      await freeGiftAwardApi(freeGiftAwardRequestInfo)
+      setTimeout(() => {
+        if (giftComponentRef.value && typeof giftComponentRef.value.triggerSuccessAnimation === 'function') {
+          console.log('onPaymentSuccess')
+          giftComponentRef.value.triggerSuccessAnimation()
+        }
+      }, 50)
+      return
+    }
+    catch (error) {
+      console.log(error)
+      return
+    }
+    finally {
+      Toast.close()
+    }
+  }
+  if (orderInfo.price > 0) {
+    // 不为0 走下单接口
+    popupOpen.value = true
+  }
 }
 function closePopup() {
   popupOpen.value = false

@@ -8,6 +8,7 @@ import { useBuyOrder } from '@/hooks/useBuyOrder'
 import { useGiftStore } from '@/store/modules/giftStore'
 import { useScoreElementStore } from '@/store/modules/scoreElement'
 import { formatPrice } from '@/utils'
+import { Toast } from '@/utils/toast'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -144,9 +145,9 @@ defineExpose({
   getProductList,
 })
 const { getProductListRequest } = useGiftStore()
-
 // 获取商品数据
 async function getProductList() {
+  Toast.loading()
   try {
     const res = await getProductListRequest(2)
     if (!res) {
@@ -158,9 +159,13 @@ async function getProductList() {
         item.BuyTimes = 0
     })
     console.log('battle pass itemInfoList', itemInfoList.value)
+    Toast.close()
   }
   catch (error) {
     console.error('Failed to fetch product list:', error)
+  }
+  finally {
+    Toast.close()
   }
 }
 

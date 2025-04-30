@@ -8,6 +8,7 @@ import { useBuyOrder } from '@/hooks/useBuyOrder'
 import { useGiftStore } from '@/store/modules/giftStore'
 import { formatPrice, getPGImg } from '@/utils'
 import { findImagePath } from '@/utils/imageUtils'
+import { Toast } from '@/utils/toast'
 import { computed, inject, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -18,18 +19,28 @@ const { t } = useI18n()
 const dailyLoginItemInfo = ref<DailyLoginItemInfo[]>([])
 const productInfo = ref<ProductInfo>()
 async function getProductList() {
-  const res = await getProductListRequest(6)
-  if (!res) {
-    return
-  }
-  dailyLoginItemInfo.value = res.ItemInfo as DailyLoginItemInfo[]
-  productInfo.value = res.ProductInfo as ProductInfo
+  Toast.loading()
+  try {
+    const res = await getProductListRequest(6)
+    if (!res) {
+      return
+    }
+    dailyLoginItemInfo.value = res.ItemInfo as DailyLoginItemInfo[]
+    productInfo.value = res.ProductInfo as ProductInfo
 
-  if (dailyLoginItemInfo.value[0]?.BuyTimes === undefined) {
-    dailyLoginItemInfo.value[0].BuyTimes = 0
+    if (dailyLoginItemInfo.value[0]?.BuyTimes === undefined) {
+      dailyLoginItemInfo.value[0].BuyTimes = 0
+    }
+    // dailyLoginItemInfo.value[0].Props[2].Icon = 'box/30.png'
+    console.log(res, 'res')
+    Toast.close()
   }
-  // dailyLoginItemInfo.value[0].Props[2].Icon = 'box/30.png'
-  console.log(res, 'res')
+  catch (error) {
+    console.error(error)
+  }
+  finally {
+    Toast.close()
+  }
 }
 getProductList()
 const bgImg = computed(() => {
@@ -41,44 +52,10 @@ function getImageUrl(name: string) {
 }
 
 const imgMap = {
-  bgImg: getImageUrl('底板.png'),
-  goldImg: getImageUrl('金币3.png'),
-  boxImg: getImageUrl('卡牌宝箱3.png'),
-  diamondImg: getImageUrl('钻石2.png'),
-  diceImg: getImageUrl('202_2.png'),
-  textImg: getImageUrl('头部文字_英语.png'),
   discountImg: getImageUrl('img_礼包标签.png'),
   maskImg: getImageUrl('img_每日登录标签叠加资源.png'),
 }
 
-interface Gift {
-  id: number
-  img: string
-  price?: string
-}
-
-const _giftList = ref<Gift[]>([
-  {
-    id: 1,
-    img: imgMap.goldImg,
-    price: '1M',
-  },
-  {
-    id: 2,
-    img: imgMap.diceImg,
-    price: '15',
-  },
-  {
-    id: 3,
-    img: imgMap.diamondImg,
-    price: '10',
-  },
-  {
-    id: 4,
-    img: imgMap.boxImg,
-
-  },
-])
 const greenButtonRef = ref<InstanceType<typeof GreenButton> | null>(null)
 function handleBtnClick() {
   if (dailyLoginItemInfo.value[0]?.BuyTimes > 0) {

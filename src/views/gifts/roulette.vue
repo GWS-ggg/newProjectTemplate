@@ -11,6 +11,7 @@ import { useEmitBoxClick } from '@/hooks'
 import { useGiftStore } from '@/store/modules/giftStore'
 import { formatPrice, getPGImg } from '@/utils'
 import { findImagePath } from '@/utils/imageUtils'
+import { Toast } from '@/utils/toast'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -44,26 +45,35 @@ const currentGift = computed(() => {
 })
 const productInfo = ref<ProductInfo>()
 const { getProductListRequest } = useGiftStore()
-
 async function getProductList() {
-  const res = await getProductListRequest(3)
-  if (!res) {
-    return
-  }
-  vipScore.value = res.ProductInfo?.Props?.[0]?.VipScore as number
-  productInfo.value = res.ProductInfo
-  wheelGiftList.value = res.ItemInfo as WheelGiftItemInfo[]
-  // 添加默认值
-  let id = 0
-  wheelGiftList.value.forEach((item) => {
-    if (!item.BuyTimes) {
-      item.BuyTimes = 0
+  Toast.loading()
+  try {
+    const res = await getProductListRequest(3)
+    if (!res) {
+      return
     }
-    item.id = id
-    id++
-  })
+    vipScore.value = res.ProductInfo?.Props?.[0]?.VipScore as number
+    productInfo.value = res.ProductInfo
+    wheelGiftList.value = res.ItemInfo as WheelGiftItemInfo[]
+    // 添加默认值
+    let id = 0
+    wheelGiftList.value.forEach((item) => {
+      if (!item.BuyTimes) {
+        item.BuyTimes = 0
+      }
+      item.id = id
+      id++
+    })
 
-  console.log(res)
+    console.log(res)
+    Toast.close()
+  }
+  catch (error) {
+    console.error(error)
+  }
+  finally {
+    Toast.close()
+  }
 }
 
 getProductList()
