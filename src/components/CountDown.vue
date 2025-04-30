@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 const props = defineProps({
   // 结束时间的时间戳（秒）
@@ -24,7 +25,7 @@ const props = defineProps({
     default: () => {},
   },
 })
-
+const { t } = useI18n()
 // 是否正在加载（endTime未定义）
 const isLoading = computed(() => props.endTime === undefined)
 
@@ -121,14 +122,14 @@ onBeforeUnmount(() => {
     <!-- 加载状态：endTime未定义 -->
     <template v-if="isLoading">
       <slot name="loading">
-        正在获取...
+        {{ t('loading') }}
       </slot>
     </template>
 
     <!-- 完成状态：endTime有值且剩余时间为0 -->
     <template v-else-if="isFinished">
       <slot name="finished">
-        Time's up!
+        {{ t('end') }}
       </slot>
     </template>
 

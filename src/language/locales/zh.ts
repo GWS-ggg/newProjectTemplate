@@ -19,7 +19,7 @@ const locale: LocaleMessages<any> = {
   cancel: '取消',
   loading: '加载中...',
   end: '结束',
-  get_up_to_3000: '最高可获得3000',
+  get_up_to_3000: '最高可获得',
   buy_now_to_claim: '立即购买以领取',
   your_earned_rewards: '你赚取的奖励',
   achieve_the_bar_to_gain_the_rewards: '达到指定标准以获得奖励！',
@@ -35,7 +35,7 @@ const locale: LocaleMessages<any> = {
   silver_name_gifts_for_team: '银色名字&公会礼物',
   buy_1_pack_get_2_free: '购买1个礼包，获得2个免费！',
   only_one_purchase_can_be_made: '仅限购买一次！',
-  only_one_chance_to_buy: '只有一次机会',
+  only_one_chance: '只有一次机会',
   take_each_deal_take_each_deal: '抓住每一个机会！',
   available: '可用',
 }

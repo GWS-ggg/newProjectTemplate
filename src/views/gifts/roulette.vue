@@ -12,73 +12,19 @@ import { useGiftStore } from '@/store/modules/giftStore'
 import { formatPrice, getPGImg } from '@/utils'
 import { findImagePath } from '@/utils/imageUtils'
 import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 const emits = defineEmits(['openPopup', 'boxClick'])
+const { t } = useI18n()
 function getImageUrl(name: string) {
   return new URL(`../../assets/images/gifts/roulette/${name}`, import.meta.url).href
 }
 const imgMap = {
-  bgImg: getImageUrl('背景.jpg'),
   circleImg: getImageUrl('圆形.png'),
-  giftBgImg: getImageUrl('img_支付轮盘_奖励_bg.png'),
   giftBorderImg: getImageUrl('方块底外发光.png'),
-  diceImg: getImageUrl('202_2.png'),
-  coinImg: getImageUrl('付费转盘猪猪代币.png'),
-  boxImg: getImageUrl('混合宝箱2.png'),
-  giftBgMaskImg: getImageUrl('img_支付轮盘_奖励_蒙版.png'),
-  okImg: getImageUrl('icon_勾.png'),
-}
-interface GiftItem {
-  img: string
-  id: number
-  desc?: string
-  isPurchased?: boolean
-}
-const _giftList: GiftItem[] = [
-  {
-    img: imgMap.coinImg,
-    id: 1,
-    desc: '5',
 
-  },
-  {
-    img: imgMap.coinImg,
-    id: 2,
-    desc: '5',
-    isPurchased: true,
-  },
-  {
-    img: imgMap.coinImg,
-    id: 3,
-    desc: '10',
-    isPurchased: true,
-  },
-  {
-    img: imgMap.coinImg,
-    id: 4,
-    desc: '10',
-  },
-  {
-    img: imgMap.boxImg,
-    id: 5,
-  },
-  {
-    img: imgMap.diceImg,
-    id: 6,
-    desc: '200',
-  },
-  {
-    img: imgMap.coinImg,
-    id: 7,
-    desc: '1',
-  },
-  {
-    img: imgMap.diceImg,
-    id: 8,
-    desc: '3000',
+}
 
-  },
-]
 const angles = [
   90, // 6点钟方向
   45, // 7点钟方向
@@ -95,9 +41,6 @@ const vipScore = ref(0)
 // 当前选中的礼包
 const currentGift = computed(() => {
   return wheelGiftList.value.find(item => item.BuyTimes === 0)
-})
-const currentGiftId = computed(() => {
-  return currentGift.value?.id || 0
 })
 const productInfo = ref<ProductInfo>()
 const { getProductListRequest } = useGiftStore()
@@ -133,6 +76,11 @@ const itemBgImg = computed(() => {
 })
 const greenButtonRef = ref<InstanceType<typeof GreenButton> | null>(null)
 function handleButtonClick() {
+  // 礼包全部被购买
+  if (currentGift.value === undefined) {
+    return
+  }
+
   console.log('handleButtonClick')
   const orderPopupInfo: OrderPopupInfo = {
     price: currentGift.value?.Price || 0,
@@ -219,7 +167,7 @@ const { handleBoxClick } = useEmitBoxClick(emits)
 
               <img
                 v-if="gift.BuyTimes"
-                :src="imgMap.okImg"
+                src="@/assets/images/common/icon_ok.png"
                 alt=""
                 class="absolute left-1/2 top-1/2 z-30 h-70 -translate-x-1/2 -translate-y-1/2"
               >
@@ -242,9 +190,10 @@ const { handleBoxClick } = useEmitBoxClick(emits)
         ref="greenButtonRef"
         :score="vipScore"
         score-show
+        :purchased="currentGift === undefined"
       >
         <div
-          v-if="currentGiftId <= 7"
+          v-if="currentGift !== undefined"
           class="text-40 text-white"
         >
           <TextStroke
@@ -262,15 +211,12 @@ const { handleBoxClick } = useEmitBoxClick(emits)
             stroke-color="#434343"
             :stroke-width="2"
           >
-            已购买
+            {{ t('claim') }}
           </TextStroke>
         </div>
       </GreenButton>
     </div>
-    <div
-      v-if="currentGiftId <= 7"
-      class="absolute bottom-90 left-1/2 z-10 h-96 -translate-x-1/2 -translate-y-1/2"
-    >
+    <div class="absolute bottom-90 left-1/2 z-10 h-96 -translate-x-1/2 -translate-y-1/2">
       <CountDown
         :end-time="productInfo?.ExpireTime"
         class="text-26"

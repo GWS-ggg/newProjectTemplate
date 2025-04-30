@@ -19,7 +19,7 @@ const locale: LocaleMessages<any> = {
   cancel: 'Hủy bỏ',
   loading: 'Đang tải...',
   end: 'KẾT THÚC',
-  get_up_to_3000: 'Nhận lên đến 3000',
+  get_up_to_3000: 'Nhận lên đến',
   buy_now_to_claim: 'Mua ngay để đòi',
   your_earned_rewards: 'phần thưởng bạn kiếm được',
   achieve_the_bar_to_gain_the_rewards: 'Đạt được thanh để nhận phần thưởng!',
@@ -35,7 +35,7 @@ const locale: LocaleMessages<any> = {
   silver_name_gifts_for_team: 'Tên Bạc & Quà tặng cho Đội',
   buy_1_pack_get_2_free: 'MUA 1 GÓI & NHẬN 2 MIỄN PHÍ!',
   only_one_purchase_can_be_made: 'Chỉ có thể thực hiện một giao dịch!',
-  only_one_chance_to_buy: 'Chỉ một cơ hội',
+  only_one_chance: 'Chỉ một cơ hội',
   take_each_deal_take_each_deal: 'Nhận mỗi thỏa thuận!',
   available: 'Có sẵn',
 }

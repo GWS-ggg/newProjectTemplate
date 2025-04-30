@@ -20,7 +20,7 @@ const locale: LocaleMessages<any> = {
   cancel: 'Cancel',
   loading: 'Loading...',
   end: 'End',
-  get_up_to_3000: 'Get up to 3000',
+  get_up_to_3000: 'Get up to',
   buy_now_to_claim: 'Buy now to claim',
   your_earned_rewards: 'your earned rewards',
   achieve_the_bar_to_gain_the_rewards: 'Achieve the bar to gain the rewards!',
@@ -36,7 +36,7 @@ const locale: LocaleMessages<any> = {
   silver_name_gifts_for_team: 'Silver Name & Gifts for Team',
   buy_1_pack_get_2_free: 'BUY 1 PACK & GET 2 FREE !',
   only_one_purchase_can_be_made: 'Only one purchase can be made !',
-  only_one_chance_to_buy: 'Only one chance to buy!',
+  only_one_chance: 'Only one chance',
   take_each_deal_take_each_deal: 'Take each deal take each deal !',
   available: 'Available',
 

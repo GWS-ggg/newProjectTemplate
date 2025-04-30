@@ -63,7 +63,7 @@ const currentVipLevel = computed(() => vipLevelList.value[loginInfo.value.viplev
         <div class="relative aspect-square w-full f-c">
           <div class="mb-40 flex flex-col">
             <div class="mt-40 f-c text-40 color-[#e77bff]">
-              bonus
+              {{ t('bonus') }}
             </div>
             <div class="text-61">
               <TextStroke
@@ -80,7 +80,7 @@ const currentVipLevel = computed(() => vipLevelList.value[loginInfo.value.viplev
                 :stroke-width="2"
                 text-color="#acb3ff"
               >
-                more
+                {{ t('more') }}
               </TextStroke>
             </div>
           </div>
@@ -91,15 +91,15 @@ const currentVipLevel = computed(() => vipLevelList.value[loginInfo.value.viplev
       <div class="flex flex-col items-start leading-60 -ml-25">
         <div
           class="gradient-text-with-stroke text-52"
-          data-text="&nbsp;same price&nbsp;"
+          :data-text="`&nbsp;${t('same_price')}&nbsp;`"
         >
-          <span>&nbsp;same price&nbsp;</span>
+          <span>&nbsp;{{ t('same_price') }}&nbsp;</span>
         </div>
         <div
           class="gradient-text-with-stroke text-52"
-          data-text="&nbsp;More Rewards&nbsp;"
+          :data-text="`&nbsp;${t('more_rewards')}&nbsp;`"
         >
-          <span>&nbsp;More  Rewards&nbsp;</span>
+          <span>&nbsp;{{ t('more_rewards') }}&nbsp;</span>
         </div>
       </div>
 

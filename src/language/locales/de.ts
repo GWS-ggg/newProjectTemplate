@@ -19,7 +19,7 @@ const locale: LocaleMessages<any> = {
   cancel: 'Abbrechen',
   loading: 'Laden...',
   end: 'ENDE',
-  get_up_to_3000: 'Bis zu 3000 erhalten',
+  get_up_to_3000: 'Bis zu erhalten',
   buy_now_to_claim: 'Jetzt kaufen, um zu beanspruchen',
   your_earned_rewards: 'Ihre verdienten Belohnungen',
   achieve_the_bar_to_gain_the_rewards: 'Erreichen Sie die Leiste, um die Belohnungen zu erhalten!',
@@ -35,7 +35,7 @@ const locale: LocaleMessages<any> = {
   silver_name_gifts_for_team: 'Silbername & Geschenke für das Team',
   buy_1_pack_get_2_free: 'KAUFE 1 PACKUNG & BEKOMME 2 KOSTENLOS!',
   only_one_purchase_can_be_made: 'Es kann nur ein Kauf getätigt werden!',
-  only_one_chance_to_buy: 'Nur eine Chance',
+  only_one_chance: 'Nur eine Chance',
   take_each_deal_take_each_deal: 'Nimm jedes Angebot an!',
   available: 'Verfügbar',
 }

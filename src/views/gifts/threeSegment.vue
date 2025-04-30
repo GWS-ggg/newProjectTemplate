@@ -8,8 +8,10 @@ import { useGiftStore } from '@/store/modules/giftStore'
 import { animateWithClass, formatPrice, getPGImg } from '@/utils'
 import { findImagePath } from '@/utils/imageUtils'
 import { computed, nextTick, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 const emits = defineEmits(['boxClick', 'openPopup'])
+const { t } = useI18n()
 const itemInfoList = ref<ThreeSegmentItemInfo[]>([])
 const productInfo = ref<ProductInfo>()
 const { getProductListRequest } = useGiftStore()
@@ -22,6 +24,7 @@ async function getProductList() {
   productInfo.value = res.ProductInfo
   itemInfoList.value = res.ItemInfo as ThreeSegmentItemInfo[]
   // itemInfoList.value[0].BuyTimes = 0
+  // itemInfoList.value[1].BuyTimes = 0
   // itemInfoList.value[0].Props[0].PropType = 11
   // itemInfoList.value[0].Props[0].PropID = 2030428
   // 处理item数据 添加id BuyTimes Price
@@ -54,85 +57,12 @@ const giftCellBgList = computed(() => {
 function getImageUrl(name: string) {
   return new URL(`../../assets/images/gifts/threeSegment/${name}`, import.meta.url).href
 }
+
 const imgMap = {
-  bg1Img: getImageUrl('bg1.png'),
-  bg2Img: getImageUrl('bg2.png'),
-  bg3Img: getImageUrl('bg3.png'),
-  diceImg: getImageUrl('体力3.png'),
-  goldImg: getImageUrl('金币2.png'),
-  diamondImg: getImageUrl('钻石2.png'),
-  box1Img: getImageUrl('卡牌宝箱1.png'),
-  box2Img: getImageUrl('卡牌宝箱2.png'),
-  lockImg: getImageUrl('锁.png'),
-  bg1OkImg: getImageUrl('11.png'),
-  bg2OkImg: getImageUrl('22.png'),
-  bg3OkImg: getImageUrl('33.png'),
+  bgFreeImg: getImageUrl('bg_yellow.png'),
+  bgClaimImg: getImageUrl('bg_red.png'),
 }
 
-interface GiftIcon {
-  id: number
-  iconImg: string
-  desc?: string
-}
-
-interface Gift {
-  id: number
-  btnDesc: string
-  available: boolean
-  bgImg: string
-  bgOkImg: string
-  isFree: boolean
-  iconList: GiftIcon[]
-  score: number
-  isPurchased: boolean
-}
-const _giftList = ref<Gift[]>([
-  {
-    id: 1,
-    btnDesc: 'FREE',
-    available: true,
-    isFree: true,
-    isPurchased: false,
-    bgImg: imgMap.bg1Img,
-    bgOkImg: imgMap.bg1OkImg,
-    iconList: [
-      { id: 1, iconImg: imgMap.diceImg, desc: '200' },
-      { id: 2, iconImg: imgMap.goldImg, desc: '30K' },
-      { id: 3, iconImg: imgMap.diamondImg, desc: '200' },
-    ],
-    score: 40,
-  },
-  {
-    id: 2,
-    btnDesc: '20.00',
-    available: true,
-    isFree: false,
-    isPurchased: false,
-    bgImg: imgMap.bg2Img,
-    bgOkImg: imgMap.bg2OkImg,
-    iconList: [
-      { id: 1, iconImg: imgMap.box1Img, desc: '100' },
-      { id: 2, iconImg: imgMap.diamondImg, desc: '200' },
-      { id: 3, iconImg: imgMap.box2Img, desc: '100' },
-    ],
-    score: 20,
-  },
-  {
-    id: 3,
-    btnDesc: '60.00',
-    available: true,
-    isFree: false,
-    isPurchased: false,
-    bgImg: imgMap.bg3Img,
-    bgOkImg: imgMap.bg3OkImg,
-    iconList: [
-      { id: 1, iconImg: imgMap.box1Img, desc: '200' },
-      { id: 2, iconImg: imgMap.diamondImg, desc: '300' },
-      { id: 3, iconImg: imgMap.box2Img, desc: '200' },
-    ],
-    score: 60,
-  },
-])
 const { setRef, triggerAnimation } = useAnimatableRefs()
 const currentGiftId = computed(() => {
   return itemInfoList.value.find(item => item.BuyTimes === 0)?.id
@@ -150,7 +80,20 @@ async function triggerSuccessAnimation() {
 function handleBoxClick(prop: Prop, event: MouseEvent) {
   emits('boxClick', prop, event)
 }
+
+// 检查前面的礼包是不是已经购买了
+function checkPreviousGift(giftInfo: ThreeSegmentItemInfo) {
+  const index = itemInfoList.value.findIndex(item => item.id === giftInfo.id)
+  console.log(itemInfoList.value.slice(0, index).every(item => item.BuyTimes !== 0), 'checkPreviousGift')
+  return itemInfoList.value.slice(0, index).every(item => item.BuyTimes !== 0)
+}
+
 function handleBtnClick(item: ThreeSegmentItemInfo) {
+  // 前面的礼包都购买了
+  if (!checkPreviousGift(item)) {
+    return
+  }
+
   currentItem.value = item
   const orderPopupInfo: OrderPopupInfo = {
     price: item.Price || 0,
@@ -191,7 +134,7 @@ defineExpose({
         :stroke-width="3"
         text-color="#fef29f"
       >
-        Take each deal take each deal !
+        {{ t('take_each_deal_take_each_deal') }}
       </TextStroke>
     </div>
     <div
@@ -202,7 +145,7 @@ defineExpose({
     >
       <div class="w-710">
         <img
-          :src="item.BuyTimes === 0 ? imgMap.bg1Img : giftCellBgList[item.id]"
+          :src="item.BuyTimes === 0 ? item.Price === 0 ? imgMap.bgFreeImg : imgMap.bgClaimImg : giftCellBgList[item.id]"
           alt=""
           class="w-full"
         >
@@ -243,11 +186,11 @@ defineExpose({
                 :stroke-width="3"
                 text-color="#fff"
               >
-                {{ item.Price ? formatPrice(item.Price) : 'FREE' }}
+                {{ item.Price ? formatPrice(item.Price) : t('free') }}
               </TextStroke>
               <img
                 v-if="item.Price === 0 && currentGiftId !== item.id"
-                :src="imgMap.lockImg"
+                src="@/assets/images/common/lock.png"
                 alt=""
                 class="absolute top-0 h-42 -right-40"
               >
@@ -270,7 +213,7 @@ defineExpose({
               :stroke-width="1"
               text-color="#fddfb0"
             >
-              Available
+              {{ t('available') }}
             </TextStroke>
           </div>
         </div>

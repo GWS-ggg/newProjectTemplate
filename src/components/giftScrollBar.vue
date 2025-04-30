@@ -6,14 +6,12 @@ import { FreeMode } from 'swiper/modules'
 // 导入Swiper组件和模块
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 // 导入Swiper样式
 import 'swiper/css'
 import 'swiper/css/free-mode'
 
-// 动态导入图片的函数
-function getImageUrl(name: string) {
-  return new URL(`../assets/images/GiftScrollBar/${name}`, import.meta.url).href
-}
+const { t } = useI18n()
 
 // 使用 Pinia store
 const giftStore = useGiftStore()
@@ -29,77 +27,6 @@ function handleSetCurrentGiftId(giftId: number) {
 
 // Swiper模块定义
 const modules = [FreeMode]
-// 示例数据
-const giftPackages = ref([
-  {
-    id: 1,
-    image: getImageUrl('icon_阶梯.png'),
-    countdown: { hours: 19, minutes: 20, seconds: 10 },
-    tag: 'Hot',
-    tagColor: 'bg-green-500',
-  },
-  {
-    id: 2,
-    image: getImageUrl('icon_battlePass.png'),
-    countdown: { hours: 99, minutes: 99, seconds: 99 },
-    tag: 'Sale',
-    tagColor: 'bg-red-500',
-  },
-  {
-    id: 3,
-    image: getImageUrl('icon_轮盘.png'),
-    countdown: { hours: 99, minutes: 99, seconds: 99 },
-    tag: null,
-  },
-  {
-    id: 4,
-    image: getImageUrl('icon_1+2.png'),
-    countdown: { hours: 19, minutes: 20, seconds: 10 },
-    tag: null,
-  },
-  {
-    id: 5,
-    image: getImageUrl('icon_3选1.png'),
-    countdown: { hours: 19, minutes: 20, seconds: 10 },
-    tag: null,
-  },
-  {
-    id: 6,
-    image: getImageUrl('icon_折扣.png'),
-    countdown: { hours: 19, minutes: 20, seconds: 10 },
-    tag: null,
-  },
-  {
-    id: 7,
-    image: getImageUrl('icon_折扣.png'),
-    countdown: { hours: 19, minutes: 20, seconds: 10 },
-    tag: null,
-  },
-  {
-    id: 8,
-    image: getImageUrl('icon_3段.png'),
-    countdown: { hours: 19, minutes: 20, seconds: 10 },
-    tag: null,
-  },
-  {
-    id: 9,
-    image: getImageUrl('icon_3段.png'),
-    countdown: { hours: 19, minutes: 20, seconds: 10 },
-    tag: null,
-  },
-  {
-    id: 10,
-    image: getImageUrl('icon_3选1.png'),
-    countdown: { hours: 19, minutes: 20, seconds: 10 },
-    tag: null,
-  },
-  {
-    id: 11,
-    image: getImageUrl('icon_3选1.png'),
-    countdown: { hours: 19, minutes: 20, seconds: 10 },
-    tag: null,
-  },
-])
 </script>
 
 <template>
@@ -133,10 +60,10 @@ const giftPackages = ref([
                   {{ hours }}:{{ minutes }}:{{ seconds }}
                 </template>
                 <template #loading>
-                  Loading...
+                  {{ t('loading') }}
                 </template>
                 <template #finished>
-                  Over
+                  {{ t('end') }}
                 </template>
               </CountDown>
               <img
@@ -216,7 +143,7 @@ const giftPackages = ref([
 
           <!-- Divider line (add after each item except the last one) -->
           <div
-            v-if="index < giftPackages.length - 1"
+            v-if="index < giftStore.currentShopListInfo.length - 1"
             class="divider-line absolute right-0 top-8"
           />
         </div>

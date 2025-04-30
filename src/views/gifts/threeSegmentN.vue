@@ -10,13 +10,14 @@ import { useGiftStore } from '@/store/modules/giftStore'
 import { animateWithClass, formatPrice, getPGImg } from '@/utils'
 import { findImagePath } from '@/utils/imageUtils'
 import { computed, nextTick, ref, watchEffect } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 const emits = defineEmits(['openPopup', 'boxClick'])
 const { handleBoxClick } = useEmitBoxClick(emits)
 const itemInfoList = ref<ThreeSegmentNItemInfo[]>([])
 const productInfo = ref<ProductInfo>()
 const { getProductListRequest } = useGiftStore()
-
+const { t } = useI18n()
 async function getProductList() {
   const res = await getProductListRequest(8)
   if (!res) {
@@ -214,7 +215,7 @@ async function handleAnimation(currentGift: ThreeSegmentNItemInfo) {
         :stroke-width="3"
         text-color="#fef29f"
       >
-        Take each deal take each deal !
+        {{ t('take_each_deal_take_each_deal') }}
       </TextStroke>
     </div>
     <div
@@ -265,7 +266,7 @@ async function handleAnimation(currentGift: ThreeSegmentNItemInfo) {
               :stroke-width="3"
               text-color="#fff"
             >
-              {{ item?.Price ? formatPrice(item?.Price) : 'FREE' }}
+              {{ item?.Price ? formatPrice(item?.Price) : t('free') }}
             </TextStroke>
             <img
               v-if="item.Price === 0 && item.sortId !== 1"
@@ -302,7 +303,7 @@ async function handleAnimation(currentGift: ThreeSegmentNItemInfo) {
             :stroke-width="2"
             text-color="#fddfb0"
           >
-            Available
+            {{ t('available') }}
           </TextStroke>
         </div>
       </div>

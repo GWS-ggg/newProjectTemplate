@@ -9,9 +9,10 @@ import { useGiftStore } from '@/store/modules/giftStore'
 import { useScoreElementStore } from '@/store/modules/scoreElement'
 import { formatPrice } from '@/utils'
 import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 const emits = defineEmits(['openPopup'])
-
+const { t } = useI18n()
 // 获取积分元素引用
 const { scoreRef } = useScoreElementStore()
 
@@ -49,23 +50,23 @@ const giftList = ref<Gift[]>([
   {
     id: 1,
     iconImg: imgMap.passImg,
-    title: 'Unlock All Rewards',
+    title: t('unlock_all_rewards'),
   },
   {
     id: 2,
     iconImg: imgMap.pass2Img,
-    title: 'Reach LV.20 at once',
-    desc: '(worth 4000 gems)',
+    title: t('reach_lv_20_at_once'),
+    desc: `(${t('worth_4000_gems')})`,
   },
   {
     id: 3,
     iconImg: imgMap.boxImg,
-    title: 'Auto Open Card Chest',
+    title: t('auto_open_card_chest'),
   },
   {
     id: 4,
     iconImg: imgMap.giftImg,
-    title: 'Gold Name & Gifts for Team',
+    title: t('gold_name_gifts_for_team'),
   },
 ])
 
@@ -73,12 +74,12 @@ const giftList2 = ref<Gift[]>([
   {
     id: 1,
     iconImg: imgMap.passImg,
-    title: 'Unlock All Rewards',
+    title: t('unlock_all_rewards'),
   },
   {
     id: 2,
     iconImg: imgMap.gift2Img,
-    title: 'Silver Name & Gifts for Team',
+    title: t('silver_name_gifts_for_team'),
   },
 ])
 
@@ -174,7 +175,7 @@ getProductList()
         stroke-color="#19093e"
         :stroke-width="3"
       >
-        仅限此赛季
+        {{ t('this_season_only') }}
       </TextStroke>
     </div>
 
@@ -186,7 +187,7 @@ getProductList()
       <div class="flex flex-1 flex-col justify-start">
         <!-- 卡片标题 -->
         <div class="ml-10 text-40 color-[#fbd506] leading-44">
-          Super piggy pass
+          {{ t('super_pass') }}
         </div>
 
         <!-- 分隔线 -->
@@ -331,7 +332,7 @@ getProductList()
       <div class="flex flex-1 flex-col justify-start">
         <!-- 卡片标题 -->
         <div class="ml-10 text-40 color-[#fbd506] leading-44">
-          Super pass
+          {{ t('piggy_pass') }}
         </div>
 
         <!-- 分隔线 -->

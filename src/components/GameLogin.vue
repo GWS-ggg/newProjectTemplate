@@ -160,10 +160,10 @@ defineExpose({ saveUIDRecord })
         <input
           v-model="inputUid"
           class="w-full border-none text-24 focus:outline-none"
-          lg="text-30 "
           type="text"
           autofocus
           placeholder="请输入UID"
+          style="font-size: 20px"
           @blur="handleBlur"
           @focus="inputFocus"
           @keydown.enter="handleConfirm"

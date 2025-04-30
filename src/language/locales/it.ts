@@ -19,7 +19,7 @@ const locale: LocaleMessages<any> = {
   cancel: 'Annulla',
   loading: 'Caricamento...',
   end: 'FINE',
-  get_up_to_3000: 'Ricevi fino a 3000',
+  get_up_to_3000: 'Ricevi fino a',
   buy_now_to_claim: 'Acquista ora per reclamare',
   your_earned_rewards: 'le tue ricompense guadagnate',
   achieve_the_bar_to_gain_the_rewards: 'Raggiungi la sbarra per ottenere le ricompense!',
@@ -35,7 +35,7 @@ const locale: LocaleMessages<any> = {
   silver_name_gifts_for_team: 'Nome in argento e regali per il team',
   buy_1_pack_get_2_free: 'ACQUISTA 1 PACCHETTO E NE OTTIENI 2 GRATIS!',
   only_one_purchase_can_be_made: 'È possibile effettuare un solo acquisto!',
-  only_one_chance_to_buy: 'Solo una possibilità',
+  only_one_chance: 'Solo una possibilità',
   take_each_deal_take_each_deal: 'Prendi ogni affare!',
   available: 'Disponibile',
 }

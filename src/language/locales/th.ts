@@ -19,7 +19,7 @@ const locale: LocaleMessages<any> = {
   cancel: 'ยกเลิก',
   loading: 'กำลังโหลด...',
   end: 'จบ',
-  get_up_to_3000: 'ได้รับสูงสุด 3000',
+  get_up_to_3000: 'ได้รับสูงสุด',
   buy_now_to_claim: 'ซื้อเลยเพื่อเรียกร้อง',
   your_earned_rewards: 'รางวัลที่คุณได้รับ',
   achieve_the_bar_to_gain_the_rewards: 'บังคับให้เกิดเพื่อได้รับรางวัล!',
@@ -35,7 +35,7 @@ const locale: LocaleMessages<any> = {
   silver_name_gifts_for_team: 'ชื่อเงินและของขวัญสำหรับทีม',
   buy_1_pack_get_2_free: 'ซื้อ 1 ชุด และรับ 2 ชุดฟรี!',
   only_one_purchase_can_be_made: 'สามารถทำการซื้อได้เพียงครั้งเดียว!',
-  only_one_chance_to_buy: 'โอกาสเพียงครั้งเดียว',
+  only_one_chance: 'โอกาสเพียงครั้งเดียว',
   take_each_deal_take_each_deal: 'รับทุกข้อเสนอทุกข้อเสนอ!',
   available: 'มีจำหน่าย',
 }

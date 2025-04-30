@@ -32,9 +32,9 @@ export const useGiftStore = defineStore('gift', () => {
     const newTabInfo = [...res.TabInfo]
     newTabInfo.push({
       BannerPic: 'newChooseThree/2/gift_icon.png',
-      ProductType: 10,
+      ProductType: 2,
       Expire: 1747734900,
-      id: 7,
+      id: 10,
     })
     // newTabInfo.push({
     //   BannerPic: 'newChooseThree/2/gift_icon.png',

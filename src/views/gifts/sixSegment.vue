@@ -10,9 +10,11 @@ import { useGiftStore } from '@/store/modules/giftStore'
 import { animateWithClass, formatPrice, getPGImg } from '@/utils'
 import { findImagePath } from '@/utils/imageUtils'
 import { computed, nextTick, ref, watchEffect } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 const emits = defineEmits(['openPopup', 'boxClick'])
 const { handleBoxClick } = useEmitBoxClick(emits)
+const { t } = useI18n()
 function getImageUrl(name: string) {
   return new URL(`../../assets/images/gifts/sixSegment/${name}`, import.meta.url).href
 }
@@ -33,6 +35,8 @@ async function getProductList() {
   itemInfoList.value = itemInfoList.value.slice(0, 9)
   currentScore.value = res.ProductInfo?.TaskScore ?? 0
   targetScore.value = res.ProductInfo?.TaskTargetScore ?? 0
+
+  // itemInfoList.value = itemInfoList.value.slice(0, 4)
   // 处理item数据 添加id BuyTimes Price
   let idNum = 0
   itemInfoList.value.forEach((item) => {
@@ -68,32 +72,6 @@ watchEffect(() => {
   ]
   giftCellBgImgList.value = giftCellBgImgList.value.filter(item => item !== '')
 })
-
-const okImg = new URL(`../../assets/images/common/icon_ok.png`, import.meta.url).href
-
-const imgMap = {
-  pinkBgImg: getImageUrl('背景粉.png'),
-  purpleBgImg: getImageUrl('背景紫.png'),
-  scoreImg: getImageUrl('积分.png'),
-  scoreBgImg: getImageUrl('收集物底.png'),
-  processImg: getImageUrl('img_通用进度条.png'),
-  processBgImg: getImageUrl('img_通用进度条_bg.png'),
-  processIconLeftImg: getImageUrl('进度条左侧图标.png'),
-  lockImg: getImageUrl('锁.png'),
-  processIconBgImg: getImageUrl('img_通用积分_bg.png'),
-  arrowLeftImg: getImageUrl('新N段式礼包-超级碗_0007_圆角矩形-1-拷贝-3.png'),
-  arrowRightImg: getImageUrl('新N段式礼包-超级碗_0009_圆角矩形-1-拷贝-5.png'),
-  arrowDownImg: getImageUrl('新N段式礼包-超级碗_0008_圆角矩形-1-拷贝-4.png'),
-  box3Img: getImageUrl('卡牌宝箱3.png'),
-  box1Img: getImageUrl('卡牌宝箱33.png'),
-  diceImg: getImageUrl('体力1.png'),
-  goldImg: getImageUrl('金币1.png'),
-  castleImg: getImageUrl('城堡-buff礼包icon.png'),
-  spinImg: getImageUrl('金色spin礼包icon-高级.png'),
-  btnSmallImg: getImageUrl('btn_6阶N段式按钮_小.png'),
-  btnBigImg: getImageUrl('btn_6阶N段式按钮_大.png'),
-  glowImg: getImageUrl('img_光.png'),
-}
 
 // TODO 对礼包进行重新排序 购买的不显示  待购买的6个  其余的隐藏
 // 只显示前六个礼包
@@ -137,11 +115,6 @@ const currentGiftScore = computed(() => {
   }
   return item?.Props.find(prop => prop.PropID === 270001)?.DeltaCount || 0
 })
-
-const iconImg = ref('')
-iconImg.value = imgMap.processIconLeftImg
-const glowImg = ref('')
-glowImg.value = imgMap.glowImg
 
 const totalScore = ref(100)
 const _currentScore = ref(50)
@@ -412,11 +385,22 @@ function getScoreInfo(props: Array<{
               </div>
             </div>
             <div class="ml-24 mt-30 f-s">
-              <div class="text-22 text-stroke-1 text-stroke-[#5d1a00]">
-                1/1
+              <div class="text-22">
+                <TextStroke
+                  stroke-color="#5d1a00"
+                  :stroke-width="2"
+                >
+                  1/1
+                </TextStroke>
               </div>
-              <div class="relative ml-5 text-20 text-[#ffe0ab] text-stroke-1 text-stroke-[#5d1a00]">
-                Available
+              <div class="relative ml-5 text-20">
+                <TextStroke
+                  stroke-color="#5d1a00"
+                  :stroke-width="2"
+                  color="#ffe0ab"
+                >
+                  {{ t('available') }}
+                </TextStroke>
               </div>
             </div>
             <div
@@ -444,11 +428,11 @@ function getScoreInfo(props: Array<{
                       stroke-color="#164b2e"
                       :stroke-width="3"
                     >
-                      FREE
+                      {{ t('free') }}
                     </TextStroke>
                     <img
                       v-if="gift.sortId !== 1"
-                      :src="imgMap.lockImg"
+                      src="@/assets/images/common/lock.png"
                       alt=""
                       class="absolute top-1/2 z-20 ml-20 w-40 translate-x-1/2 -right-30 -translate-y-1/2"
                     >
@@ -488,7 +472,7 @@ function getScoreInfo(props: Array<{
             >
               <img
                 class="h-80"
-                :src="okImg"
+                src="@/assets/images/common/icon_ok.png"
                 alt=""
               >
             </div>

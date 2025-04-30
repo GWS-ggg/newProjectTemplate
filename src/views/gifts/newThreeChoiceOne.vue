@@ -14,6 +14,8 @@ import { findImagePath } from '@/utils/imageUtils'
 
 import { computed, onMounted, reactive, ref, watch, watchEffect } from 'vue'
 
+import { useI18n } from 'vue-i18n'
+
 // function getImageUrl(name: string) {
 //   return new URL(`../../assets/images/gifts/newThreeChoiceOne/${name}`, import.meta.url).href
 // }
@@ -46,7 +48,7 @@ import { computed, onMounted, reactive, ref, watch, watchEffect } from 'vue'
 //   imgMap.bg3Img,
 // ]
 const emits = defineEmits(['openPopup', 'boxClick'])
-
+const { t } = useI18n()
 // 接口保留但因暂未使用而注释
 interface _Gift {
   id: number
@@ -321,7 +323,7 @@ getProductList()
         stroke-color="#19093e"
         :stroke-width="3"
       >
-        Only one purchase can be made !
+        {{ t('only_one_chance') }}
       </TextStroke>
     </div>
     <div class="min-h-789 w-700 flex items-end justify-center">
@@ -462,7 +464,7 @@ getProductList()
               stroke-color="#164b2e"
               :stroke-width="3"
             >
-              BUY ALL {{ formatPrice(itemInfoList[3]?.Price || 0) }}
+              {{ t('buy_all') }} {{ formatPrice(itemInfoList[3]?.Price || 0) }}
             </TextStroke>
           </div>
           <div
@@ -473,7 +475,7 @@ getProductList()
               stroke-color="#434343"
               :stroke-width="3"
             >
-              PURCHASED
+              {{ t('claim') }}
             </TextStroke>
           </div>
         </GreenButton>

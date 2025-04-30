@@ -23,16 +23,21 @@ const { getPayType } = usePayStore()
 const isVisibleLogin = ref(false)
 const gameLoginRef = ref()
 const giftListRef = ref()
-isVisibleLogin.value = true
+// TODO 测试
+// isVisibleLogin.value = true
+onMounted(() => {
+  handleLogin('142830')
+})
+
 async function handleLogin(uid: string) {
   Toast.loading()
   try {
     setUid(uid)
     const res = await getLoginInfo()
-    gameLoginRef.value.saveUIDRecord({
-      uid,
-      userName: res.username,
-    })
+    // gameLoginRef.value.saveUIDRecord({
+    //   uid,
+    //   userName: res.username,
+    // })
     await getShopListInfo(uid)
     await giftListRef.value.handleLoginGetInfo()
     isVisibleLogin.value = false

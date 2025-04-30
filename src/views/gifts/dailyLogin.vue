@@ -9,11 +9,12 @@ import { useGiftStore } from '@/store/modules/giftStore'
 import { formatPrice, getPGImg } from '@/utils'
 import { findImagePath } from '@/utils/imageUtils'
 import { computed, inject, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 const emits = defineEmits(['openPopup', 'boxClick'])
 const { handleBoxClick } = useEmitBoxClick(emits)
 const { getProductListRequest } = useGiftStore()
-
+const { t } = useI18n()
 const dailyLoginItemInfo = ref<DailyLoginItemInfo[]>([])
 const productInfo = ref<ProductInfo>()
 async function getProductList() {
@@ -173,7 +174,7 @@ const bubblePosition = {
         stroke-color="#0a273d"
         :stroke-width="3"
       >
-        Only one chance
+        {{ t('only_one_chance') }}
       </TextStroke>
     </div>
     <div class="absolute bottom-300 left-1/2 h-126 w-590 flex items-center justify-center -translate-x-1/2">
@@ -229,18 +230,18 @@ const bubblePosition = {
               class="absolute inset-0"
               style="text-shadow: 0px 0.03rem 0px #bcfb6b; color: transparent;"
             >
-              Buy now
+              {{ t('buy_now') }}
             </div>
             <!-- 顶层：只有渐变的文字 -->
             <div class="gradient-text-with-shadow relative">
-              Buy now
+              {{ t('buy_now') }}
             </div>
           </div>
           <div
             v-if="dailyLoginItemInfo[0]?.BuyTimes > 0"
             class="text-50"
           >
-            已购买
+            {{ t('claim') }}
           </div>
         </GreenButton>
       </div>

@@ -10,103 +10,12 @@ import { formatPrice, getPGImg } from '@/utils'
 
 import { findImagePath } from '@/utils/imageUtils'
 import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 const emits = defineEmits(['openPopup', 'boxClick'])
 const { handleBoxClick } = useEmitBoxClick(emits)
+const { t } = useI18n()
 
-function getImageUrl(name: string) {
-  return new URL(`../../assets/images/gifts/threeChoiceOne/${name}`, import.meta.url).href
-}
-
-const imgMap = {
-  bg1Img: getImageUrl('三选一礼包_0004_1.png'),
-  bg2Img: getImageUrl('三选一礼包_0002_2.png'),
-  bg3Img: getImageUrl('三选一礼包_0003_3.png'),
-  gift1Icon1Img: getImageUrl('体力3.png'),
-  gift1Icon2Img: getImageUrl('药水魔力瓶.png'),
-  gift1Icon3Img: getImageUrl('钻石1.png'),
-  gift2Icon1Img: getImageUrl('体力3.png'),
-  gift2Icon2Img: getImageUrl('卡牌宝箱33.png'),
-  gift2Icon3Img: getImageUrl('Bet-Blast-低级-礼包活动icon.png'),
-  gift3Icon1Img: getImageUrl('体力3.png'),
-  gift3Icon2Img: getImageUrl('魔法宝箱.png'),
-  gift3Icon3Img: getImageUrl('天降buff-礼包活动icon.png'),
-  gift3Icon4Img: getImageUrl('卡牌收益buff-礼包活动icon.png'),
-  btnImg: getImageUrl('btn_三选一礼包按钮.png'),
-  btnSmallImg: getImageUrl('按钮.png'),
-  maskImg: getImageUrl('上锁半透明蒙版.png'),
-  lockImg: getImageUrl('三选一礼包_0005_suo-拷贝-3.png'),
-}
-
-// 接口保留但因暂未使用而注释
-interface _Gift {
-  id: number
-  iconImg: string
-  title?: string
-}
-
-// const giftList1 = ref<Gift[]>([
-//   {
-//     id: 1,
-//     iconImg: imgMap.gift1Icon1Img,
-//     title: '750',
-//   },
-//   {
-//     id: 2,
-//     iconImg: imgMap.gift1Icon2Img,
-//     title: '20K',
-//   },
-//   {
-//     id: 3,
-//     iconImg: imgMap.gift1Icon3Img,
-//     title: '200',
-//   },
-// ])
-
-// const giftList2 = ref<Gift[]>([
-//   {
-//     id: 1,
-//     iconImg: imgMap.gift2Icon1Img,
-//     title: '1600',
-//   },
-//   {
-//     id: 2,
-//     iconImg: imgMap.gift2Icon2Img,
-//   },
-//   {
-//     id: 3,
-//     iconImg: imgMap.gift2Icon3Img,
-//     title: '10min',
-//   },
-// ])
-
-// const giftList3 = ref<Gift[]>([
-//   {
-//     id: 1,
-//     iconImg: imgMap.gift3Icon1Img,
-//     title: '2100',
-//   },
-//   {
-//     id: 2,
-//     iconImg: imgMap.gift3Icon2Img,
-//   },
-//   {
-//     id: 3,
-//     iconImg: imgMap.gift3Icon3Img,
-//     title: '10min',
-//   },
-//   {
-//     id: 4,
-//     iconImg: imgMap.gift3Icon4Img,
-//     title: '10min',
-//   },
-// ])
-
-const _testbBgImgList = ref<string[]>([
-  imgMap.bg1Img,
-  imgMap.bg2Img,
-  imgMap.bg3Img,
-])
 const { setRef, triggerAnimation } = useAnimatableRefs()
 
 const activeGiftId = ref(0)
@@ -204,7 +113,7 @@ const purchasedStatus = computed(() => {
         stroke-color="#19093e"
         :stroke-width="3"
       >
-        Only one purchase can be made !
+        {{ t('only_one_purchase_can_be_made') }}
       </TextStroke>
     </div>
     <div class="min-h-789 w-700 flex items-end justify-center">
@@ -224,7 +133,7 @@ const purchasedStatus = computed(() => {
           <img
             v-show="giftPackage.id !== activeGiftId"
             class="absolute bottom-300 left-1/2 z-40 w-220 -translate-x-1/2"
-            :src="imgMap.lockImg"
+            src="@/assets/images/gifts/threeChoiceOne/maskLock.png"
             alt=""
           >
         </transition>
@@ -258,16 +167,6 @@ const purchasedStatus = computed(() => {
                 :gift-type="prop.PropType"
                 @click="(event: any) => handleBoxClick(prop, event)"
               />
-
-              <!-- <img
-                class="h-90"
-                :src="getPGImg(prop.Icon)"
-                alt=""
-                @click="(event) => handleBoxClick(prop, event)"
-              >
-              <div class="text-31 text-stroke-2 text-stroke-[#464646] paint-order -mt-15">
-                {{ prop.Text }}
-              </div> -->
             </div>
           </div>
         </div>
@@ -306,7 +205,7 @@ const purchasedStatus = computed(() => {
                   stroke-color="#434343"
                   :stroke-width="3"
                 >
-                  PURCHASED
+                  {{ t('claim') }}
                 </TextStroke>
               </div>
             </GreenButton>
@@ -328,10 +227,15 @@ const purchasedStatus = computed(() => {
     <div class="mt-20 f-c">
       <CountDown
         :end-time="productInfo?.ExpireTime"
-        class="text-26 text-[#f1e49e]"
+        class="text-26"
       >
         <template #default="{ hours, minutes, seconds }">
-          END IN {{ hours }}:{{ minutes }}:{{ seconds }}
+          <TextStroke
+            stroke-color="#581616"
+            :stroke-width="3"
+          >
+            END IN  {{ hours }}:{{ minutes }}:{{ seconds }}
+          </TextStroke>
         </template>
       </CountDown>
     </div>

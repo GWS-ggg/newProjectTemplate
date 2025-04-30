@@ -11,8 +11,12 @@ import { useLoginStore } from '@/store/modules/loginStore'
 import { formatPrice, getPGImg } from '@/utils'
 import { findImagePath } from '@/utils/imageUtils'
 import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 const emits = defineEmits(['openPopup', 'boxClick'])
+
+const { t } = useI18n()
+
 const { handleBoxClick } = useEmitBoxClick(emits)
 function getImageUrl(name: string) {
   return new URL(`../../assets/images/gifts/stepGift/${name}`, import.meta.url).href
@@ -209,7 +213,7 @@ function getTaskImg(item: ItemInfo) {
               stroke-color="#46344a"
               :stroke-width="3"
             >
-              Get up to<span class="color-[#fff44b]"> 30,000</span>
+              {{ t('get_up_to_3000') }}<span class="color-[#fff44b]"> 30,000</span>
             </TextStroke>
             <!-- <div>
               Get up to <span class="color-[#fff44b]">30,000</span>
@@ -255,12 +259,12 @@ function getTaskImg(item: ItemInfo) {
       >
         <div class="mr-20 flex flex-col items-end text-29 font-normal">
           <div class="dual-color-text relative">
-            <span class="absolute inset-0 text-[#ffffd3] text-stroke-2 text-stroke-[#581368]">Buy now to claim</span>
-            <span class="gold-gradient-text relative z-10">Buy now to claim</span>
+            <span class="absolute inset-0 text-[#ffffd3] text-stroke-2 text-stroke-[#581368]">{{ t('buy_now_to_claim') }}</span>
+            <span class="gold-gradient-text relative z-10">{{ t('buy_now_to_claim') }}</span>
           </div>
           <div class="dual-color-text relative">
-            <span class="absolute inset-0 text-[#ffffd3] text-stroke-2 text-stroke-[#581368]">your earned rewards</span>
-            <span class="gold-gradient-text relative z-10">your earned rewards</span>
+            <span class="absolute inset-0 text-[#ffffd3] text-stroke-2 text-stroke-[#581368]">{{ t('your_earned_rewards') }}</span>
+            <span class="gold-gradient-text relative z-10">{{ t('your_earned_rewards') }}</span>
           </div>
         </div>
         <div
@@ -292,15 +296,15 @@ function getTaskImg(item: ItemInfo) {
       >
         <div class="mr-20 flex flex-col items-end text-29 font-normal">
           <div class="dual-color-text relative">
-            <span class="absolute inset-0 text-[#ffffd3] text-stroke-2 text-stroke-[#581368]">Achieve the bar to gain the rewards!</span>
-            <span class="gold-gradient-text relative z-10">Achieve the bar to gain the rewards!</span>
+            <span class="absolute inset-0 text-[#ffffd3] text-stroke-2 text-stroke-[#581368]">{{ t('achieve_the_bar_to_gain_the_rewards') }}</span>
+            <span class="gold-gradient-text relative z-10">{{ t('achieve_the_bar_to_gain_the_rewards') }}</span>
           </div>
         </div>
       </div>
     </div>
 
     <div class="hide-scrollbar h-500 w-full flex-shrink flex-grow">
-      <div class="hide-scrollbar custom-scrollbar h-full w-full flex flex-col items-center overflow-x-hidden overflow-y-auto rounded-20 bg-[#171f3d] bg-opacity-70 px-10 py-20">
+      <div class="hide-scrollbar custom-scrollbar h-full w-full flex flex-col items-center overflow-x-hidden overflow-y-auto bg-opacity-70 px-10 py-20">
         <TransitionGroup
           name="gift-list"
           tag="div"

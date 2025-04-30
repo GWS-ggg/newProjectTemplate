@@ -192,7 +192,7 @@ export interface ThreeSegmentItemInfo {
   TradeProductID: number
   ExchangeID?: number
   Limit: number
-  BuyTimes?: number
+  BuyTimes: number
   Props: Array<Prop>
 }
 

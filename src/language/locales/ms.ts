@@ -19,7 +19,7 @@ const locale: LocaleMessages<any> = {
   cancel: 'Batal',
   loading: 'Memuatkan...',
   end: 'TAMAT',
-  get_up_to_3000: 'Dapatkan sehingga 3000',
+  get_up_to_3000: 'Dapatkan sehingga',
   buy_now_to_claim: 'Beli sekarang untuk tuntutan',
   your_earned_rewards: 'ganjaran yang anda peroleh',
   achieve_the_bar_to_gain_the_rewards: 'Capai bar untuk mendapatkan ganjaran!',
@@ -35,7 +35,7 @@ const locale: LocaleMessages<any> = {
   silver_name_gifts_for_team: 'Nama Perak & Hadiah untuk Pasukan',
   buy_1_pack_get_2_free: 'BELI 1 PAKET & DAPATKAN 2 PERCUMA!',
   only_one_purchase_can_be_made: 'Hanya satu pembelian boleh dibuat!',
-  only_one_chance_to_buy: 'Hanya satu peluang',
+  only_one_chance: 'Hanya satu peluang',
   take_each_deal_take_each_deal: 'Ambil setiap perjanjian!',
   available: 'Boleh didapati',
 }

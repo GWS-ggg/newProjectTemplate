@@ -15,8 +15,10 @@ import { useGiftStore } from '@/store/modules/giftStore'
 import { animateWithClass, formatPrice, getPGImg } from '@/utils'
 import { findImagePath } from '@/utils/imageUtils'
 import { computed, nextTick, ref, watchEffect } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 const emits = defineEmits(['boxClick', 'openPopup'])
+const { t } = useI18n()
 const { handleBoxClick } = useEmitBoxClick(emits)
 function getImageUrl(name: string) {
   return new URL(`../../assets/images/gifts/1+2/${name}`, import.meta.url).href
@@ -141,7 +143,7 @@ watchEffect(() => {
 
 function getPrice(giftPackage: onePlusTwoGiftItemInfo) {
   if (giftPackage.Price === 0) {
-    return 'FREE'
+    return t('free')
   }
   return formatPrice(giftPackage.Price || 0)
 }
@@ -285,7 +287,7 @@ async function handleGiftAnimation(giftPackage: onePlusTwoGiftItemInfo) {
         stroke-color="#19093e"
         :stroke-width="3"
       >
-        BUY 1 PACK & GET 2 FREE !
+        {{ t('buy_1_pack_get_2_free') }}
       </TextStroke>
     </div>
     <div class="relative mt-35 flex items-center justify-center">
