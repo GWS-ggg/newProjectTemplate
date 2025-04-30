@@ -28,7 +28,8 @@ async function getProductList() {
     }
     productInfo.value = res.ProductInfo
     itemInfoList.value = res.ItemInfo as ThreeSegmentNItemInfo[]
-    // itemInfoList.value = itemInfoList.value.slice(0, 5)
+    // test
+    // itemInfoList.value = itemInfoList.value.slice(0, 3)
     // 处理item数据 添加id BuyTimes Price
     let idNum = 0
     itemInfoList.value.forEach((item) => {
@@ -51,6 +52,10 @@ async function getProductList() {
   }
 }
 getProductList()
+
+function getImageUrl(name: string) {
+  return new URL(`../../assets/images/gifts/threeSegmentN/${name}`, import.meta.url).href
+}
 const giftCellBg1Img = getImageUrl('gift_cell_bg_1.png')
 
 const giftCellBgList = ref<string[]>([])
@@ -71,25 +76,6 @@ function getBgImgUrl(sortId: number, id: number) {
     return giftCellBg1Img
   }
   return giftCellBgList.value[id % giftCellBgList.value.length]
-}
-
-function getImageUrl(name: string) {
-  return new URL(`../../assets/images/gifts/threeSegmentN/${name}`, import.meta.url).href
-}
-const imgMap = {
-  bg1Img: getImageUrl('bg1.png'),
-  bg2Img: getImageUrl('bg2.png'),
-  bg3Img: getImageUrl('bg3.png'),
-  diceImg: getImageUrl('体力3.png'),
-  goldImg: getImageUrl('金币2.png'),
-  diamondImg: getImageUrl('钻石2.png'),
-  box1Img: getImageUrl('卡牌宝箱1.png'),
-  box2Img: getImageUrl('卡牌宝箱2.png'),
-  lockImg: getImageUrl('锁.png'),
-  bg1OkImg: getImageUrl('11.png'),
-  bg2OkImg: getImageUrl('22.png'),
-  bg3OkImg: getImageUrl('33.png'),
-  okImg: getImageUrl('icon_勾.png'),
 }
 
 const displayGiftList = ref<ThreeSegmentNItemInfo[]>([])
@@ -281,7 +267,7 @@ async function handleAnimation(currentGift: ThreeSegmentNItemInfo) {
             </TextStroke>
             <img
               v-if="item.Price === 0 && item.sortId !== 1"
-              :src="imgMap.lockImg"
+              src="@/assets/images/common/lock.png"
               alt=""
               class="absolute top-0 h-50 -right-50"
             >
@@ -293,7 +279,7 @@ async function handleAnimation(currentGift: ThreeSegmentNItemInfo) {
         >
           <img
             class="h-100"
-            :src="imgMap.okImg"
+            src="@/assets/images/common/icon_ok.png"
             alt=""
           >
         </div>

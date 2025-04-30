@@ -10,6 +10,7 @@ import { AntDesignVueResolver, ElementPlusResolver } from 'unplugin-vue-componen
 import Components from 'unplugin-vue-components/vite'
 import { defineConfig, loadEnv } from 'vite'
 import imageminPlugin from 'vite-plugin-imagemin'
+
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
   console.log('mode', mode)
@@ -46,31 +47,43 @@ export default defineConfig(({ mode }) => {
       Icons({
         autoInstall: true,
       }),
+      // 使用 vite-plugin-imagemin 压缩图片
       imageminPlugin({
+        // 没有 filter 参数，移除此项
         gifsicle: {
           optimizationLevel: 7,
           interlaced: false,
         },
         optipng: {
-          optimizationLevel: 7,
+          optimizationLevel: 5,
         },
         mozjpeg: {
-          quality: 80,
+          quality: 75,
+          progressive: true,
         },
         pngquant: {
-          quality: [0.8, 0.9],
-          speed: 4,
+          quality: [0.7, 0.8],
+          speed: 6,
         },
         svgo: {
           plugins: [
             {
               name: 'removeViewBox',
+              active: false, // 保留viewBox以保持SVG缩放能力
             },
             {
               name: 'removeEmptyAttrs',
               active: false,
             },
+            {
+              name: 'cleanupIDs',
+              active: true,
+            },
           ],
+        },
+        // 为WebP格式添加支持
+        webp: {
+          quality: 75,
         },
       }),
     ],
@@ -129,11 +142,31 @@ export default defineConfig(({ mode }) => {
     build: {
       target: 'ESNext',
       minify: 'esbuild', // 使用 esbuild 进行代码压缩
+      assetsInlineLimit: 4096, // 4kb以下的图片会被转为base64
+      // 优化 Chunk 大小
+      chunkSizeWarningLimit: 1000, // 提高警告阈值
       rollupOptions: {
         output: {
           chunkFileNames: 'js/[name]-[hash].js',
           entryFileNames: 'js/[name]-[hash].js',
           assetFileNames: '[ext]/[name]-[hash].[ext]',
+          manualChunks(id) {
+            // 将 node_modules 中的代码单独打包
+            if (id.includes('node_modules')) {
+              // 可以根据包名再次分割
+              const packageName = id.toString().split('node_modules/')[1].split('/')[0]
+              // 一些大型库单独分包
+              if (['vue', 'vue-router', 'pinia'].includes(packageName)) {
+                return `vendor-${packageName}`
+              }
+              return 'vendor' // 其他依赖打包成一个 vendor 文件
+            }
+
+            // 添加图片资源分组
+            if (id.includes('/assets/images/')) {
+              return 'images'
+            }
+          },
         },
       },
       esbuild: {

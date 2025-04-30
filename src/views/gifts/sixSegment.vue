@@ -33,11 +33,11 @@ async function getProductList() {
     }
     productInfo.value = res.ProductInfo
     itemInfoList.value = res.ItemInfo as SixSegmentItemInfo[]
-    // TODO
-    itemInfoList.value = itemInfoList.value.slice(0, 9)
     currentScore.value = res.ProductInfo?.TaskScore ?? 0
     targetScore.value = res.ProductInfo?.TaskTargetScore ?? 0
 
+    // TODO
+    // itemInfoList.value = itemInfoList.value.slice(0, 9)
     // itemInfoList.value = itemInfoList.value.slice(0, 4)
     // 处理item数据 添加id BuyTimes Price
     let idNum = 0

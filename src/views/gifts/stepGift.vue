@@ -58,21 +58,12 @@ const redBarImg = computed(() => {
 })
 
 const imgMap: Record<string, string> = {
-  bgImg: getImageUrl('_0008_组-2.png'),
   textImg: getImageUrl('文字横条.png'),
   tagImg: getImageUrl('新标签.png'),
-  headerImg: getImageUrl('头部1.png'),
-  diceImg: getImageUrl('骰子-列表.png'),
   bgImg2: getImageUrl('img_付费副阶梯标签叠加资源.png'),
-  bgImg3: getImageUrl('img_付费副阶梯标签叠加资源.png'),
-  btn_bg: getImageUrl('btn_6阶N段式按钮_小.png'),
   taskBarImg: getImageUrl('img_付费副阶梯_任务条.png'),
   processBgImg: getImageUrl('img_付费副阶梯_进度条_bg.png'),
   processImg: getImageUrl('img_付费副阶梯_进度条.png'),
-  carImg: getImageUrl('传送-列表.png'),
-  bombImg: getImageUrl('列表-炮收集.png'),
-  stealImg: getImageUrl('列表-偷收集.png'),
-  back: new URL('../../assets/images/gifts/icon_back.png', import.meta.url).href,
   taskOkBgImg: getImageUrl('img_付费副阶梯_任务条_黄.png'),
 }
 
@@ -250,11 +241,6 @@ function getTaskImg(item: ItemInfo) {
               </div>
             </div>
           </div>
-
-          <!-- <img
-            :src="imgMap.diceImg"
-            class="ml-20 w-45"
-          > -->
         </div>
       </div>
     </div>
