@@ -139,6 +139,9 @@ onUnmounted(() => {
   document.removeEventListener('touchmove', onDrag)
   document.removeEventListener('touchend', stopDrag)
 })
+function handleClick() {
+  window.open('https://piggygo-jy.forevernine.com/', '_blank')
+}
 </script>
 
 <template>
@@ -150,5 +153,6 @@ onUnmounted(() => {
     alt=""
     @mousedown="startDrag"
     @touchstart="startDrag"
+    @click="handleClick"
   >
 </template>
