@@ -38,6 +38,15 @@ const locale: LocaleMessages<any> = {
   only_one_chance: 'โอกาสเพียงครั้งเดียว',
   take_each_deal_take_each_deal: 'รับทุกข้อเสนอทุกข้อเสนอ!',
   available: 'มีจำหน่าย',
+
+  user_login: 'เข้าสู่ระบบของผู้ใช้',
+  total: 'ทั้งหมด',
+  pay_now: 'ชำระเงินทันที',
+  payment_method: 'วิธีการชำระเงิน',
+  confirm: 'ยืนยัน',
+
+  input_uid: 'กรุณาป้อน UID',
+  apple_does_not_support_this_transaction: 'Apple ไม่รองรับการทำธุรกรรมนี้',
 }
 
 export default locale

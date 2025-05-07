@@ -38,6 +38,15 @@ const locale: LocaleMessages<any> = {
   only_one_chance: '只有一次机会',
   take_each_deal_take_each_deal: '抓住每一个机会！',
   available: '可用',
+
+  user_login: '用户登录',
+  total: '总计',
+  pay_now: '立即支付',
+  payment_method: '支付方式',
+  confirm: '确认',
+
+  input_uid: '请输入UID',
+  apple_does_not_support_this_transaction: '苹果不支持此交易',
 }
 
 export default locale

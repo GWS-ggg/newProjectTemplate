@@ -13,7 +13,7 @@ import '@/assets/reset.css'
 initRootFontSize()
 const app = createApp(App)
 
-const _vConsole = new VConsole()
+// const _vConsole = new VConsole()
 app.use(store)
 app.use(router)
 setupI18n(app)

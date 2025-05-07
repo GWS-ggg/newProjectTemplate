@@ -6,6 +6,7 @@ import AnimatedIcon from '@/components/AnimatedIcon.vue'
 
 import { useBuyOrder } from '@/hooks/useBuyOrder'
 import { useGiftStore } from '@/store/modules/giftStore'
+import { useLoginStore } from '@/store/modules/loginStore'
 import { useScoreElementStore } from '@/store/modules/scoreElement'
 import { formatPrice } from '@/utils'
 import { Toast } from '@/utils/toast'
@@ -83,6 +84,11 @@ const giftList2 = ref<Gift[]>([
     title: t('silver_name_gifts_for_team'),
   },
 ])
+const loginStore = useLoginStore()
+
+const isVipScoreShow = computed(() => {
+  return loginStore.vipScoreShow
+})
 
 // 商品数据相关计算属性
 const firstProduct = computed(() => itemInfoList.value[0] || { Price: 0, Props: [{ VipScore: 0 }], AddProps: [{ VipScore: 0 }] })
@@ -256,7 +262,7 @@ getProductList()
             </div>
             <!-- 积分气泡 -->
             <div
-              v-show="firstProduct.BuyTimes === 0"
+              v-show="firstProduct.BuyTimes === 0 && isVipScoreShow"
               class="absolute right-70 h-91 translate-x-1/2 -top-34"
             >
               <div class="relative">
@@ -401,7 +407,7 @@ getProductList()
             </div>
             <!-- 积分气泡 -->
             <div
-              v-show="secondProduct.BuyTimes === 0"
+              v-show="secondProduct.BuyTimes === 0 && isVipScoreShow"
               class="absolute right-70 h-91 translate-x-1/2 -top-34"
             >
               <div class="relative">

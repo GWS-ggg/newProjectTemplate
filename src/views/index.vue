@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { UIDRecord } from '@/types'
 import BackBtn from '@/components/BackBtn.vue'
 import Dialog from '@/components/Dialog.vue'
 import GiftList from '@/components/GiftList.vue'
@@ -10,6 +11,7 @@ import { usePayStore } from '@/store/modules/payStore'
 import { MessageBox } from '@/utils/messageBox'
 import { initToast, Toast } from '@/utils/toast'
 import { onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
 
 function getImageUrl(name: string) {
   return new URL(`../assets/images/gifts/${name}`, import.meta.url).href
@@ -25,19 +27,19 @@ const gameLoginRef = ref()
 const giftListRef = ref()
 // TODO 测试
 // isVisibleLogin.value = true
-onMounted(() => {
-  handleLogin('142830')
-})
+// onMounted(() => {
+//   handleLogin('142830')
+// })
 
 async function handleLogin(uid: string) {
   Toast.loading()
   try {
     setUid(uid)
     const res = await getLoginInfo()
-    // gameLoginRef.value.saveUIDRecord({
-    //   uid,
-    //   userName: res.username,
-    // })
+    saveUIDRecord({
+      uid,
+      userName: res.username,
+    })
     await getShopListInfo(uid)
     await giftListRef.value.handleLoginGetInfo()
     isVisibleLogin.value = false
@@ -51,20 +53,61 @@ async function handleLogin(uid: string) {
     if (error.message === 'type_1') {
       MessageBox.paymentFailed('获取礼包数据失败', '确认', () => {
         console.log('取消登录')
+        isVisibleLogin.value = true
       })
     }
     else {
       MessageBox.paymentFailed('登录失败', '确认', () => {
         console.log('取消登录')
+        isVisibleLogin.value = true
       })
     }
   }
+  finally {
+    Toast.close()
+  }
+}
+const storageKey = `PG_UIDRecord`
+function saveUIDRecord(userInfo: UIDRecord) {
+  try {
+    const recordStorage = localStorage.getItem(storageKey)
+    const record = recordStorage ? JSON.parse(recordStorage) : []
+    // 去重
+    const index = record.findIndex((_item: UIDRecord) => {
+      return _item.uid === userInfo.uid
+    })
+    if (index > -1) {
+      record.splice(index, 1)
+    }
+    record.unshift({
+      uid: userInfo.uid,
+      userName: userInfo.userName,
+    })
+    localStorage.setItem(storageKey, JSON.stringify(record))
+  }
+  catch (error) {
+    console.log(error)
+  }
 }
 
+const route = useRoute()
 onMounted(() => {
   initToast()
 
   // 使用端内携带的uid登录
+  if (route.query.uid) {
+    try {
+      handleLogin(route.query.uid as string)
+      isVisibleLogin.value = false
+    }
+    catch (error: any) {
+      console.log(error)
+      isVisibleLogin.value = true
+    }
+  }
+  else {
+    isVisibleLogin.value = true
+  }
 })
 
 // onMounted(() => {

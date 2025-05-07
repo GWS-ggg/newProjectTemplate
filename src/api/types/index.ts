@@ -5,6 +5,7 @@ export interface LoginInfo {
   viplevel: number
   vipscore: number
   viptargetscore: number
+  vipActive: number
 }
 
 export interface ShopListInfo {

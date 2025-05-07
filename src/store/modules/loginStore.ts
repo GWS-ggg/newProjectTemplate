@@ -10,6 +10,10 @@ export const useLoginStore = defineStore('login', () => {
     viplevel: 0,
     vipscore: 0,
     viptargetscore: 0,
+    vipActive: 0,
+  })
+  const vipScoreShow = computed(() => {
+    return loginInfo.value.vipActive === 1
   })
   const userUid = ref<string>('')
 
@@ -24,6 +28,7 @@ export const useLoginStore = defineStore('login', () => {
       uid: userUid.value,
     })
     loginInfo.value = res
+    // loginInfo.value.vipActive = 1
     return res
   }
   function setLoginInfo(info: LoginInfo) {
@@ -31,7 +36,7 @@ export const useLoginStore = defineStore('login', () => {
   }
 
   return {
-
+    vipScoreShow,
     userUid,
     loginInfo,
     getLoginInfo,

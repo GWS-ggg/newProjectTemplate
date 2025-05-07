@@ -38,6 +38,15 @@ const locale: LocaleMessages<any> = {
   only_one_chance: 'Chỉ một cơ hội',
   take_each_deal_take_each_deal: 'Nhận mỗi thỏa thuận!',
   available: 'Có sẵn',
+
+  user_login: 'Đăng nhập người dùng',
+  total: 'Tổng cộng',
+  pay_now: 'Thanh toán ngay',
+  payment_method: 'Phương thức thanh toán',
+  confirm: 'Xác nhận',
+
+  input_uid: 'Vui lòng nhập UID',
+  apple_does_not_support_this_transaction: 'Apple không hỗ trợ giao dịch này',
 }
 
 export default locale

@@ -41,6 +41,13 @@ const locale: LocaleMessages<any> = {
   available: 'Available',
 
   user_login: 'User login',
+  total: 'Total',
+  pay_now: 'Pay now',
+  payment_method: 'Payment method',
+  confirm: 'Confirm',
+
+  input_uid: 'Please input UID',
+  apple_does_not_support_this_transaction: 'Apple does not support this transaction',
 }
 
 export default locale

@@ -2,11 +2,14 @@
 import type { UIDRecord } from '@/types/index'
 import { ref } from 'vue'
 
+import { useI18n } from 'vue-i18n'
+
 // const props = defineProps<{
 //   path: string
 //   guideImgList: string[]
 // }>()
 const emit = defineEmits(['onCloseLogin', 'onClickLogin', 'onShowGuide'])
+const { t } = useI18n()
 const inputUid = ref('')
 const validateMessage = ref('')
 
@@ -25,7 +28,7 @@ function handleBlur() {
   setTimeout(() => {
     showDropdown.value = false
     isinputFocus.value = false
-    validateInput()
+    // validateInput()
   }, 200)
 }
 
@@ -45,31 +48,31 @@ function inputFocus() {
   showDropdown.value = true
 }
 
-function validateInput() {
-  if (inputUid.value === '') {
-    validateMessage.value = '请输入UID'
-    showDropdown.value = false
-    return false
-  }
+// function validateInput() {
+//   if (inputUid.value === '') {
+//     validateMessage.value = '请输入UID'
+//     showDropdown.value = false
+//     return false
+//   }
 
-  // 使用正则表达式校验是否只包含数字
-  // const uidPattern = /^\d+$/
-  // if (!uidPattern.test(inputUid.value)) {
-  //   validateMessage.value = 'uid_format_error_tip'
-  //   showDropdown.value = false
-  //   return false
-  // }
+//   // 使用正则表达式校验是否只包含数字
+//   // const uidPattern = /^\d+$/
+//   // if (!uidPattern.test(inputUid.value)) {
+//   //   validateMessage.value = 'uid_format_error_tip'
+//   //   showDropdown.value = false
+//   //   return false
+//   // }
 
-  // 检查输入长度是否大于三个字符
-  if (inputUid.value.length <= 3) {
-    validateMessage.value = 'UID长度不能小于3'
-    showDropdown.value = false
-    return false
-  }
+//   // 检查输入长度是否大于三个字符
+//   if (inputUid.value.length <= 3) {
+//     validateMessage.value = 'UID长度不能小于3'
+//     showDropdown.value = false
+//     return false
+//   }
 
-  validateMessage.value = ''
-  return true
-}
+//   validateMessage.value = ''
+//   return true
+// }
 
 // UID引导
 // const isVisibleUIDGuide = ref(false)
@@ -154,7 +157,7 @@ defineExpose({ saveUIDRecord })
         >
       </div>
       <div class="mt-50 f-c text-30">
-        用户登录
+        {{ t('user_login') }}
       </div>
       <div class="relative mt-40 f-c flex-col px-60">
         <input
@@ -162,7 +165,7 @@ defineExpose({ saveUIDRecord })
           class="w-full border-none text-24 focus:outline-none"
           type="text"
           autofocus
-          placeholder="请输入UID"
+          :placeholder="t('input_uid')"
           style="font-size: 20px"
           @blur="handleBlur"
           @focus="inputFocus"
@@ -201,7 +204,7 @@ defineExpose({ saveUIDRecord })
 
           @click="handleConfirm"
         >
-          确认
+          {{ t('confirm') }}
         </div>
         <!-- <div
           class="mb-50 mt-50 f-c cursor-pointer"

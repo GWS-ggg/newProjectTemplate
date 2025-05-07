@@ -3,7 +3,9 @@ import type { MyCardType, MyCardTypeList, OrderPopupInfo, PayOrderReq } from '@/
 import { myCardTypeApi, payOrderApi } from '@/api'
 import { MYCARD_PAY_TYPE, PG_APP_ID } from '@/enum'
 
+import { Toast } from '@/utils/toast'
 import { ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 interface Props {
   userUid: string
@@ -15,6 +17,7 @@ const props = withDefaults(defineProps<Props>(), {
   selectedPayChannelId: MYCARD_PAY_TYPE,
 })
 const emits = defineEmits(['created', 'close'])
+const { t } = useI18n()
 const currency = ref<string>('TWD')
 const mycardTypeList = ref<MyCardTypeList>([])
 const visible = ref<boolean>(false)
@@ -46,18 +49,23 @@ const payMethod = ref<MyCardType>()
 function chageMethod(method: MyCardType) {
   payMethod.value = method
 }
-
 const toastVisble = ref(false)
 async function getTypeList(amount: number) {
-  toastVisble.value = true
-  const res = await myCardTypeApi({
-    appid: PG_APP_ID,
-    currency: currency.value,
-    amount,
-  })
-  mycardTypeList.value = res
-  payMethod.value = res.length ? res[0] : undefined
-  toastVisble.value = false
+  Toast.loading()
+  try {
+    toastVisble.value = true
+    const res = await myCardTypeApi({
+      appid: PG_APP_ID,
+      currency: currency.value,
+      amount,
+    })
+    mycardTypeList.value = res
+    payMethod.value = res.length ? res[0] : undefined
+    toastVisble.value = false
+  }
+  finally {
+    Toast.close()
+  }
 }
 async function order() {
   const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent)
@@ -166,7 +174,7 @@ defineExpose({
           v-if="!mycardTypeList.length && !toastVisble"
           class="mt-80 w-full f-c color-[#222C37]"
         >
-          暂无可用的支付方式
+          {{ t('no_payment_method') }}
         </div>
         <div class="h-348 overflow-auto">
           <div
@@ -191,7 +199,7 @@ defineExpose({
           class="absolute bottom-45 h-100 w-640 f-c cursor-pointer rounded-16 bg-[#ED6504]"
           @click="order"
         >
-          确认
+          {{ t('confirm') }}
         </div>
       </div>
     </div>

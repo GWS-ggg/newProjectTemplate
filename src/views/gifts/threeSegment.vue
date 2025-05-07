@@ -26,6 +26,7 @@ async function getProductList() {
     }
     productInfo.value = res.ProductInfo
     itemInfoList.value = res.ItemInfo as ThreeSegmentItemInfo[]
+
     // itemInfoList.value[0].BuyTimes = 0
     // itemInfoList.value[1].BuyTimes = 0
     // itemInfoList.value[0].Props[0].PropType = 11

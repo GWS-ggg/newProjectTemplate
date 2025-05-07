@@ -46,6 +46,9 @@ const loginInfo = computed(() => loginStore.loginInfo)
 
 const currentVipLevel = computed(() => vipLevelList.value[loginInfo.value.viplevel])
 
+const isVipScoreShow = computed(() => {
+  return loginStore.vipScoreShow
+})
 // setTimeout(() => {
 //   loginStore.setLoginInfo({
 //     username: 'test',
@@ -57,7 +60,18 @@ const currentVipLevel = computed(() => vipLevelList.value[loginInfo.value.viplev
 </script>
 
 <template>
-  <div class="h-304 w-full flex">
+  <div class="relative h-304 w-full flex">
+    <div class="absolute right-0 top-0 rounded-0 rounded-l-30 rounded-t-0 bg-[#000] bg-op-30 p-10 pl-15">
+      <TextStroke
+        stroke-color="#000"
+        :stroke-width="3"
+        text-color="#e6eaff"
+        class="text-12"
+        style="font-family: system-ui;"
+      >
+        {{ t('apple_does_not_support_this_transaction') }}
+      </TextStroke>
+    </div>
     <div class="relative h-full w-[40%]">
       <div class="absolute left-50 top-30 z-10 w-[80%]">
         <div class="relative aspect-square w-full f-c">
@@ -102,8 +116,10 @@ const currentVipLevel = computed(() => vipLevelList.value[loginInfo.value.viplev
           <span>&nbsp;{{ t('more_rewards') }}&nbsp;</span>
         </div>
       </div>
-
-      <div class="mt-18 flex items-center -ml-10">
+      <div
+        v-if="isVipScoreShow"
+        class="mt-18 flex items-center -ml-10"
+      >
         <img
           :ref="el => scoreElementStore.setScoreRef(el as HTMLElement)"
           :src="currentVipLevel.icon"

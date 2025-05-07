@@ -332,7 +332,7 @@ function getTaskImg(item: ItemInfo) {
 
                   <div
                     class="absolute left-0 top-0 h-full overflow-hidden"
-                    :style="{ width: `${item.TaskScore || 0 / item.TaskTargetScore * 100}%` }"
+                    :style="{ width: `${(item.TaskScore || 0) / (item.TaskTargetScore || 0) * 100}%` }"
                   >
                     <img
                       :src="imgMap.processImg"

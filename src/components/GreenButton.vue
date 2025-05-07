@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type AnimatedIcon from './AnimatedIcon.vue'
+import { useLoginStore } from '@/store/modules/loginStore'
 import { useScoreElementStore } from '@/store/modules/scoreElement'
 import { computed, onMounted, ref } from 'vue'
 
@@ -108,6 +109,9 @@ const scoreAddShow = computed(() => {
 
 function triggerAnimation() {
   console.log('triggerAnimation')
+  if (props.score === 0) {
+    return
+  }
   if (!scoreAddShow.value) {
     console.log('triggerScoreSingleAnimation')
     triggerScoreSingleAnimation()
@@ -170,7 +174,7 @@ defineExpose({
     >
       <slot />
       <div
-        v-if="!scoreAddShow && scoreShow"
+        v-if="!scoreAddShow && scoreShow && score !== 0"
         class="absolute z-50 h-74"
         :style="{
           top: singleBubblePosition.top ?? '-0.3rem',
@@ -206,7 +210,7 @@ defineExpose({
         </div>
       </div>
       <div
-        v-if="scoreAddShow"
+        v-if="scoreAddShow && score !== 0 "
         class="absolute z-50 h-91 scale-[0.8]!"
         :style="{
           top: bubblePosition.top ?? '-40px',
