@@ -5,5 +5,7 @@ function testFunction() {
 </script>
 
 <template>
-  <h1>test</h1>
+  <h1 class="relative text-100 font-bold underline">
+    test
+  </h1>
 </template>
